@@ -11,8 +11,8 @@ public class Table
     }
     
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] //This line is for AutoIncrement
-    public int TableId { get; set; }
+    public Guid TableId { get; set; }
+    public int TableNumber { get; set; }
     public int SeatAmount { get; set; }
     public bool IsAvailable { get; set; }
     public DateTime CreatedAt { get; set; }

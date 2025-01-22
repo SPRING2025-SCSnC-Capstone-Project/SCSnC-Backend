@@ -102,8 +102,8 @@ namespace Infrastructure.Persistence
                 name: "Tables",
                 columns: table => new
                 {
-                    TableId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TableId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TableNumber = table.Column<int>(type: "integer", nullable: false),
                     SeatAmount = table.Column<int>(type: "integer", nullable: false),
                     IsAvailable = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -312,15 +312,14 @@ namespace Infrastructure.Persistence
                     VoucherId = table.Column<Guid>(type: "uuid", nullable: false),
                     PaymentStatus = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastUpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    TableId1 = table.Column<int>(type: "integer", nullable: false)
+                    LastUpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Orders", x => x.OrderId);
                     table.ForeignKey(
-                        name: "FK_Orders_Tables_TableId1",
-                        column: x => x.TableId1,
+                        name: "FK_Orders_Tables_TableId",
+                        column: x => x.TableId,
                         principalTable: "Tables",
                         principalColumn: "TableId",
                         onDelete: ReferentialAction.Cascade);
@@ -554,9 +553,9 @@ namespace Infrastructure.Persistence
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_TableId1",
+                name: "IX_Orders_TableId",
                 table: "Orders",
-                column: "TableId1");
+                column: "TableId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_UserId",

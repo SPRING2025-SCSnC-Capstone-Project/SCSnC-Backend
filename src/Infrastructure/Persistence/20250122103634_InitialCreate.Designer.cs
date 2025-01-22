@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Persistence
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250122102148_InitialCreate")]
+    [Migration("20250122103634_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -237,9 +237,6 @@ namespace Infrastructure.Persistence
                     b.Property<Guid>("TableId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("TableId1")
-                        .HasColumnType("integer");
-
                     b.Property<double>("TotalPrice")
                         .HasColumnType("double precision");
 
@@ -251,7 +248,7 @@ namespace Infrastructure.Persistence
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("TableId1");
+                    b.HasIndex("TableId");
 
                     b.HasIndex("UserId");
 
@@ -401,11 +398,9 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.Table", b =>
                 {
-                    b.Property<int>("TableId")
+                    b.Property<Guid>("TableId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TableId"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -417,6 +412,9 @@ namespace Infrastructure.Persistence
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("SeatAmount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TableNumber")
                         .HasColumnType("integer");
 
                     b.HasKey("TableId");
@@ -712,7 +710,7 @@ namespace Infrastructure.Persistence
                 {
                     b.HasOne("Domain.Entities.Table", "Table")
                         .WithMany("Orders")
-                        .HasForeignKey("TableId1")
+                        .HasForeignKey("TableId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
