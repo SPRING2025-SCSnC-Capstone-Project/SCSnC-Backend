@@ -249,6 +249,24 @@ namespace Infrastructure.Persistence
                     b.ToTable("OrderDetails");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("PaymentId");
+
+                    b.ToTable("Payment");
+                });
+
             modelBuilder.Entity("Domain.Entities.Reservation", b =>
                 {
                     b.Property<int>("ReservationId")
@@ -390,6 +408,35 @@ namespace Infrastructure.Persistence
                     b.HasKey("ToppingId");
 
                     b.ToTable("Toppings");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Transaction", b =>
+                {
+                    b.Property<Guid>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TransactionStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique();
+
+                    b.ToTable("Transaction");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -670,6 +717,25 @@ namespace Infrastructure.Persistence
                     b.Navigation("Workspace");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Transaction", b =>
+                {
+                    b.HasOne("Domain.Entities.Order", "Order")
+                        .WithMany("Transactions")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Payment", "Payment")
+                        .WithOne("Transaction")
+                        .HasForeignKey("Domain.Entities.Transaction", "PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Payment");
+                });
+
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.HasOne("Domain.Entities.Role", "Role")
@@ -763,6 +829,14 @@ namespace Infrastructure.Persistence
                         .IsRequired();
 
                     b.Navigation("OrderDetails");
+
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Payment", b =>
+                {
+                    b.Navigation("Transaction")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.Role", b =>

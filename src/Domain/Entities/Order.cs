@@ -8,6 +8,7 @@ public class Order
     public Order()
     {
         OrderDetails = new HashSet<OrderDetail>();
+        Transactions = new HashSet<Transaction>();
     }
     
     [Key]
@@ -28,4 +29,5 @@ public class Order
     public virtual Voucher Voucher { get; set; }
     public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     public virtual Feedback Feedback { get; set; }
+    public virtual ICollection<Transaction> Transactions { get; set; }
 }

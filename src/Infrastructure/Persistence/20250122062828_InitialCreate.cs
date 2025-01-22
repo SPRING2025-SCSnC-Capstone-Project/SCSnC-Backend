@@ -45,6 +45,19 @@ namespace Infrastructure.Persistence
                 });
 
             migrationBuilder.CreateTable(
+                name: "Payment",
+                columns: table => new
+                {
+                    PaymentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<double>(type: "double precision", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payment", x => x.PaymentId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -413,6 +426,33 @@ namespace Infrastructure.Persistence
                 });
 
             migrationBuilder.CreateTable(
+                name: "Transaction",
+                columns: table => new
+                {
+                    TransactionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PaymentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TransactionStatus = table.Column<string>(type: "text", nullable: false),
+                    TransactionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transaction", x => x.TransactionId);
+                    table.ForeignKey(
+                        name: "FK_Transaction_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Transaction_Payment_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payment",
+                        principalColumn: "PaymentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrderDetailTopping",
                 columns: table => new
                 {
@@ -504,6 +544,17 @@ namespace Infrastructure.Persistence
                 column: "WorkspaceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Transaction_OrderId",
+                table: "Transaction",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transaction_PaymentId",
+                table: "Transaction",
+                column: "PaymentId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
                 table: "Users",
                 column: "RoleId");
@@ -543,6 +594,9 @@ namespace Infrastructure.Persistence
                 name: "Reservations");
 
             migrationBuilder.DropTable(
+                name: "Transaction");
+
+            migrationBuilder.DropTable(
                 name: "UserVouchers");
 
             migrationBuilder.DropTable(
@@ -562,6 +616,9 @@ namespace Infrastructure.Persistence
 
             migrationBuilder.DropTable(
                 name: "Workspaces");
+
+            migrationBuilder.DropTable(
+                name: "Payment");
 
             migrationBuilder.DropTable(
                 name: "Items");
