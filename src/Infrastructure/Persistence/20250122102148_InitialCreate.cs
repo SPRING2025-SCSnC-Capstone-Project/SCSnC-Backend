@@ -88,8 +88,8 @@ namespace Infrastructure.Persistence
                 name: "Slots",
                 columns: table => new
                 {
-                    SlotId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SlotId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SlotNumber = table.Column<int>(type: "integer", nullable: false),
                     TimeStart = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
                     TimeEnd = table.Column<TimeOnly>(type: "time without time zone", nullable: false)
                 },
@@ -134,6 +134,7 @@ namespace Infrastructure.Persistence
                 name: "Vouchers",
                 columns: table => new
                 {
+                    VoucherId = table.Column<Guid>(type: "uuid", nullable: false),
                     VoucherCode = table.Column<string>(type: "text", nullable: false),
                     DiscountValue = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
@@ -143,15 +144,14 @@ namespace Infrastructure.Persistence
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Vouchers", x => x.VoucherCode);
+                    table.PrimaryKey("PK_Vouchers", x => x.VoucherId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "WorkspaceTypes",
                 columns: table => new
                 {
-                    WorkspaceTypeId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    WorkspaceTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     WorkspaceTypeName = table.Column<string>(type: "text", nullable: false),
                     MaxCapacity = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -170,7 +170,6 @@ namespace Infrastructure.Persistence
                     ItemBasePrice = table.Column<double>(type: "double precision", nullable: false),
                     ItemImg = table.Column<string>(type: "text", nullable: false),
                     ItemCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SizeId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastUpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -212,13 +211,31 @@ namespace Infrastructure.Persistence
                 });
 
             migrationBuilder.CreateTable(
+                name: "IncludeTopping",
+                columns: table => new
+                {
+                    IncludeToppingId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ToppingId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderDetailId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IncludeTopping", x => x.IncludeToppingId);
+                    table.ForeignKey(
+                        name: "FK_IncludeTopping_Toppings_ToppingId",
+                        column: x => x.ToppingId,
+                        principalTable: "Toppings",
+                        principalColumn: "ToppingId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Workspaces",
                 columns: table => new
                 {
-                    WorkspaceId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    IsAvailable = table.Column<bool>(type: "boolean", nullable: false),
-                    WorkspaceTypeId = table.Column<int>(type: "integer", nullable: false)
+                    WorkspaceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    WorkspaceTypeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsAvailable = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -232,24 +249,25 @@ namespace Infrastructure.Persistence
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemSize",
+                name: "ItemWithSize",
                 columns: table => new
                 {
-                    ItemsItemId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SizesSizeId = table.Column<Guid>(type: "uuid", nullable: false)
+                    ItemWithSizeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SizeId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemSize", x => new { x.ItemsItemId, x.SizesSizeId });
+                    table.PrimaryKey("PK_ItemWithSize", x => x.ItemWithSizeId);
                     table.ForeignKey(
-                        name: "FK_ItemSize_Items_ItemsItemId",
-                        column: x => x.ItemsItemId,
+                        name: "FK_ItemWithSize_Items_ItemId",
+                        column: x => x.ItemId,
                         principalTable: "Items",
                         principalColumn: "ItemId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ItemSize_Sizes_SizesSizeId",
-                        column: x => x.SizesSizeId,
+                        name: "FK_ItemWithSize_Sizes_SizeId",
+                        column: x => x.SizeId,
                         principalTable: "Sizes",
                         principalColumn: "SizeId",
                         onDelete: ReferentialAction.Cascade);
@@ -289,20 +307,20 @@ namespace Infrastructure.Persistence
                 {
                     OrderId = table.Column<Guid>(type: "uuid", nullable: false),
                     TotalPrice = table.Column<double>(type: "double precision", nullable: false),
-                    TableId = table.Column<int>(type: "integer", nullable: false),
+                    TableId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    VoucherCode = table.Column<string>(type: "text", nullable: false),
+                    VoucherId = table.Column<Guid>(type: "uuid", nullable: false),
                     PaymentStatus = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastUpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    VoucherCode1 = table.Column<string>(type: "text", nullable: false)
+                    TableId1 = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Orders", x => x.OrderId);
                     table.ForeignKey(
-                        name: "FK_Orders_Tables_TableId",
-                        column: x => x.TableId,
+                        name: "FK_Orders_Tables_TableId1",
+                        column: x => x.TableId1,
                         principalTable: "Tables",
                         principalColumn: "TableId",
                         onDelete: ReferentialAction.Cascade);
@@ -313,10 +331,10 @@ namespace Infrastructure.Persistence
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Orders_Vouchers_VoucherCode1",
-                        column: x => x.VoucherCode1,
+                        name: "FK_Orders_Vouchers_VoucherId",
+                        column: x => x.VoucherId,
                         principalTable: "Vouchers",
-                        principalColumn: "VoucherCode",
+                        principalColumn: "VoucherId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -326,9 +344,9 @@ namespace Infrastructure.Persistence
                 {
                     UserVoucherId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    VoucherCode = table.Column<string>(type: "text", nullable: false),
+                    VoucherId = table.Column<Guid>(type: "uuid", nullable: false),
                     DateAdded = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    VoucherCode1 = table.Column<string>(type: "text", nullable: false)
+                    RedeemStatus = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -340,10 +358,10 @@ namespace Infrastructure.Persistence
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserVouchers_Vouchers_VoucherCode1",
-                        column: x => x.VoucherCode1,
+                        name: "FK_UserVouchers_Vouchers_VoucherId",
+                        column: x => x.VoucherId,
                         principalTable: "Vouchers",
-                        principalColumn: "VoucherCode",
+                        principalColumn: "VoucherId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -354,9 +372,9 @@ namespace Infrastructure.Persistence
                     ReservationId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ReservationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    WorkspaceId = table.Column<int>(type: "integer", nullable: false),
+                    WorkspaceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Deposit = table.Column<double>(type: "double precision", nullable: false),
-                    SlotId = table.Column<int>(type: "integer", nullable: false),
+                    SlotId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -367,6 +385,12 @@ namespace Infrastructure.Persistence
                         column: x => x.SlotId,
                         principalTable: "Slots",
                         principalColumn: "SlotId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reservations_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Reservations_Workspaces_WorkspaceId",
@@ -404,7 +428,7 @@ namespace Infrastructure.Persistence
                 {
                     OrderDetailId = table.Column<Guid>(type: "uuid", nullable: false),
                     OrderId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ItemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemWithSizeId = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     TotalPrice = table.Column<double>(type: "double precision", nullable: false)
                 },
@@ -412,10 +436,10 @@ namespace Infrastructure.Persistence
                 {
                     table.PrimaryKey("PK_OrderDetails", x => x.OrderDetailId);
                     table.ForeignKey(
-                        name: "FK_OrderDetails_Items_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "Items",
-                        principalColumn: "ItemId",
+                        name: "FK_OrderDetails_ItemWithSize_ItemWithSizeId",
+                        column: x => x.ItemWithSizeId,
+                        principalTable: "ItemWithSize",
+                        principalColumn: "ItemWithSizeId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_OrderDetails_Orders_OrderId",
@@ -453,26 +477,26 @@ namespace Infrastructure.Persistence
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderDetailTopping",
+                name: "IncludeToppingOrderDetail",
                 columns: table => new
                 {
-                    OrderDetailsOrderDetailId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ToppingsToppingId = table.Column<Guid>(type: "uuid", nullable: false)
+                    IncludeToppingsIncludeToppingId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderDetailsOrderDetailId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderDetailTopping", x => new { x.OrderDetailsOrderDetailId, x.ToppingsToppingId });
+                    table.PrimaryKey("PK_IncludeToppingOrderDetail", x => new { x.IncludeToppingsIncludeToppingId, x.OrderDetailsOrderDetailId });
                     table.ForeignKey(
-                        name: "FK_OrderDetailTopping_OrderDetails_OrderDetailsOrderDetailId",
+                        name: "FK_IncludeToppingOrderDetail_IncludeTopping_IncludeToppingsInc~",
+                        column: x => x.IncludeToppingsIncludeToppingId,
+                        principalTable: "IncludeTopping",
+                        principalColumn: "IncludeToppingId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_IncludeToppingOrderDetail_OrderDetails_OrderDetailsOrderDet~",
                         column: x => x.OrderDetailsOrderDetailId,
                         principalTable: "OrderDetails",
                         principalColumn: "OrderDetailId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OrderDetailTopping_Toppings_ToppingsToppingId",
-                        column: x => x.ToppingsToppingId,
-                        principalTable: "Toppings",
-                        principalColumn: "ToppingId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -483,14 +507,30 @@ namespace Infrastructure.Persistence
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_IncludeTopping_ToppingId",
+                table: "IncludeTopping",
+                column: "ToppingId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IncludeToppingOrderDetail_OrderDetailsOrderDetailId",
+                table: "IncludeToppingOrderDetail",
+                column: "OrderDetailsOrderDetailId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Items_ItemCategoryId",
                 table: "Items",
                 column: "ItemCategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemSize_SizesSizeId",
-                table: "ItemSize",
-                column: "SizesSizeId");
+                name: "IX_ItemWithSize_ItemId",
+                table: "ItemWithSize",
+                column: "ItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ItemWithSize_SizeId",
+                table: "ItemWithSize",
+                column: "SizeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_JoinEvents_EventId",
@@ -503,9 +543,9 @@ namespace Infrastructure.Persistence
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderDetails_ItemId",
+                name: "IX_OrderDetails_ItemWithSizeId",
                 table: "OrderDetails",
-                column: "ItemId",
+                column: "ItemWithSizeId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -514,14 +554,9 @@ namespace Infrastructure.Persistence
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderDetailTopping_ToppingsToppingId",
-                table: "OrderDetailTopping",
-                column: "ToppingsToppingId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Orders_TableId",
+                name: "IX_Orders_TableId1",
                 table: "Orders",
-                column: "TableId");
+                column: "TableId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_UserId",
@@ -529,14 +564,19 @@ namespace Infrastructure.Persistence
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_VoucherCode1",
+                name: "IX_Orders_VoucherId",
                 table: "Orders",
-                column: "VoucherCode1");
+                column: "VoucherId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_SlotId",
                 table: "Reservations",
                 column: "SlotId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_UserId",
+                table: "Reservations",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reservations_WorkspaceId",
@@ -565,9 +605,9 @@ namespace Infrastructure.Persistence
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserVouchers_VoucherCode1",
+                name: "IX_UserVouchers_VoucherId",
                 table: "UserVouchers",
-                column: "VoucherCode1");
+                column: "VoucherId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Workspaces_WorkspaceTypeId",
@@ -582,13 +622,10 @@ namespace Infrastructure.Persistence
                 name: "Feedbacks");
 
             migrationBuilder.DropTable(
-                name: "ItemSize");
+                name: "IncludeToppingOrderDetail");
 
             migrationBuilder.DropTable(
                 name: "JoinEvents");
-
-            migrationBuilder.DropTable(
-                name: "OrderDetailTopping");
 
             migrationBuilder.DropTable(
                 name: "Reservations");
@@ -600,16 +637,13 @@ namespace Infrastructure.Persistence
                 name: "UserVouchers");
 
             migrationBuilder.DropTable(
-                name: "Sizes");
-
-            migrationBuilder.DropTable(
-                name: "Events");
+                name: "IncludeTopping");
 
             migrationBuilder.DropTable(
                 name: "OrderDetails");
 
             migrationBuilder.DropTable(
-                name: "Toppings");
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "Slots");
@@ -621,7 +655,10 @@ namespace Infrastructure.Persistence
                 name: "Payment");
 
             migrationBuilder.DropTable(
-                name: "Items");
+                name: "Toppings");
+
+            migrationBuilder.DropTable(
+                name: "ItemWithSize");
 
             migrationBuilder.DropTable(
                 name: "Orders");
@@ -630,7 +667,10 @@ namespace Infrastructure.Persistence
                 name: "WorkspaceTypes");
 
             migrationBuilder.DropTable(
-                name: "ItemCategories");
+                name: "Items");
+
+            migrationBuilder.DropTable(
+                name: "Sizes");
 
             migrationBuilder.DropTable(
                 name: "Tables");
@@ -640,6 +680,9 @@ namespace Infrastructure.Persistence
 
             migrationBuilder.DropTable(
                 name: "Vouchers");
+
+            migrationBuilder.DropTable(
+                name: "ItemCategories");
 
             migrationBuilder.DropTable(
                 name: "Roles");

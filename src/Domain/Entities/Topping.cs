@@ -4,11 +4,6 @@ namespace Domain.Entities;
 
 public class Topping
 {
-    public Topping()
-    {
-        OrderDetails = new HashSet<OrderDetail>();
-    }
-    
     [Key]
     public Guid ToppingId { get; set; }
     public string ToppingName { get; set; }
@@ -17,5 +12,5 @@ public class Topping
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
     
-    public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+    public virtual IncludeTopping IncludeTopping { get; set; }
 }

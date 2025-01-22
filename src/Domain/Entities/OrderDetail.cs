@@ -7,19 +7,19 @@ public class OrderDetail
 {
     public OrderDetail()
     {
-        Toppings = new HashSet<Topping>();
+        IncludeToppings = new HashSet<IncludeTopping>();
     }
     
     [Key]
     public Guid OrderDetailId { get; set; }
     [ForeignKey("OrderId")]
     public Guid OrderId { get; set; }
-    [ForeignKey("ItemId")]
-    public Guid ItemId { get; set; }
+    [ForeignKey("ItemWithSizeId")]
+    public Guid ItemWithSizeId { get; set; }
     public int Quantity { get; set; }
     public double TotalPrice { get; set; }
     
     public virtual Order Order { get; set; }
-    public virtual Item Item { get; set; }
-    public virtual ICollection<Topping> Toppings { get; set; }
+    public virtual ItemWithSize ItemWithSize { get; set; }
+    public virtual ICollection<IncludeTopping> IncludeToppings { get; set; }
 }

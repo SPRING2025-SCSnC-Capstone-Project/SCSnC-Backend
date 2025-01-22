@@ -10,7 +10,7 @@ public class WorkspaceType
     }
     
     [Key]
-    public int WorkspaceTypeId { get; set; }
+    public Guid WorkspaceTypeId { get; set; }
     public string WorkspaceTypeName { get; set; }
     public int MaxCapacity { get; set; }
     

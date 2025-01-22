@@ -15,11 +15,11 @@ public class Order
     public Guid OrderId { get; set; }
     public double TotalPrice { get; set; }
     [ForeignKey("TableId")]
-    public int TableId { get; set; }
+    public Guid TableId { get; set; }
     [ForeignKey("UserId")]
     public Guid UserId { get; set; }
     [ForeignKey("VoucherCode")]
-    public string VoucherCode { get; set; }
+    public Guid VoucherId { get; set; }
     public bool PaymentStatus { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }

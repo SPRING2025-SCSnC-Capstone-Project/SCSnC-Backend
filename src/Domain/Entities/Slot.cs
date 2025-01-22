@@ -10,7 +10,8 @@ public class Slot
     }
     
     [Key]
-    public int SlotId { get; set; }
+    public Guid SlotId { get; set; }
+    public int SlotNumber { get; set; }
     public TimeOnly TimeStart { get; set; }
     public TimeOnly TimeEnd { get; set; }
     

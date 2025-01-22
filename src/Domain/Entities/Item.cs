@@ -7,7 +7,7 @@ public class Item
 {
     public Item()
     {
-        Sizes = new HashSet<Size>();
+        ItemWithSizes = new HashSet<ItemWithSize>();
     }
     
     [Key]
@@ -18,12 +18,9 @@ public class Item
     public string ItemImg { get; set; }
     [ForeignKey("ItemCategoryId")]
     public Guid ItemCategoryId { get; set; }
-    [ForeignKey("SizeId")]
-    public Guid SizeId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
     
     public virtual ItemCategory ItemCategory { get; set; }
-    public virtual ICollection<Size> Sizes { get; set; }
-    public virtual OrderDetail OrderDetail { get; set; }
+    public virtual ICollection<ItemWithSize> ItemWithSizes { get; set; }
 }

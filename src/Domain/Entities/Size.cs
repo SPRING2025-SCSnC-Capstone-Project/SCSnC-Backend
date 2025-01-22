@@ -7,7 +7,7 @@ public class Size
 {
     public Size()
     {
-        Items = new HashSet<Item>();
+        ItemWithSizes = new HashSet<ItemWithSize>();
     }
     
     [Key]
@@ -17,5 +17,5 @@ public class Size
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
     
-    public virtual ICollection<Item> Items { get; set; }
+    public virtual ICollection<ItemWithSize> ItemWithSizes { get; set; }
 }

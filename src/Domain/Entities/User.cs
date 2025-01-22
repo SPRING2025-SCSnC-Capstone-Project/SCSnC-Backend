@@ -10,6 +10,7 @@ public class User
         Orders = new HashSet<Order>();
         UserVouchers = new HashSet<UserVoucher>();
         JoinEvents = new HashSet<JoinEvent>();
+        Reservations = new HashSet<Reservation>();
     }
     
     [Key]
@@ -29,4 +30,5 @@ public class User
     public virtual ICollection<Order> Orders { get; set; }
     public virtual ICollection<UserVoucher> UserVouchers { get; set; }
     public virtual ICollection<JoinEvent> JoinEvents { get; set; }
+    public virtual ICollection<Reservation> Reservations { get; set; }
 }

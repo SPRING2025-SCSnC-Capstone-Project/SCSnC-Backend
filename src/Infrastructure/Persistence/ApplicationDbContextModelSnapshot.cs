@@ -87,6 +87,26 @@ namespace Infrastructure.Persistence
                     b.ToTable("Feedbacks");
                 });
 
+            modelBuilder.Entity("Domain.Entities.IncludeTopping", b =>
+                {
+                    b.Property<Guid>("IncludeToppingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrderDetailId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ToppingId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("IncludeToppingId");
+
+                    b.HasIndex("ToppingId")
+                        .IsUnique();
+
+                    b.ToTable("IncludeTopping");
+                });
+
             modelBuilder.Entity("Domain.Entities.Item", b =>
                 {
                     b.Property<Guid>("ItemId")
@@ -117,9 +137,6 @@ namespace Infrastructure.Persistence
                     b.Property<DateTime>("LastUpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("SizeId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("ItemId");
 
                     b.HasIndex("ItemCategoryId");
@@ -146,6 +163,27 @@ namespace Infrastructure.Persistence
                     b.HasKey("ItemCategoryId");
 
                     b.ToTable("ItemCategories");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ItemWithSize", b =>
+                {
+                    b.Property<Guid>("ItemWithSizeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SizeId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ItemWithSizeId");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("SizeId");
+
+                    b.ToTable("ItemWithSize");
                 });
 
             modelBuilder.Entity("Domain.Entities.JoinEvent", b =>
@@ -193,7 +231,10 @@ namespace Infrastructure.Persistence
                     b.Property<bool>("PaymentStatus")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("TableId")
+                    b.Property<Guid>("TableId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TableId1")
                         .HasColumnType("integer");
 
                     b.Property<double>("TotalPrice")
@@ -202,21 +243,16 @@ namespace Infrastructure.Persistence
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("VoucherCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("VoucherCode1")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("VoucherId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("TableId");
+                    b.HasIndex("TableId1");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("VoucherCode1");
+                    b.HasIndex("VoucherId");
 
                     b.ToTable("Orders");
                 });
@@ -227,7 +263,7 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ItemId")
+                    b.Property<Guid>("ItemWithSizeId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("OrderId")
@@ -241,7 +277,7 @@ namespace Infrastructure.Persistence
 
                     b.HasKey("OrderDetailId");
 
-                    b.HasIndex("ItemId")
+                    b.HasIndex("ItemWithSizeId")
                         .IsUnique();
 
                     b.HasIndex("OrderId");
@@ -281,18 +317,20 @@ namespace Infrastructure.Persistence
                     b.Property<DateTime>("ReservationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("SlotId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SlotId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("WorkspaceId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("ReservationId");
 
                     b.HasIndex("SlotId");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("WorkspaceId");
 
@@ -340,11 +378,12 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.Slot", b =>
                 {
-                    b.Property<int>("SlotId")
+                    b.Property<Guid>("SlotId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SlotId"));
+                    b.Property<int>("SlotNumber")
+                        .HasColumnType("integer");
 
                     b.Property<TimeOnly>("TimeEnd")
                         .HasColumnType("time without time zone");
@@ -494,30 +533,29 @@ namespace Infrastructure.Persistence
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("RedeemStatus")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("VoucherCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("VoucherCode1")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("VoucherId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("UserVoucherId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("VoucherCode1");
+                    b.HasIndex("VoucherId");
 
                     b.ToTable("UserVouchers");
                 });
 
             modelBuilder.Entity("Domain.Entities.Voucher", b =>
                 {
-                    b.Property<string>("VoucherCode")
-                        .HasColumnType("text");
+                    b.Property<Guid>("VoucherId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -535,24 +573,26 @@ namespace Infrastructure.Persistence
                     b.Property<DateTime>("LastUpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("VoucherCode");
+                    b.Property<string>("VoucherCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("VoucherId");
 
                     b.ToTable("Vouchers");
                 });
 
             modelBuilder.Entity("Domain.Entities.Workspace", b =>
                 {
-                    b.Property<int>("WorkspaceId")
+                    b.Property<Guid>("WorkspaceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("WorkspaceId"));
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("WorkspaceTypeId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("WorkspaceTypeId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("WorkspaceId");
 
@@ -563,11 +603,9 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.WorkspaceType", b =>
                 {
-                    b.Property<int>("WorkspaceTypeId")
+                    b.Property<Guid>("WorkspaceTypeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("WorkspaceTypeId"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("MaxCapacity")
                         .HasColumnType("integer");
@@ -581,34 +619,19 @@ namespace Infrastructure.Persistence
                     b.ToTable("WorkspaceTypes");
                 });
 
-            modelBuilder.Entity("ItemSize", b =>
+            modelBuilder.Entity("IncludeToppingOrderDetail", b =>
                 {
-                    b.Property<Guid>("ItemsItemId")
+                    b.Property<Guid>("IncludeToppingsIncludeToppingId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("SizesSizeId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("ItemsItemId", "SizesSizeId");
-
-                    b.HasIndex("SizesSizeId");
-
-                    b.ToTable("ItemSize");
-                });
-
-            modelBuilder.Entity("OrderDetailTopping", b =>
-                {
                     b.Property<Guid>("OrderDetailsOrderDetailId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ToppingsToppingId")
-                        .HasColumnType("uuid");
+                    b.HasKey("IncludeToppingsIncludeToppingId", "OrderDetailsOrderDetailId");
 
-                    b.HasKey("OrderDetailsOrderDetailId", "ToppingsToppingId");
+                    b.HasIndex("OrderDetailsOrderDetailId");
 
-                    b.HasIndex("ToppingsToppingId");
-
-                    b.ToTable("OrderDetailTopping");
+                    b.ToTable("IncludeToppingOrderDetail");
                 });
 
             modelBuilder.Entity("Domain.Entities.Feedback", b =>
@@ -622,6 +645,17 @@ namespace Infrastructure.Persistence
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Domain.Entities.IncludeTopping", b =>
+                {
+                    b.HasOne("Domain.Entities.Topping", "Topping")
+                        .WithOne("IncludeTopping")
+                        .HasForeignKey("Domain.Entities.IncludeTopping", "ToppingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Topping");
+                });
+
             modelBuilder.Entity("Domain.Entities.Item", b =>
                 {
                     b.HasOne("Domain.Entities.ItemCategory", "ItemCategory")
@@ -631,6 +665,25 @@ namespace Infrastructure.Persistence
                         .IsRequired();
 
                     b.Navigation("ItemCategory");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ItemWithSize", b =>
+                {
+                    b.HasOne("Domain.Entities.Item", "Item")
+                        .WithMany("ItemWithSizes")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Size", "Size")
+                        .WithMany("ItemWithSizes")
+                        .HasForeignKey("SizeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Size");
                 });
 
             modelBuilder.Entity("Domain.Entities.JoinEvent", b =>
@@ -656,7 +709,7 @@ namespace Infrastructure.Persistence
                 {
                     b.HasOne("Domain.Entities.Table", "Table")
                         .WithMany("Orders")
-                        .HasForeignKey("TableId")
+                        .HasForeignKey("TableId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -668,7 +721,7 @@ namespace Infrastructure.Persistence
 
                     b.HasOne("Domain.Entities.Voucher", "Voucher")
                         .WithMany("Orders")
-                        .HasForeignKey("VoucherCode1")
+                        .HasForeignKey("VoucherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -681,9 +734,9 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("Domain.Entities.Item", "Item")
+                    b.HasOne("Domain.Entities.ItemWithSize", "ItemWithSize")
                         .WithOne("OrderDetail")
-                        .HasForeignKey("Domain.Entities.OrderDetail", "ItemId")
+                        .HasForeignKey("Domain.Entities.OrderDetail", "ItemWithSizeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -693,7 +746,7 @@ namespace Infrastructure.Persistence
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("ItemWithSize");
 
                     b.Navigation("Order");
                 });
@@ -706,13 +759,21 @@ namespace Infrastructure.Persistence
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("Reservations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Workspace", "Workspace")
-                        .WithMany()
+                        .WithMany("Reservations")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Slot");
+
+                    b.Navigation("User");
 
                     b.Navigation("Workspace");
                 });
@@ -756,8 +817,8 @@ namespace Infrastructure.Persistence
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Voucher", "Voucher")
-                        .WithMany()
-                        .HasForeignKey("VoucherCode1")
+                        .WithMany("UserVouchers")
+                        .HasForeignKey("VoucherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -777,32 +838,17 @@ namespace Infrastructure.Persistence
                     b.Navigation("WorkspaceType");
                 });
 
-            modelBuilder.Entity("ItemSize", b =>
+            modelBuilder.Entity("IncludeToppingOrderDetail", b =>
                 {
-                    b.HasOne("Domain.Entities.Item", null)
+                    b.HasOne("Domain.Entities.IncludeTopping", null)
                         .WithMany()
-                        .HasForeignKey("ItemsItemId")
+                        .HasForeignKey("IncludeToppingsIncludeToppingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Size", null)
-                        .WithMany()
-                        .HasForeignKey("SizesSizeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("OrderDetailTopping", b =>
-                {
                     b.HasOne("Domain.Entities.OrderDetail", null)
                         .WithMany()
                         .HasForeignKey("OrderDetailsOrderDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Topping", null)
-                        .WithMany()
-                        .HasForeignKey("ToppingsToppingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -814,13 +860,18 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.Item", b =>
                 {
-                    b.Navigation("OrderDetail")
-                        .IsRequired();
+                    b.Navigation("ItemWithSizes");
                 });
 
             modelBuilder.Entity("Domain.Entities.ItemCategory", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ItemWithSize", b =>
+                {
+                    b.Navigation("OrderDetail")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.Order", b =>
@@ -844,6 +895,11 @@ namespace Infrastructure.Persistence
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Size", b =>
+                {
+                    b.Navigation("ItemWithSizes");
+                });
+
             modelBuilder.Entity("Domain.Entities.Slot", b =>
                 {
                     b.Navigation("Reservations");
@@ -854,11 +910,19 @@ namespace Infrastructure.Persistence
                     b.Navigation("Orders");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Topping", b =>
+                {
+                    b.Navigation("IncludeTopping")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.Navigation("JoinEvents");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("Reservations");
 
                     b.Navigation("UserVouchers");
                 });
@@ -866,6 +930,13 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity("Domain.Entities.Voucher", b =>
                 {
                     b.Navigation("Orders");
+
+                    b.Navigation("UserVouchers");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Workspace", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkspaceType", b =>

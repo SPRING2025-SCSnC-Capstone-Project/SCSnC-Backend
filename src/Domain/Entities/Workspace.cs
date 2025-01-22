@@ -5,11 +5,17 @@ namespace Domain.Entities;
 
 public class Workspace
 {
+    public Workspace()
+    {
+        Reservations = new HashSet<Reservation>();
+    }
+    
     [Key]
-    public int WorkspaceId { get; set; }
-    public bool IsAvailable { get; set; }
+    public Guid WorkspaceId { get; set; }
     [ForeignKey("WorkspaceTypeId")]
-    public int WorkspaceTypeId { get; set; }
+    public Guid WorkspaceTypeId { get; set; }
+    public bool IsAvailable { get; set; }
     
     public virtual WorkspaceType WorkspaceType { get; set; }
+    public virtual ICollection<Reservation> Reservations { get; set; }
 }

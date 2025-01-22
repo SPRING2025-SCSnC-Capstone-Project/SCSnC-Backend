@@ -7,9 +7,11 @@ public class Voucher
     public Voucher()
     {
         Orders = new HashSet<Order>();
+        UserVouchers = new HashSet<UserVoucher>();
     }
     
     [Key]
+    public Guid VoucherId { get; set; }
     public string VoucherCode { get; set; }
     public int DiscountValue { get; set; }
     public string Description { get; set; }
@@ -18,4 +20,5 @@ public class Voucher
     public DateTime LastUpdatedAt { get; set; }
     
     public virtual ICollection<Order> Orders { get; set; }
+    public virtual ICollection<UserVoucher> UserVouchers { get; set; }
 }
