@@ -24,7 +24,7 @@ public class GetTablesPaginatedQueryHandler: IRequestHandler<GetTablesPaginatedQ
     }
 
     public async Task<PaginatedList<TableDto>> Handle(GetTablesPaginatedQuery request, CancellationToken cancellationToken) {
-        var tables = _context.Tables.AsQueryable();
+        var tables = _context.Tables.AsQueryable().Where(x => x.IsActive);
 
         return await tables.ListPaginateWithSortAsync<Table, TableDto>(
             request.Page,
