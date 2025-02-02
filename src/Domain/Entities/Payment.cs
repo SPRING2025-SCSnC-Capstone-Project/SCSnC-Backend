@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class Payment
+public class Payment : BaseEntity
 {
-    [Key]
-    public Guid PaymentId { get; set; }
     public double Amount { get; set; }
     public string PaymentMethod { get; set; }
     

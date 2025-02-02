@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class User
+public class User : BaseEntity
 {
     public User()
     {
@@ -12,9 +12,6 @@ public class User
         JoinEvents = new HashSet<JoinEvent>();
         Reservations = new HashSet<Reservation>();
     }
-    
-    [Key]
-    public Guid UserId { get; set; }
     public string Username { get; set; }
     public string PasswordHash { get; set; }
     public string FullName { get; set; }
@@ -23,8 +20,8 @@ public class User
     public string Address { get; set; }
     [ForeignKey("RoleId")]
     public Guid RoleId { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime LastUpdatedAt { get; set; }
+    public LocalDateTime CreatedAt { get; set; }
+    public LocalDateTime LastUpdatedAt { get; set; }
     
     public virtual Role Role { get; set; }
     public virtual ICollection<Order> Orders { get; set; }

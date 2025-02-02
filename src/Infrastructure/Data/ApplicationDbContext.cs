@@ -11,24 +11,24 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     #region DbSet Properties
     
-    public virtual DbSet<Event> Events { get; set; }
-    public virtual DbSet<Feedback> Feedbacks { get; set; }
-    public virtual DbSet<Item> Items { get; set; }
-    public virtual DbSet<ItemCategory> ItemCategories { get; set; }
-    public virtual DbSet<JoinEvent> JoinEvents { get; set; }
-    public virtual DbSet<Order> Orders { get; set; }
-    public virtual DbSet<OrderDetail> OrderDetails { get; set; }
-    public virtual DbSet<Reservation> Reservations { get; set; }
-    public virtual DbSet<Role> Roles { get; set; }
-    public virtual DbSet<Size> Sizes { get; set; }
-    public virtual DbSet<Slot> Slots { get; set; }
-    public virtual DbSet<Table> Tables { get; set; }
-    public virtual DbSet<Topping> Toppings { get; set; }
-    public virtual DbSet<User> Users { get; set; }
-    public virtual DbSet<UserVoucher> UserVouchers { get; set; }
-    public virtual DbSet<Voucher> Vouchers { get; set; }
-    public virtual DbSet<Workspace> Workspaces { get; set; }
-    public virtual DbSet<WorkspaceType> WorkspaceTypes { get; set; }
+    public DbSet<Event> Events => Set<Event>();
+    public DbSet<Feedback> Feedbacks => Set<Feedback>();
+    public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemCategory> ItemCategories => Set<ItemCategory>();
+    public DbSet<JoinEvent> JoinEvents => Set<JoinEvent>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
+    public DbSet<Reservation> Reservations => Set<Reservation>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Size> Sizes => Set<Size>();
+    public DbSet<Slot> Slots => Set<Slot>();
+    public DbSet<Table> Tables => Set<Table>();
+    public DbSet<Topping> Toppings => Set<Topping>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<UserVoucher> UserVouchers => Set<UserVoucher>();
+    public DbSet<Voucher> Vouchers => Set<Voucher>();
+    public DbSet<Workspace> Workspaces => Set<Workspace>();
+    public DbSet<WorkspaceType> WorkspaceTypes => Set<WorkspaceType>();
     
     #endregion
     
@@ -36,5 +36,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

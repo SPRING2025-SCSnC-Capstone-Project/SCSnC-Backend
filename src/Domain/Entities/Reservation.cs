@@ -3,11 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class Reservation
+public class Reservation : BaseEntity
 {
-    [Key]
-    public int ReservationId { get; set; }
-    public DateTime ReservationDate { get; set; }
+    public LocalDateTime ReservationDate { get; set; }
     [ForeignKey("WorkspaceId")]
     public Guid WorkspaceId { get; set; }
     public double Deposit { get; set; }
@@ -16,8 +14,8 @@ public class Reservation
     [ForeignKey("UserId")]
     public Guid UserId { get; set; }
     // public bool Status { get; set; }
-    // public DateTime CreatedAt { get; set; }
-    // public DateTime LastUpdatedAt { get; set; }
+    // public LocalDateTime CreatedAt { get; set; }
+    // public LocalDateTime LastUpdatedAt { get; set; }
         // may need reviews to add these fields
     
     public virtual Workspace Workspace { get; set; }
