@@ -2,21 +2,12 @@ using FluentValidation.Results;
 
 namespace Application.Common.Exceptions;
 
-public class ValidationException : Exception
+public class RequestValidationException : Exception
 {
-    public ValidationException()
-        : base("One or more validation failures have occurred.")
-    {
-        Errors = new Dictionary<string, string[]>();
-    }
+    public List<ValidationFailure>? Errors { get; init; }
 
-    public ValidationException(IEnumerable<ValidationFailure> failures)
-        : this()
+    public RequestValidationException(List<ValidationFailure>? errors) : base("User input validation failed!")
     {
-        Errors = failures
-            .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
-            .ToDictionary(failureGroup => failureGroup.Key, failureGroup => failureGroup.ToArray());
+        Errors = errors;
     }
-
-    public IDictionary<string, string[]> Errors { get; }
 }

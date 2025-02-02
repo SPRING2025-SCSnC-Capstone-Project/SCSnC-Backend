@@ -1,17 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Common;
 
 namespace Domain.Entities;
 
-public class IncludeTopping
+public class IncludeTopping : BaseEntity
 {
     public IncludeTopping()
     {
         OrderDetails = new HashSet<OrderDetail>();
     }
-    
-    [Key]
-    public Guid IncludeToppingId { get; set; }
+
     [ForeignKey("ToppingId")]
     public Guid ToppingId { get; set; }
     [ForeignKey("OrderDetailId")]

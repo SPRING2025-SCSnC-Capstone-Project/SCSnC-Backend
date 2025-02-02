@@ -1,16 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class Topping
+public class Topping : BaseEntity
 {
-    [Key]
-    public Guid ToppingId { get; set; }
     public string ToppingName { get; set; }
     public string ToppingDescription { get; set; }
     public double Price { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime LastUpdatedAt { get; set; }
+    public LocalDateTime CreatedAt { get; set; }
+    public LocalDateTime LastUpdatedAt { get; set; }
     
     public virtual IncludeTopping IncludeTopping { get; set; }
 }

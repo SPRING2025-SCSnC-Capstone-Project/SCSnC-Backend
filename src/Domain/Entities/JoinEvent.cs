@@ -3,10 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class JoinEvent
+public class JoinEvent : BaseEntity
 {
-    [Key]
-    public Guid JoinEventId { get; set; }
     [ForeignKey("EventId")]
     public Guid EventId { get; set; }
     [ForeignKey("UserId")]

@@ -3,17 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250127143902_RevertModifyNullableDateTime")]
+    partial class RevertModifyNullableDateTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,14 +32,14 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("EntranceFee")
                         .HasColumnType("double precision");
 
-                    b.Property<DateTime>("EventDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("EventDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("EventDescription")
                         .IsRequired()
@@ -49,8 +53,8 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("EventId");
 
@@ -67,11 +71,11 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
@@ -113,8 +117,8 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("ItemBasePrice")
                         .HasColumnType("double precision");
@@ -134,8 +138,8 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("ItemId");
 
@@ -154,11 +158,11 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("ItemCategoryId");
 
@@ -222,11 +226,11 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("PaymentStatus")
                         .HasColumnType("boolean");
@@ -311,8 +315,8 @@ namespace Infrastructure.Persistence
                     b.Property<double>("Deposit")
                         .HasColumnType("double precision");
 
-                    b.Property<DateTime>("ReservationDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("ReservationDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("SlotId")
                         .HasColumnType("uuid");
@@ -355,11 +359,11 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("PriceAdjustment")
                         .HasColumnType("double precision");
@@ -382,11 +386,11 @@ namespace Infrastructure.Persistence
                     b.Property<int>("SlotNumber")
                         .HasColumnType("integer");
 
-                    b.Property<TimeOnly>("TimeEnd")
-                        .HasColumnType("time without time zone");
+                    b.Property<LocalTime>("TimeEnd")
+                        .HasColumnType("time");
 
-                    b.Property<TimeOnly>("TimeStart")
-                        .HasColumnType("time without time zone");
+                    b.Property<LocalTime>("TimeStart")
+                        .HasColumnType("time");
 
                     b.HasKey("SlotId");
 
@@ -399,14 +403,14 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("SeatAmount")
                         .HasColumnType("integer");
@@ -425,11 +429,11 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("Price")
                         .HasColumnType("double precision");
@@ -459,8 +463,8 @@ namespace Infrastructure.Persistence
                     b.Property<Guid>("PaymentId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("TransactionDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("TransactionStatus")
                         .IsRequired()
@@ -486,8 +490,8 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -497,8 +501,8 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -528,8 +532,8 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("DateAdded")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("RedeemStatus")
                         .HasColumnType("boolean");
@@ -555,8 +559,8 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -565,11 +569,11 @@ namespace Infrastructure.Persistence
                     b.Property<int>("DiscountValue")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("ExpiredDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("ExpiredDate")
+                        .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("VoucherCode")
                         .IsRequired()

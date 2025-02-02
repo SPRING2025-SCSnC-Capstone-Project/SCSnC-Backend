@@ -1,19 +1,17 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class ItemCategory
+public class ItemCategory : BaseEntity
 {
     public ItemCategory()
     {
         Items = new HashSet<Item>();
     }
-    
-    [Key]
-    public Guid ItemCategoryId { get; set; }
     public string CategoryName { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime LastUpdatedAt { get; set; }
+    public LocalDateTime CreatedAt { get; set; }
+    public LocalDateTime LastUpdatedAt { get; set; }
     
     public virtual ICollection<Item> Items { get; set; }
 }

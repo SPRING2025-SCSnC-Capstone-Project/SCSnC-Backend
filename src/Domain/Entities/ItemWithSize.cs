@@ -3,10 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class ItemWithSize
+public class ItemWithSize : BaseEntity
 {
-    [Key]
-    public Guid ItemWithSizeId { get; set; }
     [ForeignKey("ItemId")]
     public Guid ItemId { get; set; }
     [ForeignKey("SizeId")]

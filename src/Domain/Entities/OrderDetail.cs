@@ -3,15 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class OrderDetail
+public class OrderDetail : BaseEntity
 {
     public OrderDetail()
     {
         IncludeToppings = new HashSet<IncludeTopping>();
     }
-    
-    [Key]
-    public Guid OrderDetailId { get; set; }
     [ForeignKey("OrderId")]
     public Guid OrderId { get; set; }
     [ForeignKey("ItemWithSizeId")]

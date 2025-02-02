@@ -3,14 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
-public class Transaction
+public class Transaction : BaseEntity
 {
-    [Key]
-    public Guid TransactionId { get; set; }
     [ForeignKey("PaymentId")]
     public Guid PaymentId { get; set; }
     public string TransactionStatus { get; set; }
-    public DateTime TransactionDate { get; set; }
+    public LocalDateTime TransactionDate { get; set; }
     [ForeignKey("OrderId")]
     public Guid OrderId { get; set; }
     

@@ -1,18 +1,13 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace Domain.Entities;
 
-public class Feedback
+public class Feedback : BaseEntity
 {
-    [Key]
-    public Guid FeedbackId { get; set; }
     [ForeignKey("OrderId")]
     public Guid OrderId { get; set; }
     public string Comment { get; set; }
     public int Rating { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime LastUpdatedAt { get; set; }
+    public LocalDateTime CreatedAt { get; set; }
+    public LocalDateTime LastUpdatedAt { get; set; }
     
     public virtual Order Order { get; set; }
 }
