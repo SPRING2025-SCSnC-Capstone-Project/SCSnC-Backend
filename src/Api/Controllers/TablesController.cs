@@ -1,5 +1,4 @@
 using Api.Controllers.Payload.Requests;
-using Api.Controllers.Payload.Requests.Tables;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Application.Tables.Commands;
