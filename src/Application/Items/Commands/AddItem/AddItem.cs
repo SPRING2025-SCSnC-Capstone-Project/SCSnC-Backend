@@ -8,12 +8,12 @@ namespace Application.Items.Commands.AddItem;
 
 public class AddItemCommand : IRequest<ItemDto>
 {
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public double Price { get; set; }
-    public string Img { get; set; }
-    public Guid CategoryId { get; set; }
-    public List<Guid> SizeIds { get; set; }
+    public string Name { get; init; }
+    public string Description { get; init; }
+    public double Price { get; init; }
+    public string Img { get; init; }
+    public Guid CategoryId { get; init; }
+    public List<Guid> SizeIds { get; init; }
 }
 
 public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
@@ -57,6 +57,8 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
         } 
 //      Note: end
 
+        await _context.SaveChangesAsync(cancellationToken);
+        
         return _mapper.Map<ItemDto>(result.Entity);
     }
 }

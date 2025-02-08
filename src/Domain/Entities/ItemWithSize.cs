@@ -5,6 +5,11 @@ namespace Domain.Entities;
 
 public class ItemWithSize : BaseEntity
 {
+    public ItemWithSize()
+    {
+        OrderDetails = new HashSet<OrderDetail>();
+    }
+    
     [ForeignKey("ItemId")]
     public Guid ItemId { get; set; }
     [ForeignKey("SizeId")]
@@ -12,5 +17,5 @@ public class ItemWithSize : BaseEntity
     
     public virtual Item Item { get; set; }
     public virtual Size Size { get; set; }
-    public virtual OrderDetail OrderDetail { get; set; }
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 }

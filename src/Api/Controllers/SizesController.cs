@@ -87,8 +87,4 @@ public class SizesController : ApiControllerBase
     }
     
     #endregion
-    
-    #region Additional Operations
-    
-    #endregion
 }
