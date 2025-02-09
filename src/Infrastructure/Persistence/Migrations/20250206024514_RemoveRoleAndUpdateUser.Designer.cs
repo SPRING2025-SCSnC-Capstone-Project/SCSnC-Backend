@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250206024514_RemoveRoleAndUpdateUser")]
+    partial class RemoveRoleAndUpdateUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -476,9 +479,6 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("AvatarLink")
-                        .HasColumnType("text");
-
                     b.Property<LocalDateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -489,9 +489,6 @@ namespace Infrastructure.Persistence
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
 
                     b.Property<LocalDateTime>("LastUpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -581,14 +578,8 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("WorkspaceImageUrl")
-                        .HasColumnType("text");
 
                     b.Property<Guid>("WorkspaceTypeId")
                         .HasColumnType("uuid");
@@ -605,9 +596,6 @@ namespace Infrastructure.Persistence
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("MaxCapacity")
                         .HasColumnType("integer");

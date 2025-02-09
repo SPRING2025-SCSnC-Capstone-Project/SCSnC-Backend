@@ -28,10 +28,10 @@ public class UpdateSlotCommandHandler: IRequestHandler<UpdateSlotCommand, SlotDt
             throw new KeyNotFoundException($"Slot with Id {request.Id} does not exist.");
         }
 
-        var existingTableNumber = await _context.Slots.FirstOrDefaultAsync(x => x.SlotNumber == request.SlotNumber, cancellationToken);
+        var existingSlotNumber = await _context.Slots.FirstOrDefaultAsync(x => x.SlotNumber == request.SlotNumber && x.IsActive, cancellationToken);
 
-        if (existingTableNumber is not null && slot.SlotNumber != existingTableNumber.SlotNumber) {
-            throw new ConflictException($"Table with number {request.SlotNumber} already exists");
+        if (existingSlotNumber is not null && slot.SlotNumber != existingSlotNumber.SlotNumber) {
+            throw new ConflictException($"Slot with number {request.SlotNumber} already exists");
         }
 
         if (await CheckConflict(request, cancellationToken)) {

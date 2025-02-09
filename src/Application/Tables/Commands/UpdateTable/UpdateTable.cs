@@ -28,9 +28,9 @@ public class UpdateTableCommandHandler: IRequestHandler<UpdateTableCommand, Tabl
             throw new KeyNotFoundException($"Table with Id {request.Id} does not exist.");
         }
 
-        var existingTableNumber = await _context.Tables.FirstOrDefaultAsync(x => x.TableNumber == request.TableNumber, cancellationToken);
+        var existingTable = await _context.Tables.FirstOrDefaultAsync(x => x.TableNumber == request.TableNumber && x.IsActive, cancellationToken);
 
-        if (existingTableNumber is not null && table.TableNumber != existingTableNumber.TableNumber) {
+        if (existingTable is not null && table.TableNumber != existingTable.TableNumber) {
             throw new ConflictException($"Table with number {request.TableNumber} already exists");
         }
 
