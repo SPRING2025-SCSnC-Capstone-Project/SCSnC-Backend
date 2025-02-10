@@ -21,7 +21,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
-    public DbSet<Role> Roles => Set<Role>();
     public DbSet<Size> Sizes => Set<Size>();
     public DbSet<Slot> Slots => Set<Slot>();
     public DbSet<Table> Tables => Set<Table>();

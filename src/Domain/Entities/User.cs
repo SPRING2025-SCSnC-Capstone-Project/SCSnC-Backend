@@ -18,12 +18,11 @@ public class User : BaseEntity
     public string Email { get; set; }
     public string Phone { get; set; }
     public string Address { get; set; }
-    [ForeignKey("RoleId")]
-    public Guid RoleId { get; set; }
+    public string Role { get; set; }
+    public string? AvatarLink { get; set; }
+    public bool IsActive { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
-    
-    public virtual Role Role { get; set; }
     public virtual ICollection<Order> Orders { get; set; }
     public virtual ICollection<UserVoucher> UserVouchers { get; set; }
     public virtual ICollection<JoinEvent> JoinEvents { get; set; }
