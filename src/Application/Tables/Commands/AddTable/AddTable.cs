@@ -21,7 +21,7 @@ public class AddTableCommandHandler: IRequestHandler<AddTableCommand, TableDto> 
     }
 
     public async Task<TableDto> Handle(AddTableCommand request, CancellationToken cancellationToken) {
-        var table = await _context.Tables.FirstOrDefaultAsync(x => x.TableNumber == request.TableNumber, cancellationToken);
+        var table = await _context.Tables.FirstOrDefaultAsync(x => x.TableNumber == request.TableNumber && x.IsActive, cancellationToken);
 
         if (table is not null) {
             throw new ConflictException($"Table with number {request.TableNumber} already exists");
@@ -31,6 +31,7 @@ public class AddTableCommandHandler: IRequestHandler<AddTableCommand, TableDto> 
             TableNumber = request.TableNumber,
             SeatAmount = request.SeatAmount,
             IsAvailable = true,
+            IsActive = true,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
         };

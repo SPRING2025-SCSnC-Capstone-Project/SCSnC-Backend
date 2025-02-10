@@ -17,13 +17,15 @@ public class RemoveTableCommandHandler: IRequestHandler<RemoveTableCommand, Tabl
     }
 
     public async Task<TableDto> Handle(RemoveTableCommand request, CancellationToken cancellationToken) {
-        var table = await _context.Tables.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var table = await _context.Tables.FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
 
         if (table is null) {
             throw new KeyNotFoundException($"Table with Id {request.Id} does not exist");
         }
 
-        _context.Tables.Remove(table);
+        table.IsActive = false;
+
+        _context.Tables.Update(table);
         await _context.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<TableDto>(table);

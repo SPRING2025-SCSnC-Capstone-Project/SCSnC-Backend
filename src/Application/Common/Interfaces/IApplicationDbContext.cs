@@ -12,7 +12,6 @@ public interface IApplicationDbContext
     public DbSet<Order> Orders { get; }
     public DbSet<OrderDetail> OrderDetails { get; }
     public DbSet<Reservation> Reservations { get; }
-    public DbSet<Role> Roles { get; }
     public DbSet<Size> Sizes { get; }
     public DbSet<Slot> Slots { get; }
     public DbSet<Table> Tables { get; }

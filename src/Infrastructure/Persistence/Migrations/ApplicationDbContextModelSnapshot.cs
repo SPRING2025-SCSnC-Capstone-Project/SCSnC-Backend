@@ -333,21 +333,6 @@ namespace Infrastructure.Persistence
                     b.ToTable("Reservations");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Role", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles");
-                });
-
             modelBuilder.Entity("Domain.Entities.Size", b =>
                 {
                     b.Property<Guid>("Id")
@@ -378,6 +363,9 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("SlotNumber")
                         .HasColumnType("integer");
 
@@ -400,6 +388,9 @@ namespace Infrastructure.Persistence
 
                     b.Property<LocalDateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
@@ -485,6 +476,9 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("AvatarLink")
+                        .HasColumnType("text");
+
                     b.Property<LocalDateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -495,6 +489,9 @@ namespace Infrastructure.Persistence
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<LocalDateTime>("LastUpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -507,16 +504,15 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
@@ -585,8 +581,17 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("WorkspaceImageUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int>("WorkspaceNumber")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("WorkspaceTypeId")
                         .HasColumnType("uuid");
@@ -603,6 +608,9 @@ namespace Infrastructure.Persistence
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("MaxCapacity")
                         .HasColumnType("integer");
@@ -794,17 +802,6 @@ namespace Infrastructure.Persistence
                     b.Navigation("Payment");
                 });
 
-            modelBuilder.Entity("Domain.Entities.User", b =>
-                {
-                    b.HasOne("Domain.Entities.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("Domain.Entities.UserVoucher", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
@@ -885,11 +882,6 @@ namespace Infrastructure.Persistence
                 {
                     b.Navigation("Transaction")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Entities.Role", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Domain.Entities.Size", b =>

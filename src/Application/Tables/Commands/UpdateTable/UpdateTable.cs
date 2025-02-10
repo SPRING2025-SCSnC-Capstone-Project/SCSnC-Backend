@@ -9,6 +9,7 @@ public record UpdateTableCommand: IRequest<TableDto> {
     public Guid Id { get; init; }
     public int TableNumber { get; init; }
     public int SeatAmount { get; init; }
+    public bool IsAvailable { get; init; }
 }
 
 public class UpdateTableCommandHandler: IRequestHandler<UpdateTableCommand, TableDto> {
@@ -21,20 +22,21 @@ public class UpdateTableCommandHandler: IRequestHandler<UpdateTableCommand, Tabl
     }
 
     public async Task<TableDto> Handle(UpdateTableCommand request, CancellationToken cancellationToken) {
-        var table = await _context.Tables.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var table = await _context.Tables.FirstOrDefaultAsync(x => x.Id == request.Id  && x.IsActive, cancellationToken);
 
         if (table is null) {
             throw new KeyNotFoundException($"Table with Id {request.Id} does not exist.");
         }
 
-        var existingTableNumber = await _context.Tables.FirstOrDefaultAsync(x => x.TableNumber == request.TableNumber, cancellationToken);
+        var existingTable = await _context.Tables.FirstOrDefaultAsync(x => x.TableNumber == request.TableNumber && x.IsActive, cancellationToken);
 
-        if (existingTableNumber is not null && table.TableNumber != existingTableNumber.TableNumber) {
+        if (existingTable is not null && table.TableNumber != existingTable.TableNumber) {
             throw new ConflictException($"Table with number {request.TableNumber} already exists");
         }
 
         table.TableNumber = request.TableNumber;
         table.SeatAmount = request.SeatAmount;
+        table.IsAvailable = request.IsAvailable;
         table.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
 
         _context.Tables.Update(table);

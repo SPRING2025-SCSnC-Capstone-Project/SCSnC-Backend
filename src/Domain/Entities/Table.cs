@@ -15,6 +15,7 @@ public class Table : BaseEntity
     public bool IsAvailable { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
-    
+    public bool IsActive { get; set; }
+
     public virtual ICollection<Order> Orders { get; set; }
 }

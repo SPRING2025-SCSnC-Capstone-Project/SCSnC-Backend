@@ -12,6 +12,7 @@ public class Slot : BaseEntity
     public int SlotNumber { get; set; }
     public LocalTime TimeStart { get; set; }
     public LocalTime TimeEnd { get; set; }
+    public bool IsActive { get; set; }
     
     public virtual ICollection<Reservation> Reservations { get; set; }
 }
