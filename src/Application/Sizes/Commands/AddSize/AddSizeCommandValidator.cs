@@ -9,7 +9,7 @@ public class AddSizeCommandValidator: AbstractValidator<AddSizeCommand>
             .MaximumLength(200).WithMessage("Size name must not exceed 200 characters");
 
         RuleFor(x => x.PriceAdjustment)
-            .NotEmpty().WithMessage("Price adjustment is required")
-            .GreaterThan(0).WithMessage("Price adjustment must be greater than 0");
+            .NotNull().WithMessage("Price adjustment is required")
+            .GreaterThanOrEqualTo(0).WithMessage("Price adjustment must be greater than or equal 0");
     }
 }

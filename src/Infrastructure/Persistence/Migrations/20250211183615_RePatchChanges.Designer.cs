@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250211183615_RePatchChanges")]
+    partial class RePatchChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,8 +104,6 @@ namespace Infrastructure.Persistence
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrderDetailId");
 
                     b.HasIndex("ToppingId");
 
@@ -624,6 +625,21 @@ namespace Infrastructure.Persistence
                     b.ToTable("WorkspaceTypes");
                 });
 
+            modelBuilder.Entity("IncludeToppingOrderDetail", b =>
+                {
+                    b.Property<Guid>("IncludeToppingsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OrderDetailsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("IncludeToppingsId", "OrderDetailsId");
+
+                    b.HasIndex("OrderDetailsId");
+
+                    b.ToTable("IncludeToppingOrderDetail");
+                });
+
             modelBuilder.Entity("Domain.Entities.Feedback", b =>
                 {
                     b.HasOne("Domain.Entities.Order", "Order")
@@ -637,19 +653,11 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.IncludeTopping", b =>
                 {
-                    b.HasOne("Domain.Entities.OrderDetail", "OrderDetail")
-                        .WithMany("IncludeToppings")
-                        .HasForeignKey("OrderDetailId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.Topping", "Topping")
                         .WithMany("IncludeToppings")
                         .HasForeignKey("ToppingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("OrderDetail");
 
                     b.Navigation("Topping");
                 });
@@ -823,6 +831,21 @@ namespace Infrastructure.Persistence
                     b.Navigation("WorkspaceType");
                 });
 
+            modelBuilder.Entity("IncludeToppingOrderDetail", b =>
+                {
+                    b.HasOne("Domain.Entities.IncludeTopping", null)
+                        .WithMany()
+                        .HasForeignKey("IncludeToppingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.OrderDetail", null)
+                        .WithMany()
+                        .HasForeignKey("OrderDetailsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entities.Event", b =>
                 {
                     b.Navigation("JoinEvents");
@@ -851,11 +874,6 @@ namespace Infrastructure.Persistence
                     b.Navigation("OrderDetails");
 
                     b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("Domain.Entities.OrderDetail", b =>
-                {
-                    b.Navigation("IncludeToppings");
                 });
 
             modelBuilder.Entity("Domain.Entities.Payment", b =>

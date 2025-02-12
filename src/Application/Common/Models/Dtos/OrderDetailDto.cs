@@ -17,7 +17,7 @@ public class OrderDetailDto: BaseDto, IMapFrom<OrderDetail>
             .ForMember(dest => dest.ItemName, opt => opt.MapFrom(src => src.ItemWithSize.Item.ItemName))
             .ForMember(dest => dest.SizeName, opt => opt.MapFrom(src => src.ItemWithSize.Size.SizeName))
             .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice))
-            .ForMember(dest => dest.Toppings, opt => opt.MapFrom(src => src.IncludeToppings.Where(i => i.OrderDetailId == src.Id).Select(i => i.Topping.ToppingName)))
+            .ForMember(dest => dest.Toppings, opt => opt.MapFrom(src => src.IncludeToppings.Where(i => i.OrderDetailId == src.Id).Select(i => i.Topping.ToppingName).ToList()))
             .ReverseMap();
     }
 }

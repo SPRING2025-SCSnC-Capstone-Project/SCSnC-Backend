@@ -39,6 +39,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Respo
             .Include(od => od.ItemWithSize.Item)
             .Include(od => od.ItemWithSize.Size)
             .Include(od => od.IncludeToppings)
+            .ThenInclude(t => t.Topping)
             .Where(od => od.OrderId == order.Id)
             .Select(od => _mapper.Map<OrderDetailDto>(od))
             .ToList();

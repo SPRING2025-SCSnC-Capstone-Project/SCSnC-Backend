@@ -50,7 +50,7 @@ public class SizesController : ApiControllerBase
         var command = new AddSizeCommand()
         {
             SizeName = request.SizeName,
-            PriceAdjustment = request.PriceAdjustment
+            PriceAdjustment = request.PriceAdjust
         };
 
         var result = await Mediator.Send(command);

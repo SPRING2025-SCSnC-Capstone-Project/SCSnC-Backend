@@ -44,7 +44,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         {
             TableId = request.TableId,
             UserId = request.UserId,
-            VoucherId = request.VoucherId.Equals(Guid.Empty) ? Guid.Empty : request.VoucherId,
+            VoucherId = request.VoucherId,
             //TotalPrice = totalPrice,
             TotalPrice = 0,
             
