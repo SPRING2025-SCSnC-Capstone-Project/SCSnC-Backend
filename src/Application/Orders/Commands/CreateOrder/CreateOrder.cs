@@ -10,7 +10,8 @@ namespace Application.Orders.Commands.CreateOrder;
 
 public record CreateOrderCommand : IRequest<OrderDto>
 {
-    public Guid TableId { get; init; }
+    public Guid? TableId { get; init; }
+    public Guid? WorkspaceId { get; init; }
     public Guid UserId { get; init; }
     public Guid? VoucherId { get; init; }
     public List<CreateOrderDetailDto> OrderDetails { get; init; }
@@ -29,8 +30,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
 
     public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
+        #region Manual Validation (temporary)
         //double totalPrice = 0;
-        
         // var checkOrder = _context.Orders.OrderByDescending(x => x.LastUpdatedAt).FirstOrDefaultAsync(x => x.TableId == request.TableId, cancellationToken).Result;
         //
         // if (checkOrder != null && checkOrder.PaymentStatus == false)
@@ -39,15 +40,36 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         //     //redirect to update order
         //     
         // }
-
+        
+        // Upper comment is code for checking if table is already occupied
+        
+        
+        // Will need another way to validate order either have tableId or workspaceId
+        // if both are null, throw exception
+        if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
+        {
+            throw new ValidationException("TableId or WorkspaceId must be provided");
+        }
+        // if both are not null, throw exception
+        if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
+        {
+            throw new ValidationException("TableId or WorkspaceId must be provided");
+        }
+        
+        #endregion
+        
+        // start creating order from here
+        
         var order = new Order
         {
             TableId = request.TableId,
+            WorkspaceId = request.WorkspaceId,
             UserId = request.UserId,
             VoucherId = request.VoucherId,
             //TotalPrice = totalPrice,
             TotalPrice = 0,
             
+            IsActive = true,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             PaymentStatus = false
@@ -107,10 +129,17 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             _context.OrderDetails.Update(newOrderDetail);
             await _context.SaveChangesAsync(cancellationToken);
         }
-        var discount = await _context.Vouchers.FirstOrDefaultAsync(x => x.Id == request.VoucherId, cancellationToken);
+        var discount = await _context.UserVouchers.Include(x => x.Voucher).FirstOrDefaultAsync(x => x.Id == request.VoucherId, cancellationToken);
         
-        if (discount == null) order.TotalPrice = OrderHelper.CalculateTotalPrice(order.Id, cancellationToken, _context).Result;
-        else order.TotalPrice = OrderHelper.CalculateTotalPrice(order.Id, cancellationToken, _context).Result / 100 * (100 - discount.DiscountValue);
+        if (discount != null)
+        {
+            if (discount.RedeemStatus == true || discount.Voucher.ExpiredDate < LocalDateTime.FromDateTime(DateTime.Now))
+            {
+                order.TotalPrice = OrderHelper.CalculateTotalPrice(order.Id, cancellationToken, _context).Result;
+            }
+            order.TotalPrice = OrderHelper.CalculateTotalPrice(order.Id, cancellationToken, _context).Result / 100 * (100 - discount.Voucher.DiscountValue);
+        } 
+        else order.TotalPrice = OrderHelper.CalculateTotalPrice(order.Id, cancellationToken, _context).Result;
         
         _context.Orders.Update(order);
         

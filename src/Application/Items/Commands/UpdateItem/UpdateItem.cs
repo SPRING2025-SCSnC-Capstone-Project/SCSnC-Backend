@@ -12,6 +12,7 @@ public record UpdateItemCommand : IRequest<ItemDto>
     public double Price { get; init; }
     public string Img { get; init; }
     public Guid CategoryId { get; init; }
+    public bool IsActive { get; init; }
 }
 
 public class UpdateItemCommandHandler : IRequestHandler<UpdateItemCommand, ItemDto>
@@ -40,6 +41,7 @@ public class UpdateItemCommandHandler : IRequestHandler<UpdateItemCommand, ItemD
         item.ItemCategoryId = request.CategoryId;
         item.ItemImg = request.Img;
         item.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
+        item.IsActive = request.IsActive;
         
         _context.Items.Update(item);
         await _context.SaveChangesAsync(cancellationToken);

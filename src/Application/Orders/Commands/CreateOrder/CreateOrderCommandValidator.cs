@@ -4,9 +4,6 @@ public class CreateOrderCommandValidator: AbstractValidator<CreateOrderCommand>
 {
     public CreateOrderCommandValidator()
     {
-        RuleFor(x => x.TableId)
-            .NotEmpty().WithMessage("TableId is required.");
-        
         RuleFor(x => x.UserId)
             .NotEmpty().WithMessage("UserId is required.");
         

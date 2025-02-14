@@ -10,6 +10,7 @@ public class ItemCategory : BaseEntity
         Items = new HashSet<Item>();
     }
     public string CategoryName { get; set; }
+    public bool IsActive { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
     

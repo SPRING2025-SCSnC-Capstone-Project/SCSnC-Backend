@@ -9,6 +9,7 @@ public record UpdateSizeCommand : IRequest<SizeDto>
     public Guid Id { get; init; }
     public string SizeName { get; init; }
     public double PriceAdjustment { get; init; }
+    public bool IsActive { get; init; }
 }
 
 public class UpdateSizeCommandHandler : IRequestHandler<UpdateSizeCommand, SizeDto>
@@ -34,6 +35,7 @@ public class UpdateSizeCommandHandler : IRequestHandler<UpdateSizeCommand, SizeD
         size.SizeName = request.SizeName;
         size.PriceAdjustment = request.PriceAdjustment;
         size.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
+        size.IsActive = request.IsActive;
         
         _context.Sizes.Update(size);
         await _context.SaveChangesAsync(cancellationToken);

@@ -67,7 +67,8 @@ public class ToppingsController: ApiControllerBase
             Id = id,
             Name = request.ToppingName,
             Description = request.ToppingDescription,
-            Price = request.Price
+            Price = request.Price,
+            IsActive = request.IsActive
         };
 
         var result = await Mediator.Send(command);

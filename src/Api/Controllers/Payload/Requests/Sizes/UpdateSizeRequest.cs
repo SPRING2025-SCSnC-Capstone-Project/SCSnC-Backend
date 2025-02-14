@@ -4,4 +4,5 @@ public class UpdateSizeRequest
 {
     public string SizeName { get; set; }
     public double PriceAdjustment { get; set; }
+    public bool IsActive { get; set; }
 }

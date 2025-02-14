@@ -14,6 +14,7 @@ public class ItemWithSize : BaseEntity
     public Guid ItemId { get; set; }
     [ForeignKey("SizeId")]
     public Guid SizeId { get; set; }
+    public bool IsActive { get; set; }
     
     public virtual Item Item { get; set; }
     public virtual Size Size { get; set; }

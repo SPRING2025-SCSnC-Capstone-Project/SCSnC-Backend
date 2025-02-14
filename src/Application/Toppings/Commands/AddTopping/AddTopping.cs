@@ -30,6 +30,7 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
             ToppingName = request.ToppingName,
             ToppingDescription = request.ToppingDescription,
             Price = request.Price,
+            IsActive = true,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
         };

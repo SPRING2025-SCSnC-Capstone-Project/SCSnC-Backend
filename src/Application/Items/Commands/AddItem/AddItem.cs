@@ -34,8 +34,9 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
             ItemName = request.Name,
             ItemDescription = request.Description,
             ItemBasePrice = request.Price,
-            ItemCategoryId = request.CategoryId,
+            ItemCategoryId =request.CategoryId,
             ItemImg = request.Img,
+            IsActive = true,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
         };

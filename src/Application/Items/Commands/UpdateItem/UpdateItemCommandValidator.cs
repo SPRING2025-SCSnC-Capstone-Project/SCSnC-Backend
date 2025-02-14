@@ -21,5 +21,8 @@ public class UpdateItemCommandValidator : AbstractValidator<UpdateItemCommand>
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Id is required")
             .WithMessage("Item is not valid");
+        
+        RuleFor(x => x.IsActive)
+            .NotNull().WithMessage("IsActive is required");
     }
 }

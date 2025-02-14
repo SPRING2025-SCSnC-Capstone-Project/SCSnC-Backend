@@ -7,4 +7,5 @@ public class UpdateItemRequest
     public double Price { get; set; }
     public string Img { get; set; }
     public Guid CategoryId { get; set; }
+    public bool IsActive { get; set; }
 }

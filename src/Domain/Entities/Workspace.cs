@@ -18,4 +18,5 @@ public class Workspace : BaseEntity
     
     public virtual WorkspaceType WorkspaceType { get; set; }
     public virtual ICollection<Reservation> Reservations { get; set; }
+    public virtual ICollection<Order> Orders { get; set; }
 }

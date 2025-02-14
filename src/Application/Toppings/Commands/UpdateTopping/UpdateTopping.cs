@@ -10,6 +10,7 @@ public record UpdateToppingCommand : IRequest<ToppingDto>
     public string Name { get; init; }
     public string Description { get; init; }
     public double Price { get; init; }
+    public bool IsActive { get; init; }
 }
 
 public class UpdateToppingCommandHandler : IRequestHandler<UpdateToppingCommand, ToppingDto>
@@ -36,6 +37,7 @@ public class UpdateToppingCommandHandler : IRequestHandler<UpdateToppingCommand,
         topping.ToppingDescription = request.Description;
         topping.Price = request.Price;
         topping.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
+        topping.IsActive = request.IsActive;
         
         _context.Toppings.Update(topping);
         await _context.SaveChangesAsync(cancellationToken);

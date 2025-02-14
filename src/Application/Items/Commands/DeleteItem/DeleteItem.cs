@@ -27,8 +27,10 @@ public class DeleteItemCommandHandler : IRequestHandler<DeleteItemCommand, ItemD
         {
             throw new KeyNotFoundException($"Item with id {request.Id} not found");
         }
+
+        item.IsActive = false;
         
-        _context.Items.Remove(item);
+        _context.Items.Update(item);
         
         await _context.SaveChangesAsync(cancellationToken);
         

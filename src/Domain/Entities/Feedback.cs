@@ -6,6 +6,7 @@ public class Feedback : BaseEntity
     public Guid OrderId { get; set; }
     public string Comment { get; set; }
     public int Rating { get; set; }
+    public bool IsActive { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
     

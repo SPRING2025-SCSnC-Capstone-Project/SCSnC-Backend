@@ -15,6 +15,7 @@ public class Item : BaseEntity
     public string ItemImg { get; set; }
     [ForeignKey("ItemCategoryId")]
     public Guid ItemCategoryId { get; set; }
+    public bool IsActive { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
     

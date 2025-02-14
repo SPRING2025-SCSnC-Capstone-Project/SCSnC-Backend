@@ -72,7 +72,8 @@ public class ItemsController : ApiControllerBase
             Price = request.Price,
             CategoryId = request.CategoryId,
             Description = request.Description,
-            Img = request.Img
+            Img = request.Img,
+            IsActive = request.IsActive
         };
 
         var result = await Mediator.Send(command);

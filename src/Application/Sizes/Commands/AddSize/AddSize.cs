@@ -28,6 +28,7 @@ public class AddSizeCommandHandler : IRequestHandler<AddSizeCommand, SizeDto>
         {
             SizeName = request.SizeName,
             PriceAdjustment = request.PriceAdjustment,
+            IsActive = true,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
         };

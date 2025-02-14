@@ -65,7 +65,8 @@ public class SizesController : ApiControllerBase
         {
             Id = id,
             SizeName = request.SizeName,
-            PriceAdjustment = request.PriceAdjustment
+            PriceAdjustment = request.PriceAdjustment,
+            IsActive = request.IsActive
         };
 
         var result = await Mediator.Send(command);

@@ -28,7 +28,9 @@ public class DeleteToppingCommandHandler : IRequestHandler<DeleteToppingCommand,
             throw new KeyNotFoundException($"Topping with id {request.Id} not found");
         }
         
-        _context.Toppings.Remove(topping);
+        topping.IsActive = false;
+        
+        _context.Toppings.Update(topping);
         
         await _context.SaveChangesAsync(cancellationToken);
         

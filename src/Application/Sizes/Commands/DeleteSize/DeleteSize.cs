@@ -27,8 +27,10 @@ public class DeleteSizeCommandHandler : IRequestHandler<DeleteSizeCommand, SizeD
         {
             throw new KeyNotFoundException($"Size with id {request.Id} not found");
         }
+
+        size.IsActive = false;
         
-        _context.Sizes.Remove(size);
+        _context.Sizes.Update(size);
         
         await _context.SaveChangesAsync(cancellationToken);
         

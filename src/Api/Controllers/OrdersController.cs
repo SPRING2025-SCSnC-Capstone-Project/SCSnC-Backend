@@ -30,6 +30,7 @@ public class OrdersController: ApiControllerBase
         {
             UserId = request.UserId,
             TableId = request.TableId,
+            WorkspaceId = request.WorkspaceId,
             VoucherId = request.VoucherId,
             OrderDetails = request.OrderDetails
         };
