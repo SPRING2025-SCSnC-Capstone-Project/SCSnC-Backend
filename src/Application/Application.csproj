@@ -18,4 +18,15 @@
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="OrderDetails\Commands\CreateOrderDetail\" />
+      <Folder Include="OrderDetails\Commands\DeleteOrderDetail\" />
+      <Folder Include="OrderDetails\Commands\UpdateOrderDetail\" />
+      <Folder Include="OrderDetails\Queries\GetOrderDetailById\" />
+      <Folder Include="OrderDetails\Queries\GetOrderDetailsByOrderId\" />
+      <Folder Include="Orders\Commands\DeleteOrder\" />
+      <Folder Include="Orders\Queries\GetOrdersPaginated\" />
+      <Folder Include="Users\" />
+    </ItemGroup>
+
 </Project>

@@ -13,8 +13,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
+    public DbSet<IncludeTopping> IncludeToppings => Set<IncludeTopping>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemCategory> ItemCategories => Set<ItemCategory>();
+    public DbSet<ItemWithSize> ItemWithSizes => Set<ItemWithSize>();
     public DbSet<JoinEvent> JoinEvents => Set<JoinEvent>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();

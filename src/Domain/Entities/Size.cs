@@ -11,6 +11,7 @@ public class Size : BaseEntity
     }
     public string SizeName { get; set; }
     public double PriceAdjustment { get; set; }
+    public bool IsActive { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
     

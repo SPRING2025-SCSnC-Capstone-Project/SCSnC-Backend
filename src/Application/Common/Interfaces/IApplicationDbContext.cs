@@ -6,8 +6,10 @@ public interface IApplicationDbContext
 {
     public DbSet<Event> Events { get; }
     public DbSet<Feedback> Feedbacks { get; }
+    public DbSet<IncludeTopping> IncludeToppings { get; }
     public DbSet<Item> Items { get; }
     public DbSet<ItemCategory> ItemCategories { get; }
+    public DbSet<ItemWithSize> ItemWithSizes { get; }
     public DbSet<JoinEvent> JoinEvents { get; }
     public DbSet<Order> Orders { get; }
     public DbSet<OrderDetail> OrderDetails { get; }

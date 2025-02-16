@@ -13,6 +13,7 @@ public class Voucher : BaseEntity
     public string VoucherCode { get; set; }
     public int DiscountValue { get; set; }
     public string Description { get; set; }
+    public bool IsActive { get; set; }
     public LocalDateTime ExpiredDate { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
