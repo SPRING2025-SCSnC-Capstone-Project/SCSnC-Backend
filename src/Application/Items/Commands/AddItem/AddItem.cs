@@ -51,7 +51,8 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
             var itemWithSize = new ItemWithSize
             {
                 ItemId = result.Entity.Id,
-                SizeId = size
+                SizeId = size,
+                IsActive = true
             };
             
             await _context.ItemWithSizes.AddAsync(itemWithSize, cancellationToken);

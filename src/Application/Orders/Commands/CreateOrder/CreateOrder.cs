@@ -8,7 +8,7 @@ using ValidationException = System.ComponentModel.DataAnnotations.ValidationExce
 
 namespace Application.Orders.Commands.CreateOrder;
 
-public record CreateOrderCommand : IRequest<OrderDto>
+public record CreateOrderCommand : IRequest<ResponseOrderDto>
 {
     public Guid? TableId { get; init; }
     public Guid? WorkspaceId { get; init; }
@@ -17,7 +17,7 @@ public record CreateOrderCommand : IRequest<OrderDto>
     public List<CreateOrderDetailDto> OrderDetails { get; init; }
 }
 
-public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, OrderDto>
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, ResponseOrderDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -28,7 +28,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         _mapper = mapper;
     }
 
-    public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseOrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         #region Manual Validation (temporary)
         //double totalPrice = 0;
@@ -145,10 +145,25 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         
         await _context.SaveChangesAsync(cancellationToken);
 
-        var result = _mapper.Map<OrderDto>(order);
+        //var result = _mapper.Map<ResponseOrderDto>(order);
         
-        //include missing data in return result
-        result.TableNumber = _context.Tables.FirstOrDefaultAsync(x => x.Id == order.TableId, cancellationToken).Result.TableNumber;
+        var get = await _context.Orders
+            .Include(o => o.Table)
+            .Include(o => o.User)
+            .Include(o => o.Voucher)
+            .FirstOrDefaultAsync(o => o.Id == order.Id, cancellationToken);
+
+        var result = _mapper.Map<ResponseOrderDto>(get);
+        
+        result.OrderDetails = _context.OrderDetails
+            .Include(od => od.ItemWithSize)
+            .Include(od => od.ItemWithSize.Item)
+            .Include(od => od.ItemWithSize.Size)
+            .Include(od => od.IncludeToppings)
+            .ThenInclude(t => t.Topping)
+            .Where(od => od.OrderId == order.Id)
+            .Select(od => _mapper.Map<OrderDetailDto>(od))
+            .ToList();
         
         return result;
     }
