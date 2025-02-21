@@ -1,4 +1,12 @@
-namespace Infrastructure.Services.VNPay.Common;
+namespace Application.Common.Models.Dtos;
+
+public class PaymentResponse
+{
+    public string OrderId { get; set; }
+    public string? PaymentStatus { get; set; }
+    public string? PaymentMessage { get; set; }
+    public decimal? Amount { get; set; }
+}
 
 public class VNPayRequest
 {

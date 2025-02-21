@@ -28,4 +28,5 @@ public class CreateOrderDetailDto
     public Guid SizeId { get; set; }
     public int Quantity { get; set; }
     public List<Guid> ToppingIds { get; set; }
+    public double OrderDetailPrice { get; set; }
 }

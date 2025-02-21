@@ -1,16 +1,13 @@
 using System.Net;
 using System.Text;
+using Application.Common.Interfaces;
+using Application.Common.Models.Dtos;
+using Application.Orders.Common;
 using Infrastructure.Services.VNPay.Common;
 
 namespace Infrastructure.Services.VNPay;
 
-public interface IVNPayService
-{
-    public Task<string> GetPaymentLink(string baseUrl, string secretKey, VNPayRequest request);
-    public Task<bool> IsValidSignature(string secretKey, VNPayResponse response);
-}
-
-public class VNPayService: IVNPayService
+public class VNPayService: IPaymentService
 {
     public SortedList<string, string> requestData = new SortedList<string, string>(new VNPayCompare());
     public SortedList<string, string> responseData = new SortedList<string, string>(new VNPayCompare());

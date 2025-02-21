@@ -24,7 +24,7 @@ public class OrdersController: ApiControllerBase
     }
     
     [HttpPost]
-    public async Task<ActionResult<Result<ResponseOrderDto>>> AddOrder([FromBody] CreateOrderRequest request)
+    public async Task<ActionResult<Result<OrderDto>>> AddOrder([FromBody] CreateOrderRequest request)
     {
         var command = new CreateOrderCommand()
         {
@@ -32,12 +32,14 @@ public class OrdersController: ApiControllerBase
             TableId = request.TableId,
             WorkspaceId = request.WorkspaceId,
             VoucherId = request.VoucherId,
-            OrderDetails = request.OrderDetails
+            OrderDetails = request.OrderDetails,
+            TotalPrice = request.TotalPrice,
+            PaymentMethod = request.PaymentMethod
         };
 
         var result = await Mediator.Send(command);
-
-        return Ok(Result<ResponseOrderDto>.Succeed(result));
+        
+        return Ok(Result<OrderDto>.Succeed(result));
     }
     
     [HttpPut]

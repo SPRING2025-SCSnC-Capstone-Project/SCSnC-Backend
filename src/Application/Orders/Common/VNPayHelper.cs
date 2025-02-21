@@ -1,7 +1,10 @@
 using System.Globalization;
+using System.Net;
+using System.Net.Sockets;
+using Application.Common.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Services.VNPay.Common;
+namespace Application.Orders.Common;
 
 public class VNPayHelper
 {
@@ -44,6 +47,24 @@ public class VNPayCompare : IComparer<string>
         return vnpCompare.Compare(x, y, CompareOptions.Ordinal);
     }
 }
+
+public class IPAddressHelper
+{
+    public static string GetLocalIPAddress()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (var ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                return ip.ToString();
+            }
+        }
+        throw new Exception("No network adapters with an IPv4 address in the system!");
+    }
+}
+
+
 
 
 

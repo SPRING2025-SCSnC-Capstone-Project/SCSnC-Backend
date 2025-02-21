@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Ardalis.GuardClauses;
 using Infrastructure.Data;
+using Infrastructure.Services.VNPay;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,7 @@ public static class DependencyInjection
     {
         services.AddApplicationDbContext(configuration);
         services.AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!);
-        
+        services.AddScoped<IPaymentService>(p => p.GetService<VNPayService>()!);
     }
 
     private static void AddApplicationDbContext(this IServiceCollection services, IConfiguration configuration)

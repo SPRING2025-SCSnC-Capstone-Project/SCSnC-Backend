@@ -5,11 +5,13 @@ namespace Application.Common.Models.Dtos;
 
 public class OrderDto: BaseDto, IMapFrom<Order>
 {
+    public string PaymentLink { get; set; }
     public Guid UserId { get; set; }
     public double TotalPrice { get; set; }
     public int TableNumber { get; set; }
     public string? VoucherCode { get; set; }
     public bool PaymentStatus { get; set; }
+    public List<OrderDetailDto> OrderDetails { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
     
