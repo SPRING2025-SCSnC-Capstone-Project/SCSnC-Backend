@@ -298,6 +298,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
              .Include(o => o.Table)
              .Include(o => o.User)
              .Include(o => o.Voucher)
+             // .Include(o => o.OrderDetails)
+             // .ThenInclude(od => od.ItemWithSizes)
              .FirstOrDefaultAsync(o => o.Id == order.Id, cancellationToken);
 
          var result = _mapper.Map<OrderDto>(get);
@@ -321,6 +323,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          };
          
          await _context.Payments.AddAsync(payment, cancellationToken);
+         await _context.SaveChangesAsync(cancellationToken);
 
          switch (request.PaymentMethod)
          {
@@ -360,7 +363,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
              TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
          };
          
-            await _context.Transactions.AddAsync(transaction, cancellationToken);
+         await _context.Transactions.AddAsync(transaction, cancellationToken);
+         await _context.SaveChangesAsync(cancellationToken);
          
          return result;
      }

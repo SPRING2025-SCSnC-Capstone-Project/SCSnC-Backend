@@ -23,10 +23,20 @@ public class VNPayService: IPaymentService
                 data.Append(WebUtility.UrlEncode(kv.Key) + "=" + WebUtility.UrlEncode(kv.Value) + "&");
             }
         }
+        
+        string queryString = data.ToString();
+        
+        baseUrl += "?" + queryString;
+        String signData = queryString;
+        if (signData.Length > 0)
+        {
 
-        string result = baseUrl + "?" + data.ToString();
-        var secureHash = HashHelper.HmacSHA512(secretKey, data.ToString().Remove(data.Length - 1, 1));
-        return Task.FromResult(result += "vnp_SecureHash=" + secureHash);
+            signData= signData.Remove(data.Length - 1, 1);
+        }
+        string vnp_SecureHash = HashHelper.HmacSHA512(secretKey , signData);
+        baseUrl += "vnp_SecureHash=" + vnp_SecureHash;
+           
+        return Task.FromResult(baseUrl);
     }
     
     public void MakeRequestData(VNPayRequest request)

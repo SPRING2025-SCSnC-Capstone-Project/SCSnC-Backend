@@ -7,7 +7,7 @@ namespace Api.Controllers;
 
 public class PaymentController: ApiControllerBase
 {
-    [HttpGet("return")]
+    [HttpGet("result")]
     public async Task<ActionResult> PaymentReturn([FromQuery] VNPayResponse response)
     {
         var command = new CheckPaymentResponseQuery()

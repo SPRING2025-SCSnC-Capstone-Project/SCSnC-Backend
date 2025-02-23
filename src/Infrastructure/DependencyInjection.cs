@@ -15,7 +15,7 @@ public static class DependencyInjection
     {
         services.AddApplicationDbContext(configuration);
         services.AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!);
-        services.AddScoped<IPaymentService>(p => p.GetService<VNPayService>()!);
+        services.AddScoped<IPaymentService, VNPayService>();
     }
 
     private static void AddApplicationDbContext(this IServiceCollection services, IConfiguration configuration)
@@ -31,6 +31,7 @@ public static class DependencyInjection
                 option.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                 option.UseNodaTime();
             });
+            builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
     }
 }
