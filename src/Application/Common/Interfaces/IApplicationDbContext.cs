@@ -13,11 +13,13 @@ public interface IApplicationDbContext
     public DbSet<JoinEvent> JoinEvents { get; }
     public DbSet<Order> Orders { get; }
     public DbSet<OrderDetail> OrderDetails { get; }
+    public DbSet<Payment> Payments { get; }
     public DbSet<Reservation> Reservations { get; }
     public DbSet<Size> Sizes { get; }
     public DbSet<Slot> Slots { get; }
     public DbSet<Table> Tables { get; }
     public DbSet<Topping> Toppings { get; }
+    public DbSet<Transaction> Transactions { get; }
     public DbSet<User> Users { get; }
     public DbSet<UserVoucher> UserVouchers { get; }
     public DbSet<Voucher> Vouchers { get; }

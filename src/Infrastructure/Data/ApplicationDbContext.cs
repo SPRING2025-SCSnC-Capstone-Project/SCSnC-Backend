@@ -20,11 +20,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<JoinEvent> JoinEvents => Set<JoinEvent>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
+    public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<Size> Sizes => Set<Size>();
     public DbSet<Slot> Slots => Set<Slot>();
     public DbSet<Table> Tables => Set<Table>();
     public DbSet<Topping> Toppings => Set<Topping>();
+    public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserVoucher> UserVouchers => Set<UserVoucher>();
     public DbSet<Voucher> Vouchers => Set<Voucher>();

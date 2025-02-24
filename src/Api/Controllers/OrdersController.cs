@@ -32,11 +32,13 @@ public class OrdersController: ApiControllerBase
             TableId = request.TableId,
             WorkspaceId = request.WorkspaceId,
             VoucherId = request.VoucherId,
-            OrderDetails = request.OrderDetails
+            OrderDetails = request.OrderDetails,
+            TotalPrice = request.TotalPrice,
+            PaymentMethod = request.PaymentMethod
         };
 
         var result = await Mediator.Send(command);
-
+        
         return Ok(Result<OrderDto>.Succeed(result));
     }
     
