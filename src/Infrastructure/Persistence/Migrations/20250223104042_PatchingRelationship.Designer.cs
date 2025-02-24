@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250223104042_PatchingRelationship")]
+    partial class PatchingRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -296,7 +299,8 @@ namespace Infrastructure.Persistence
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemWithSizeId");
+                    b.HasIndex("ItemWithSizeId")
+                        .IsUnique();
 
                     b.HasIndex("OrderId");
 
@@ -764,8 +768,8 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity("Domain.Entities.OrderDetail", b =>
                 {
                     b.HasOne("Domain.Entities.ItemWithSize", "ItemWithSize")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("ItemWithSizeId")
+                        .WithOne("OrderDetail")
+                        .HasForeignKey("Domain.Entities.OrderDetail", "ItemWithSizeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -873,7 +877,8 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.ItemWithSize", b =>
                 {
-                    b.Navigation("OrderDetails");
+                    b.Navigation("OrderDetail")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.Order", b =>
