@@ -7,9 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 try
 {
-    builder.Services.AddApplicationServices();
-    builder.Services.AddInfrastructureServices(builder.Configuration);
-    builder.Services.AddApiServices(builder.Configuration);
+    builder.Services
+        .AddApplicationServices()
+        .AddInfrastructureServices(builder.Configuration)
+        .AddApiServices(builder.Configuration);
     var app = builder.Build();
 
     app.UseInfrastructure(builder.Configuration);

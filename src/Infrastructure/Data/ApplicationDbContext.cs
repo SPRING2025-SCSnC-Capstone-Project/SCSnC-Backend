@@ -32,6 +32,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Voucher> Vouchers => Set<Voucher>();
     public DbSet<Workspace> Workspaces => Set<Workspace>();
     public DbSet<WorkspaceType> WorkspaceTypes => Set<WorkspaceType>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     
     #endregion
     
