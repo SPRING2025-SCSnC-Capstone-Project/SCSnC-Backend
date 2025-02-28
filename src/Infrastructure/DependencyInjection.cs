@@ -1,24 +1,35 @@
+using System.Security.Cryptography;
 using Application.Common.Interfaces;
 using Ardalis.GuardClauses;
 using Infrastructure.Data;
+using Infrastructure.Services.Identity;
+using Infrastructure.Services.Jwt;
+using Infrastructure.Services.Security;
 using Infrastructure.Services.VNPay;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddApplicationDbContext(configuration);
-        services.AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!);
-        services.AddScoped<IPaymentService, VNPayService>();
+        services
+            .AddApplicationDbContext(configuration)
+            .AddJwtAuthentication(configuration)
+            .AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!)
+            .AddScoped<IPaymentService, VNPayService>()
+            .AddTransient<ISecurityService, SecurityService>()
+            .AddScoped<IIdentityService, IdentityService>()
+            .AddScoped<IJwtSService, JwtService>();
+
+        return services;
     }
 
-    private static void AddApplicationDbContext(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddApplicationDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         
         var connectionString = configuration.GetConnectionString("SCSnC_DB");
@@ -33,5 +44,23 @@ public static class DependencyInjection
             });
             builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configurations) {
+       services.Configure<JwtSettings>(configurations.GetSection(JwtSettings.Section));
+       services.AddScoped<IJwtSService, JwtService>();
+
+       var signingKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+       services.AddSingleton(signingKey);
+
+       services
+           .ConfigureOptions<JwtBearerTokenValidationConfiguration>()
+           .AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
+           .AddJwtBearer();
+
+       return services;
     }
 }

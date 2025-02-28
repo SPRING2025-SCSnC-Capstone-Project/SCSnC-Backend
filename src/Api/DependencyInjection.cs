@@ -8,7 +8,7 @@ namespace Api;
 
 public static class DependencyInjection
 {
-    public static void AddApiServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ExceptionMiddleware>();
         services.AddControllers(opt =>
@@ -29,6 +29,26 @@ public static class DependencyInjection
             
             var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme() {
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+            });
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement() {
+                {
+                    new OpenApiSecurityScheme() {
+                        Reference = new OpenApiReference() {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer",
+                        }
+                    },
+                    new string[]{}
+                },
+            });
         });
+
+        return services;
     } 
 }

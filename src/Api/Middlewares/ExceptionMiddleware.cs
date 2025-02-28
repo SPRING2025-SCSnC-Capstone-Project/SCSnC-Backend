@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Common.Exceptions;
 using Application.Common.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Middlewares;
@@ -26,7 +27,8 @@ public class ExceptionMiddleware: IMiddleware {
             // Note: Handle every exception you throw here
             { typeof(KeyNotFoundException), HandleKeyNotFoundException },
             { typeof(ConflictException), HandleConflictException },
-            { typeof(RequestValidationException), HandleValidationException }
+            { typeof(RequestValidationException), HandleValidationException },
+            { typeof(AuthenticationFailureException), HandleAuthenticationFailureException }
         };
     }
 
@@ -50,13 +52,17 @@ public class ExceptionMiddleware: IMiddleware {
         context.Response.StatusCode = StatusCodes.Status400BadRequest;
 
         var rve = ex as RequestValidationException;
-        var data = rve!.Errors!.ToDictionary(vf => vf.PropertyName.ToLower(), vf => vf.ErrorMessage);
+        if (rve!.Errors != null) {
+            var data = rve!.Errors.ToDictionary(vf => vf.PropertyName.ToLower(), vf => vf.ErrorMessage);
 
-        var result = Result<Dictionary<string, string>>.Fail(ex) with
-        {
-            Data = data
-        };
-        await context.Response.Body.WriteAsync(SerializeToUtf8BytesWeb(result));
+            var result = Result<Dictionary<string, string>>.Fail(ex) with
+            {
+                Data = data
+            };
+            await context.Response.Body.WriteAsync(SerializeToUtf8BytesWeb(result));       
+        } else {
+            await WriteExceptionMessageAsync(context, ex);
+        }
     }
 
     private static async void HandleKeyNotFoundException(HttpContext context, Exception ex)
@@ -68,6 +74,12 @@ public class ExceptionMiddleware: IMiddleware {
     private static async void HandleConflictException(HttpContext context, Exception ex)
     {
         context.Response.StatusCode = StatusCodes.Status409Conflict;
+        await WriteExceptionMessageAsync(context, ex);
+    }
+
+    private static async void HandleAuthenticationFailureException(HttpContext context, Exception ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         await WriteExceptionMessageAsync(context, ex);
     }
 
