@@ -10,4 +10,8 @@ public class RequestValidationException : Exception
     {
         Errors = errors;
     }
+
+    public RequestValidationException(string? message) : base(message)
+    {
+    }
 }
