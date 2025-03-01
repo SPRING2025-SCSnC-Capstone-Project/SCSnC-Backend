@@ -224,28 +224,28 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
      public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
      {
          #region Manual Validation (temporary)
-         //double totalPrice = 0;
-         // var checkOrder = _context.Orders.OrderByDescending(x => x.LastUpdatedAt).FirstOrDefaultAsync(x => x.TableId == request.TableId, cancellationToken).Result;
-         //
-         // if (checkOrder != null && checkOrder.PaymentStatus == false)
-         // {
-         //     throw new ValidationException("Table is already occupied");
-         //     //redirect to update order
-         //     
-         // }
-         
-         // Upper comment is code for checking if table is already occupied
-         
          // Will need another way to validate order either have tableId or workspaceId
+         
          // if both are null, throw exception
          if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
          {
              throw new ValidationException("TableId or WorkspaceId must be provided");
          }
+         
          // if both are not null, throw exception
          if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
          {
              throw new ValidationException("TableId or WorkspaceId must be provided");
+         }
+         
+         //validate voucher used or expired
+         var uservoucher = await _context.UserVouchers
+             .Include(x => x.Voucher)
+             .FirstOrDefaultAsync(x => x.UserId == request.UserId && x.VoucherId == request.VoucherId, cancellationToken);
+         
+         if (uservoucher.RedeemStatus == true || uservoucher.Voucher.ExpiredDate <= LocalDateTime.FromDateTime(DateTime.Now))
+         {
+             throw new ValidationException("Voucher is used or expired");
          }
          
          #endregion
