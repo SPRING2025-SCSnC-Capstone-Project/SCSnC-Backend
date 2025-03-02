@@ -45,7 +45,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                 }
                 else
                 {
-                    paymentResponse.PaymentStatus = "Unsuccess";
+                    paymentResponse.PaymentStatus = "Failed";
                 }
 
                 switch (request.vnpayResponse.vnp_ResponseCode)
@@ -99,13 +99,13 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
             }
             else
             {
-                paymentResponse.PaymentStatus = "Unsuccess";
+                paymentResponse.PaymentStatus = "Failed";
                 paymentResponse.PaymentMessage = "Can't find order in DB.";
             }
         }
         else
         {
-            paymentResponse.PaymentStatus = "Unsuccess";
+            paymentResponse.PaymentStatus = "Failed";
             paymentResponse.PaymentMessage = "Invalid signature in response.";
         }
         
