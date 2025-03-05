@@ -1,7 +1,6 @@
+using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
-using Application.Orders.Common;
-using Application.Payments.Common;
 
 namespace Application.Payments.Queries.CheckPaymentResponse;
 
@@ -45,7 +44,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                 }
                 else
                 {
-                    paymentResponse.PaymentStatus = "Unsuccess";
+                    paymentResponse.PaymentStatus = "Failed";
                 }
 
                 switch (request.vnpayResponse.vnp_ResponseCode)
@@ -99,13 +98,13 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
             }
             else
             {
-                paymentResponse.PaymentStatus = "Unsuccess";
+                paymentResponse.PaymentStatus = "Failed";
                 paymentResponse.PaymentMessage = "Can't find order in DB.";
             }
         }
         else
         {
-            paymentResponse.PaymentStatus = "Unsuccess";
+            paymentResponse.PaymentStatus = "Failed";
             paymentResponse.PaymentMessage = "Invalid signature in response.";
         }
         
