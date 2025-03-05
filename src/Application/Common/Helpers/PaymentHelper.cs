@@ -1,7 +1,7 @@
 using Application.Common.Interfaces;
 using NodaTime;
 
-namespace Application.Payments.Common;
+namespace Application.Common.Helpers;
 
 public static class PaymentHelper
 {

@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using Application.Common.Models.Dtos;
 using Microsoft.Extensions.Configuration;
 
-namespace Application.Orders.Common;
+namespace Application.Common.Helpers;
 
 public class VNPayHelper
 {

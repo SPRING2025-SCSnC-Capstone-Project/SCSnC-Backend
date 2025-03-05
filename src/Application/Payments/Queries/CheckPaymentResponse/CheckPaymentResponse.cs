@@ -1,7 +1,6 @@
+using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
-using Application.Orders.Common;
-using Application.Payments.Common;
 
 namespace Application.Payments.Queries.CheckPaymentResponse;
 

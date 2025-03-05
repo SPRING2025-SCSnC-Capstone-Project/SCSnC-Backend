@@ -1,8 +1,8 @@
 using System.Net;
 using System.Text;
+using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
-using Application.Orders.Common;
 using Infrastructure.Services.VNPay.Common;
 
 namespace Infrastructure.Services.VNPay;

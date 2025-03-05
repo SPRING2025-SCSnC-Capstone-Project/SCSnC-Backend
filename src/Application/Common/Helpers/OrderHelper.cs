@@ -1,6 +1,6 @@
 using Application.Common.Interfaces;
 
-namespace Application.Orders.Common;
+namespace Application.Common.Helpers;
 
 public static class OrderHelper
 {
