@@ -14,6 +14,7 @@ public static class PaymentHelper
         }
         
         order.PaymentStatus = true;
+        order.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
         _context.Orders.Update(order);
         _context.SaveChangesAsync(cancellationToken);
         
