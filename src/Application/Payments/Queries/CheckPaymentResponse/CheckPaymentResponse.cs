@@ -26,13 +26,12 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
 
     public async Task<PaymentResponse> Handle(CheckPaymentResponseQuery request, CancellationToken cancellationToken)
     {
-        VNPayConfig vNPayConfig = VNPayHelper.GetConfigData();
         PaymentResponse paymentResponse = new PaymentResponse();
 
         paymentResponse.OrderId = request.vnpayResponse.vnp_TxnRef;
         paymentResponse.Amount = request.vnpayResponse.vnp_Amount;
 
-        bool isValid = await _paymentService.IsValidSignature(vNPayConfig.HashSecret, request.vnpayResponse);
+        bool isValid = await _paymentService.IsValidSignature(request.vnpayResponse);
         if (isValid)
         {
             if (await _context.Orders.FirstOrDefaultAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef)) !=
