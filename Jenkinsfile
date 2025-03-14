@@ -10,8 +10,8 @@ void setBuildStatus(String message, String state) {
 
 pipeline {
     agent any
-
     stages {
+        setBuildStatus("Biuld pending", "PENDING");
         stage('Build') {
             steps {
                 echo 'Building..'
@@ -29,11 +29,11 @@ pipeline {
         }
     }
     post {
-    success {
-        setBuildStatus("Build succeeded", "SUCCESS");
+        success {
+            setBuildStatus("Build succeeded", "SUCCESS");
+        }
+        failure {
+            setBuildStatus("Build failed", "FAILURE");
+        }
     }
-    failure {
-        setBuildStatus("Build failed", "FAILURE");
-    }
-  }
 }
