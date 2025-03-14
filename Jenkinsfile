@@ -11,9 +11,9 @@ void setBuildStatus(String message, String state) {
 pipeline {
     agent any
     stages {
-        setBuildStatus("Biuld pending", "PENDING");
         stage('Build') {
             steps {
+                setBuildStatus("Build pending", "PENDING");
                 echo 'Building..'
             }
         }
