@@ -11,6 +11,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     #region DbSet Properties
     
+    public DbSet<Blog> Blogs => Set<Blog>();
+    public DbSet<BlogMedia> BlogMedias => Set<BlogMedia>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<IncludeTopping> IncludeToppings => Set<IncludeTopping>();
@@ -20,7 +22,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<JoinEvent> JoinEvents => Set<JoinEvent>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
-    public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<Size> Sizes => Set<Size>();
     public DbSet<Slot> Slots => Set<Slot>();
@@ -31,6 +32,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<UserVoucher> UserVouchers => Set<UserVoucher>();
     public DbSet<Voucher> Vouchers => Set<Voucher>();
     public DbSet<Workspace> Workspaces => Set<Workspace>();
+    public DbSet<WorkspaceMedia> WorkspaceMedias => Set<WorkspaceMedia>();
     public DbSet<WorkspaceType> WorkspaceTypes => Set<WorkspaceType>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     

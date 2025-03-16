@@ -5,13 +5,12 @@ namespace Domain.Entities;
 
 public class Transaction : BaseEntity
 {
-    [ForeignKey("PaymentId")]
-    public Guid PaymentId { get; set; }
     public string TransactionStatus { get; set; }
     public LocalDateTime TransactionDate { get; set; }
     [ForeignKey("OrderId")]
     public Guid OrderId { get; set; }
+    public double Amount { get; set; }
+    public string PaymentMethod { get; set; }
     
-    public virtual Payment Payment { get; set; }
     public virtual Order Order { get; set; }
 }
