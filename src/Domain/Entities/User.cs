@@ -11,6 +11,7 @@ public class User : BaseEntity
         UserVouchers = new HashSet<UserVoucher>();
         JoinEvents = new HashSet<JoinEvent>();
         Reservations = new HashSet<Reservation>();
+        Blogs = new HashSet<Blog>();
     }
     public string AccountType { get; set; }
     public string Username { get; set; }
@@ -28,4 +29,5 @@ public class User : BaseEntity
     public virtual ICollection<UserVoucher> UserVouchers { get; set; }
     public virtual ICollection<JoinEvent> JoinEvents { get; set; }
     public virtual ICollection<Reservation> Reservations { get; set; }
+    public virtual ICollection<Blog> Blogs { get; set; }
 }

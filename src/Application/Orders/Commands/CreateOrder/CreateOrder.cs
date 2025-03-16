@@ -322,15 +322,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          
          //create payment here
 
-         var payment = new Payment
-         {
-             Amount = result.TotalPrice,
-             PaymentMethod = request.PaymentMethod
-         };
-         
-         await _context.Payments.AddAsync(payment, cancellationToken);
-         await _context.SaveChangesAsync(cancellationToken);
-
          switch (request.PaymentMethod)
          {
              case "VNPay":
@@ -359,9 +350,10 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          var transaction = new Transaction
          {
              OrderId = order.Id,
-             PaymentId = payment.Id,
              TransactionStatus = "Pending",
-             TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
+             TransactionDate = LocalDateTime.FromDateTime(DateTime.Now),
+             Amount = result.TotalPrice,
+             PaymentMethod = request.PaymentMethod
          };
          
          await _context.Transactions.AddAsync(transaction, cancellationToken);

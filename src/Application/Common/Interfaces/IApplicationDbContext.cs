@@ -4,6 +4,8 @@ namespace Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+    public DbSet<Blog> Blogs { get; }
+    public DbSet<BlogMedia> BlogMedias { get; }
     public DbSet<Event> Events { get; }
     public DbSet<Feedback> Feedbacks { get; }
     public DbSet<IncludeTopping> IncludeToppings { get; }
@@ -13,7 +15,6 @@ public interface IApplicationDbContext
     public DbSet<JoinEvent> JoinEvents { get; }
     public DbSet<Order> Orders { get; }
     public DbSet<OrderDetail> OrderDetails { get; }
-    public DbSet<Payment> Payments { get; }
     public DbSet<Reservation> Reservations { get; }
     public DbSet<Size> Sizes { get; }
     public DbSet<Slot> Slots { get; }
@@ -24,6 +25,7 @@ public interface IApplicationDbContext
     public DbSet<UserVoucher> UserVouchers { get; }
     public DbSet<Voucher> Vouchers { get; }
     public DbSet<Workspace> Workspaces { get; }
+    public DbSet<WorkspaceMedia> WorkspaceMedias { get; }
     public DbSet<WorkspaceType> WorkspaceTypes { get; }
     public DbSet<RefreshToken> RefreshTokens { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);

@@ -41,7 +41,7 @@ public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceComma
         }
 
         workspace.WorkspaceNumber = request.WorkspaceNumber;
-        workspace.WorkspaceImageUrl = request.WorkspaceImageUrl;
+        //workspace.WorkspaceImageUrl = request.WorkspaceImageUrl;
         workspace.WorkspaceType = workspaceType;
         workspace.WorkspaceTypeId = request.WorkspaceTypeId;
 

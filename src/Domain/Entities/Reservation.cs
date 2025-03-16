@@ -13,7 +13,8 @@ public class Reservation : BaseEntity
     public Guid SlotId { get; set; }
     [ForeignKey("UserId")]
     public Guid UserId { get; set; }
-    // public bool Status { get; set; }
+    public bool IsFullPaid { get; set; }
+    public double TotalPrice { get; set; }
     // public LocalDateTime CreatedAt { get; set; }
     // public LocalDateTime LastUpdatedAt { get; set; }
         // may need reviews to add these fields
