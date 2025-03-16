@@ -38,4 +38,7 @@ public static class WebApplicationExtensions
 
         app.MapGet("/", () => "Hello from SCSnC!");
     }
+    public static void AddAppConfiguration(this IConfigurationBuilder configuration) {
+        configuration.AddEnvironmentVariables("SCSnC_");
+    }
 }
