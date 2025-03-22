@@ -318,7 +318,40 @@ namespace Infrastructure.Persistence
 
                     b.HasKey("Id");
 
-                    b.ToTable("Payment");
+                    b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
+                    b.Property<LocalDateTime>("CreationDateTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<LocalDateTime>("ExpiryDateTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ReplacedBy")
+                        .HasColumnType("text");
+
+                    b.Property<LocalDateTime?>("RevocationDateTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("RevocationReason")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reservation", b =>
@@ -489,7 +522,7 @@ namespace Infrastructure.Persistence
                     b.HasIndex("PaymentId")
                         .IsUnique();
 
-                    b.ToTable("Transaction");
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -498,8 +531,11 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Address")
+                    b.Property<string>("AccountType")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Address")
                         .HasColumnType("text");
 
                     b.Property<string>("AvatarLink")
@@ -513,7 +549,6 @@ namespace Infrastructure.Persistence
                         .HasColumnType("text");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
@@ -523,11 +558,9 @@ namespace Infrastructure.Persistence
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
@@ -778,6 +811,17 @@ namespace Infrastructure.Persistence
                     b.Navigation("ItemWithSize");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reservation", b =>
