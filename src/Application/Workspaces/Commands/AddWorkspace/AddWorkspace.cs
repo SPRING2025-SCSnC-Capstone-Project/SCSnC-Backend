@@ -38,7 +38,7 @@ public class AddWorkspaceCommandHandler: IRequestHandler<AddWorkspaceCommand, Wo
             WorkspaceNumber = request.WorkspaceNumber,
             IsAvailable = true,
             IsActive = true,
-            WorkspaceImageUrl = request.WorkspaceImageUrl,
+            //WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
             WorkspaceType = workspaceType
         };

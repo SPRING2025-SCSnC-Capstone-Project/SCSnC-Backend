@@ -1,7 +1,6 @@
+using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
-using Application.Orders.Common;
-using Application.Payments.Common;
 
 namespace Application.Payments.Queries.CheckPaymentResponse;
 
@@ -27,13 +26,12 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
 
     public async Task<PaymentResponse> Handle(CheckPaymentResponseQuery request, CancellationToken cancellationToken)
     {
-        VNPayConfig vNPayConfig = VNPayHelper.GetConfigData();
         PaymentResponse paymentResponse = new PaymentResponse();
 
         paymentResponse.OrderId = request.vnpayResponse.vnp_TxnRef;
         paymentResponse.Amount = request.vnpayResponse.vnp_Amount;
 
-        bool isValid = await _paymentService.IsValidSignature(vNPayConfig.HashSecret, request.vnpayResponse);
+        bool isValid = await _paymentService.IsValidSignature(request.vnpayResponse);
         if (isValid)
         {
             if (await _context.Orders.FirstOrDefaultAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef)) !=
@@ -45,7 +43,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                 }
                 else
                 {
-                    paymentResponse.PaymentStatus = "Unsuccess";
+                    paymentResponse.PaymentStatus = "Failed";
                 }
 
                 switch (request.vnpayResponse.vnp_ResponseCode)
@@ -99,13 +97,13 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
             }
             else
             {
-                paymentResponse.PaymentStatus = "Unsuccess";
+                paymentResponse.PaymentStatus = "Failed";
                 paymentResponse.PaymentMessage = "Can't find order in DB.";
             }
         }
         else
         {
-            paymentResponse.PaymentStatus = "Unsuccess";
+            paymentResponse.PaymentStatus = "Failed";
             paymentResponse.PaymentMessage = "Invalid signature in response.";
         }
         

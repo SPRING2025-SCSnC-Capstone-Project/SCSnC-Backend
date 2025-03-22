@@ -20,8 +20,8 @@ public static class DependencyInjection
         services
             .AddApplicationDbContext(configuration)
             .AddJwtAuthentication(configuration)
+            .AddVNPayService(configuration)
             .AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!)
-            .AddScoped<IPaymentService, VNPayService>()
             .AddTransient<ISecurityService, SecurityService>()
             .AddScoped<IIdentityService, IdentityService>()
             .AddScoped<IJwtSService, JwtService>();
@@ -62,5 +62,13 @@ public static class DependencyInjection
            .AddJwtBearer();
 
        return services;
+    }
+    
+    private static IServiceCollection AddVNPayService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<VNPayConfig>(configuration.GetSection(VNPayConfig.Section));
+        services.AddTransient<IPaymentService, VNPayService>();
+
+        return services;
     }
 }

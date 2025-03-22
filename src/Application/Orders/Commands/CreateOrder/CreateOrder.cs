@@ -1,7 +1,7 @@
 using Application.Common.Exceptions;
+using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
-using Application.Orders.Common;
 using Domain.Entities;
 using NodaTime;
 using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
@@ -224,29 +224,35 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
      public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
      {
          #region Manual Validation (temporary)
-         //double totalPrice = 0;
-         // var checkOrder = _context.Orders.OrderByDescending(x => x.LastUpdatedAt).FirstOrDefaultAsync(x => x.TableId == request.TableId, cancellationToken).Result;
-         //
-         // if (checkOrder != null && checkOrder.PaymentStatus == false)
-         // {
-         //     throw new ValidationException("Table is already occupied");
-         //     //redirect to update order
-         //     
-         // }
-         
-         // Upper comment is code for checking if table is already occupied
-         
          // Will need another way to validate order either have tableId or workspaceId
+         
          // if both are null, throw exception
          if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
          {
              throw new ValidationException("TableId or WorkspaceId must be provided");
          }
+         
          // if both are not null, throw exception
          if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
          {
              throw new ValidationException("TableId or WorkspaceId must be provided");
          }
+         
+         //validate voucher used or expired
+         if (request.VoucherId != null)
+         {
+             var uservoucher = await _context.UserVouchers
+                 .Include(x => x.Voucher)
+                 .FirstOrDefaultAsync(x => x.UserId == request.UserId && x.VoucherId == request.VoucherId,
+                     cancellationToken);
+
+             if (uservoucher.RedeemStatus == true ||
+                 uservoucher.Voucher.ExpiredDate <= LocalDateTime.FromDateTime(DateTime.Now))
+             {
+                 throw new ValidationException("Voucher is used or expired");
+             }
+         }
+         
          
          #endregion
          
@@ -316,37 +322,23 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          
          //create payment here
 
-         var payment = new Payment
-         {
-             Amount = result.TotalPrice,
-             PaymentMethod = request.PaymentMethod
-         };
-         
-         await _context.Payments.AddAsync(payment, cancellationToken);
-         await _context.SaveChangesAsync(cancellationToken);
-
          switch (request.PaymentMethod)
          {
              case "VNPay":
-                 VNPayConfig vnPayConfig = VNPayHelper.GetConfigData();
-
+                 
                  VNPayRequest vnPayRequest = new VNPayRequest()
                  {
-                     vnp_Version = vnPayConfig.Version,
-                     vnp_TmnCode = vnPayConfig.TmnCode,
                      vnp_CreateDate = DateTime.Now.ToString("yyyyMMddHHmmss"),
                      vnp_IpAddr = IPAddressHelper.GetLocalIPAddress(),
                      vnp_Amount = (decimal) get.TotalPrice * 100,
-                     vnp_CurrCode = vnPayConfig.CurrencyCode,
                      vnp_OrderType = "other",
                      vnp_OrderInfo = $"Date: {DateTime.Now.ToString("yyyyMMddHHmmss")}; Total Price: {get.TotalPrice}",
-                     vnp_ReturnUrl = vnPayConfig.ReturnUrl,
                      vnp_TxnRef = order.Id.ToString(),
                      vnp_Command = "pay",
-                     vnp_Locale = vnPayConfig.Locale
+                     vnp_ExpireDate = DateTime.Now.AddMinutes(5).ToString("yyyyMMddHHmmss"),
                  };
          
-                 var paymentUrl = await _vnpayService.GetPaymentLink(vnPayConfig.PaymentUrl, vnPayConfig.HashSecret, vnPayRequest);
+                 var paymentUrl = await _vnpayService.GetPaymentLink(vnPayRequest);
                  result.PaymentLink = paymentUrl;
                  break;
              
@@ -358,9 +350,10 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          var transaction = new Transaction
          {
              OrderId = order.Id,
-             PaymentId = payment.Id,
              TransactionStatus = "Pending",
-             TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
+             TransactionDate = LocalDateTime.FromDateTime(DateTime.Now),
+             Amount = result.TotalPrice,
+             PaymentMethod = request.PaymentMethod
          };
          
          await _context.Transactions.AddAsync(transaction, cancellationToken);

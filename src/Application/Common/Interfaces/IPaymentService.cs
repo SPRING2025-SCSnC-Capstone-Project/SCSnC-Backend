@@ -4,6 +4,6 @@ namespace Application.Common.Interfaces;
 
 public interface IPaymentService
 {
-    public Task<string> GetPaymentLink(string baseUrl, string secretKey, VNPayRequest request);
-    public Task<bool> IsValidSignature(string secretKey, VNPayResponse response);
+    public Task<string> GetPaymentLink(VNPayRequest request);
+    public Task<bool> IsValidSignature(VNPayResponse response);
 }

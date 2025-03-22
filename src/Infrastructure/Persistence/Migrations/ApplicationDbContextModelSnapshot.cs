@@ -23,6 +23,77 @@ namespace Infrastructure.Persistence
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Entities.Blog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Blogs");
+                });
+
+            modelBuilder.Entity("Domain.Entities.BlogMedia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BlogId")
+                        .HasColumnType("uuid");
+
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("MediaType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MediaUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogId");
+
+                    b.ToTable("BlogMedias");
+                });
+
             modelBuilder.Entity("Domain.Entities.Event", b =>
                 {
                     b.Property<Guid>("Id")
@@ -303,24 +374,6 @@ namespace Infrastructure.Persistence
                     b.ToTable("OrderDetails");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Payment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<string>("Token")
@@ -363,11 +416,17 @@ namespace Infrastructure.Persistence
                     b.Property<double>("Deposit")
                         .HasColumnType("double precision");
 
+                    b.Property<bool>("IsFullPaid")
+                        .HasColumnType("boolean");
+
                     b.Property<LocalDateTime>("ReservationDate")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("SlotId")
                         .HasColumnType("uuid");
+
+                    b.Property<double>("TotalPrice")
+                        .HasColumnType("double precision");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -502,11 +561,15 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<double>("Amount")
+                        .HasColumnType("double precision");
+
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PaymentId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<LocalDateTime>("TransactionDate")
                         .HasColumnType("timestamp without time zone");
@@ -518,9 +581,6 @@ namespace Infrastructure.Persistence
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("PaymentId")
-                        .IsUnique();
 
                     b.ToTable("Transactions");
                 });
@@ -649,8 +709,8 @@ namespace Infrastructure.Persistence
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("WorkspaceImageUrl")
-                        .HasColumnType("text");
+                    b.Property<double>("PricePerHour")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("WorkspaceNumber")
                         .HasColumnType("integer");
@@ -663,6 +723,39 @@ namespace Infrastructure.Persistence
                     b.HasIndex("WorkspaceTypeId");
 
                     b.ToTable("Workspaces");
+                });
+
+            modelBuilder.Entity("Domain.Entities.WorkspaceMedia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<LocalDateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<LocalDateTime>("LastUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("MediaType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MediaUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkspaceId");
+
+                    b.ToTable("WorkspaceMedias");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkspaceType", b =>
@@ -684,6 +777,36 @@ namespace Infrastructure.Persistence
                     b.HasKey("Id");
 
                     b.ToTable("WorkspaceTypes");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Blog", b =>
+                {
+                    b.HasOne("Domain.Entities.Event", "Event")
+                        .WithMany("Blogs")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("Blogs")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.BlogMedia", b =>
+                {
+                    b.HasOne("Domain.Entities.Blog", "Blog")
+                        .WithMany("BlogMedias")
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Blog");
                 });
 
             modelBuilder.Entity("Domain.Entities.Feedback", b =>
@@ -859,15 +982,7 @@ namespace Infrastructure.Persistence
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Payment", "Payment")
-                        .WithOne("Transaction")
-                        .HasForeignKey("Domain.Entities.Transaction", "PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Order");
-
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserVoucher", b =>
@@ -900,8 +1015,26 @@ namespace Infrastructure.Persistence
                     b.Navigation("WorkspaceType");
                 });
 
+            modelBuilder.Entity("Domain.Entities.WorkspaceMedia", b =>
+                {
+                    b.HasOne("Domain.Entities.Workspace", "Workspace")
+                        .WithMany("WorkspaceMedias")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Blog", b =>
+                {
+                    b.Navigation("BlogMedias");
+                });
+
             modelBuilder.Entity("Domain.Entities.Event", b =>
                 {
+                    b.Navigation("Blogs");
+
                     b.Navigation("JoinEvents");
                 });
 
@@ -935,12 +1068,6 @@ namespace Infrastructure.Persistence
                     b.Navigation("IncludeToppings");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Payment", b =>
-                {
-                    b.Navigation("Transaction")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Domain.Entities.Size", b =>
                 {
                     b.Navigation("ItemWithSizes");
@@ -963,6 +1090,8 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
+                    b.Navigation("Blogs");
+
                     b.Navigation("JoinEvents");
 
                     b.Navigation("Orders");
@@ -984,6 +1113,8 @@ namespace Infrastructure.Persistence
                     b.Navigation("Orders");
 
                     b.Navigation("Reservations");
+
+                    b.Navigation("WorkspaceMedias");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkspaceType", b =>
