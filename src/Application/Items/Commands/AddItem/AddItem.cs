@@ -6,7 +6,7 @@ using NodaTime;
 
 namespace Application.Items.Commands.AddItem;
 
-public class AddItemCommand : IRequest<ItemDto>
+public record AddItemCommand : IRequest<ItemDto>
 {
     public string Name { get; init; }
     public string Description { get; init; }
