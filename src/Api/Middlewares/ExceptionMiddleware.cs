@@ -3,6 +3,7 @@ using Application.Common.Exceptions;
 using Application.Common.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Middlewares;
 
@@ -28,7 +29,8 @@ public class ExceptionMiddleware: IMiddleware {
             { typeof(KeyNotFoundException), HandleKeyNotFoundException },
             { typeof(ConflictException), HandleConflictException },
             { typeof(RequestValidationException), HandleValidationException },
-            { typeof(AuthenticationFailureException), HandleAuthenticationFailureException }
+            { typeof(AuthenticationFailureException), HandleAuthenticationFailureException },
+            { typeof(SecurityTokenValidationException), HandleSecurityTokenValidationException }
         };
     }
 
@@ -78,6 +80,12 @@ public class ExceptionMiddleware: IMiddleware {
     }
 
     private static async void HandleAuthenticationFailureException(HttpContext context, Exception ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        await WriteExceptionMessageAsync(context, ex);
+    }
+
+    private static async void HandleSecurityTokenValidationException(HttpContext context, Exception ex)
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         await WriteExceptionMessageAsync(context, ex);

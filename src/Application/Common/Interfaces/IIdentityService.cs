@@ -5,5 +5,5 @@ using OneOf;
 namespace Application.Common.Interfaces;
 
 public interface IIdentityService {
-   public Task<OneOf<(UserDto, ClaimsIdentity), string>> AuthenticateAsync(string email, string password, CancellationToken cancellationToken);
+   public Task<OneOf<UserDto, string>> AuthenticateAsync(string email, string password, CancellationToken cancellationToken);
 }
