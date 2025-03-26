@@ -11,7 +11,7 @@ public class RefreshToken
     public virtual User User { get; set; }
 
     [NotMapped]
-    public bool IsExpired => LocalDateTime.FromDateTime(DateTime.Now) >= ExpiryDateTime;
+    public bool IsExpired => LocalDateTime.FromDateTime(DateTime.UtcNow) >= ExpiryDateTime;
     public LocalDateTime CreationDateTime { get; set; }
     public LocalDateTime ExpiryDateTime { get; set; }
 
