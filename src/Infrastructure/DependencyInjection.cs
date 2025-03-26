@@ -43,6 +43,7 @@ public static class DependencyInjection
                 option.UseNodaTime();
             });
             builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            ;
         });
 
         return services;

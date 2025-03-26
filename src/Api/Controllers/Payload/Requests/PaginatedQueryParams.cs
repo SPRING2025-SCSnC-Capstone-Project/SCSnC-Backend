@@ -18,4 +18,8 @@ public class PaginatedQueryParameters
     /// Sort direction
     /// </summary>
     public string? SortOrder { get; set; }
+    /// <summary>
+    /// Filter by catergory
+    /// </summary>
+    public string? FilterByCategory { get; set; }
 }

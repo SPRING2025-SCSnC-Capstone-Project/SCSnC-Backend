@@ -24,6 +24,8 @@ public class ItemsController : ApiControllerBase
             Size = request.Size,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
+            FilterByCategory = request.FilterByCategory
+
         };
 
         var result = await Mediator.Send(query);

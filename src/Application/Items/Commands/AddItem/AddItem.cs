@@ -3,6 +3,7 @@ using Application.Common.Models.Dtos;
 using Application.ItemWithSizes.Commands.CreateItemWithSize;
 using Domain.Entities;
 using NodaTime;
+using System.Diagnostics;
 
 namespace Application.Items.Commands.AddItem;
 
@@ -14,6 +15,8 @@ public class AddItemCommand : IRequest<ItemDto>
     public string Img { get; init; }
     public Guid CategoryId { get; init; }
     public List<Guid> SizeIds { get; init; }
+    public bool? AutoCreate { get; init; } = false;
+
 }
 
 public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
@@ -29,38 +32,90 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
 
     public async Task<ItemDto> Handle(AddItemCommand request, CancellationToken cancellationToken)
     {
-        var entity = new Item
+        try
         {
-            ItemName = request.Name,
-            ItemDescription = request.Description,
-            ItemBasePrice = request.Price,
-            ItemCategoryId =request.CategoryId,
-            ItemImg = request.Img,
-            IsActive = true,
-            CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-            LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
-        };
-
-        var result = await _context.Items.AddAsync(entity, cancellationToken);
-        
-        await _context.SaveChangesAsync(cancellationToken);
-        
-//      Note: add to ItemWithSize table when adding new item
-        foreach (var size in request.SizeIds)
-        {
-            var itemWithSize = new ItemWithSize
+            List<ItemCategory> categories = _context.ItemCategories.ToList();
+            List<Size> sizes = _context.Sizes.ToList();
+            List<Item> items = new List<Item>();
+            if (request.AutoCreate.Value)
             {
-                ItemId = result.Entity.Id,
-                SizeId = size,
-                IsActive = true
-            };
-            
-            await _context.ItemWithSizes.AddAsync(itemWithSize, cancellationToken);
-        } 
-//      Note: end
+                for (int i = 0; i < categories.Count; i++)
+                {
+                    for (int j = 0; j < 10; j++)
+                    {
+                        var entity = new Item
+                        {
+                            ItemName = categories[i].CategoryName + " " + (j + 1),
+                            ItemDescription = categories[i].CategoryName + " " + (j + 1),
+                            ItemBasePrice = 65.000,
+                            ItemCategoryId = categories[i].Id,
+                            ItemImg = request.Img,
+                            IsActive = true,
+                            CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                            LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
+                        };
 
-        await _context.SaveChangesAsync(cancellationToken);
-        
-        return _mapper.Map<ItemDto>(result.Entity);
+                        var result = await _context.Items.AddAsync(entity, cancellationToken);
+                        items.Add(result.Entity);
+                    }
+                }
+                for (int z = 0; z < items.Count; z++)
+                {
+                    foreach (var size in sizes)
+                    {
+                        var itemWithSize = new ItemWithSize
+                        {
+                            ItemId = items[z].Id,
+                            SizeId = size.Id,
+                            IsActive = true
+                        };
+
+                        await _context.ItemWithSizes.AddAsync(itemWithSize, cancellationToken);
+                    }
+                }
+                await _context.SaveChangesAsync(cancellationToken);
+                return _mapper.Map<ItemDto>(items[items.Count - 1]);
+
+            }
+            else
+            {
+                var entity = new Item
+                {
+                    ItemName = request.Name,
+                    ItemDescription = request.Description,
+                    ItemBasePrice = request.Price,
+                    ItemCategoryId = request.CategoryId,
+                    ItemImg = request.Img,
+                    IsActive = true,
+                    CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                    LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
+                };
+
+                var result = await _context.Items.AddAsync(entity, cancellationToken);
+
+                await _context.SaveChangesAsync(cancellationToken);
+
+                foreach (var size in request.SizeIds)
+                {
+                    var itemWithSize = new ItemWithSize
+                    {
+                        ItemId = result.Entity.Id,
+                        SizeId = size,
+                        IsActive = true
+                    };
+
+                    await _context.ItemWithSizes.AddAsync(itemWithSize, cancellationToken);
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
+                return _mapper.Map<ItemDto>(result.Entity);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+            throw new Exception(ex.InnerException.Message);
+        }
     }
 }

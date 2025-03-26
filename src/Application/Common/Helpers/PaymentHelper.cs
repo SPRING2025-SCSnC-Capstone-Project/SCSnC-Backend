@@ -5,7 +5,7 @@ namespace Application.Common.Helpers;
 
 public static class PaymentHelper
 {
-    public static void UpdateStatus(string orderId, IApplicationDbContext _context, CancellationToken cancellationToken)
+    public static async Task UpdateStatus(string orderId, IApplicationDbContext _context, CancellationToken cancellationToken)
     {
         var order = _context.Orders.FirstOrDefault(x => x.Id == Guid.Parse(orderId));
         if (order == null)
@@ -16,13 +16,13 @@ public static class PaymentHelper
         order.PaymentStatus = true;
         order.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
         _context.Orders.Update(order);
-        _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
         
         var transaction = _context.Transactions.FirstOrDefault(x => x.OrderId == Guid.Parse(orderId));
         transaction.TransactionStatus = "Success";
         transaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
         
         _context.Transactions.Update(transaction);
-        _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

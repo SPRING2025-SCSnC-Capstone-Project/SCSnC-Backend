@@ -239,7 +239,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          }
          
          //validate voucher used or expired
-         if (request.VoucherId != null)
+         if (request.VoucherId != null && !request.VoucherId.ToString().Equals("3fa85f64-5717-4562-b3fc-2c963f66afa6"))
          {
              var uservoucher = await _context.UserVouchers
                  .Include(x => x.Voucher)
@@ -258,10 +258,10 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          
          var order = new Order
          {
-             TableId = request.TableId,
-             WorkspaceId = request.WorkspaceId,
+             TableId = !request.TableId.ToString().Equals("3fa85f64-5717-4562-b3fc-2c963f66afa6") ? request.TableId : null,
+             WorkspaceId = !request.WorkspaceId.ToString().Equals("3fa85f64-5717-4562-b3fc-2c963f66afa6") ? request.WorkspaceId : null,
              UserId = request.UserId,
-             VoucherId = request.VoucherId,
+             VoucherId = !request.VoucherId.ToString().Equals("3fa85f64-5717-4562-b3fc-2c963f66afa6") ? request.VoucherId : null,
              TotalPrice = request.TotalPrice,
              
              IsActive = true,
@@ -325,8 +325,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          switch (request.PaymentMethod)
          {
              case "VNPay":
-                 
-                 VNPayRequest vnPayRequest = new VNPayRequest()
+                VNPayConfig vnPayConfig = VNPayHelper.GetConfigData();
+                VNPayRequest vnPayRequest = new VNPayRequest()
                  {
                      vnp_CreateDate = DateTime.Now.ToString("yyyyMMddHHmmss"),
                      vnp_IpAddr = IPAddressHelper.GetLocalIPAddress(),
@@ -335,6 +335,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
                      vnp_OrderInfo = $"Date: {DateTime.Now.ToString("yyyyMMddHHmmss")}; Total Price: {get.TotalPrice}",
                      vnp_TxnRef = order.Id.ToString(),
                      vnp_Command = "pay",
+                     vnp_ReturnUrl = vnPayConfig.ReturnUrl,
                      vnp_ExpireDate = DateTime.Now.AddMinutes(5).ToString("yyyyMMddHHmmss"),
                  };
          

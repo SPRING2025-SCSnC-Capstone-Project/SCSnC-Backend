@@ -21,9 +21,9 @@ public class GetItemByIdQueryHandler : IRequestHandler<GetItemByIdQuery, ItemDto
     
     public async Task<ItemDto> Handle(GetItemByIdQuery request, CancellationToken cancellationToken)
     {
-        var item = await _context.Items.Include(x => x.ItemCategory)
+        var item = await _context.Items.Include(x => x.ItemCategory).Include(x => x.ItemWithSizes).ThenInclude(y => y.Size)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-        
+
         if (item is null)
         {
             throw new KeyNotFoundException($"Item with id {request.Id} not found");
