@@ -23,7 +23,7 @@ public class IdentityService : IIdentityService {
         _mapper = mapper;
     }
 
-    public async Task<OneOf<(UserDto, ClaimsIdentity), string>> AuthenticateAsync(string email, string password, CancellationToken cancellationToken) {
+    public async Task<OneOf<UserDto, string>> AuthenticateAsync(string email, string password, CancellationToken cancellationToken) {
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(email) 
                 && x.IsActive && x.AccountType.Equals("manual"), cancellationToken: cancellationToken);
 
@@ -41,26 +41,6 @@ public class IdentityService : IIdentityService {
             throw new AuthenticationFailureException("Invalid email or password");
         }
 
-        var claims = CreateClaims(user);
-        return (_mapper.Map<UserDto>(user), claims);
+        return _mapper.Map<UserDto>(user);
     }
-
-    private ClaimsIdentity CreateClaims(User user)
-    {
-        var claimsIdentity = new ClaimsIdentity();
-
-        claimsIdentity.AddClaims([
-            new(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
-            new(JwtRegisteredClaimNames.Sub, user.Username),
-        ]);
-
-        if (!string.IsNullOrEmpty(user.FullName))
-        {
-            claimsIdentity.AddClaim(new(JwtRegisteredClaimNames.Name, user.FullName));
-        }
-
-        return claimsIdentity;
-    }
-
 }
