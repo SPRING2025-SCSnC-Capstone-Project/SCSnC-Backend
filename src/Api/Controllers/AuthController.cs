@@ -49,10 +49,8 @@ public class AuthController : ControllerBase {
             var handler = new JwtSecurityTokenHandler();
 
             if (existingGoogleUser != null) {
-                var gClaims = CreateClaims(existingGoogleUser);
-
                 var (gJwtToken, gRefreshToken) = _jwtService
-                    .SignInAsync(existingGoogleUser, gClaims, cancellationToken).Result;
+                    .SignInAsync(existingGoogleUser, cancellationToken).Result;
                 
                 var gAccessToken = handler.WriteToken(gJwtToken);
 
@@ -89,10 +87,8 @@ public class AuthController : ControllerBase {
 
             var newUser = await Mediator.Send(command, cancellationToken);
 
-            var claims = CreateClaims(newUser);
-
             var (jwtToken, refreshToken) = _jwtService
-                .SignInAsync(newUser, claims, cancellationToken).Result;
+                .SignInAsync(newUser, cancellationToken).Result;
 
             var accessToken = handler.WriteToken(jwtToken);
 
@@ -115,8 +111,8 @@ public class AuthController : ControllerBase {
         var result = await _identityService.AuthenticateAsync(request.Email, request.Password, cancellationToken);
 
         return result.Match<IActionResult>((loginSuccess) => {
-            var (user, claims) = loginSuccess;
-            var (jwtToken, refreshToken) = _jwtService.SignInAsync(user, claims, cancellationToken).Result;
+            var user = loginSuccess;
+            var (jwtToken, refreshToken) = _jwtService.SignInAsync(user, cancellationToken).Result;
 
             var handler = new JwtSecurityTokenHandler();
             var accessToken = handler.WriteToken(jwtToken);
@@ -135,6 +131,29 @@ public class AuthController : ControllerBase {
         token => {
             throw new NotImplementedException(); 
         });
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> Refresh([FromBody] string? token, CancellationToken cancellationToken)
+    {
+        var refreshToken = token ?? Request.Cookies["RefreshToken"];
+        if (refreshToken == null)
+            return BadRequest("Missing refresh token.");
+
+        var (jwtToken, newRefreshToken) = await _jwtService.RefreshTokenAsync(refreshToken, cancellationToken);
+       
+        var accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken);
+
+        SetJwtAccessToken(accessToken, jwtToken);
+        SetRefreshToken(newRefreshToken);
+
+        var result = new RefreshTokenResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = newRefreshToken.Token,
+        };
+        return Ok(Result<RefreshTokenResponse>.Succeed(result));
     }
 
     [Authorize]
@@ -162,22 +181,5 @@ public class AuthController : ControllerBase {
             Expires = newRefreshToken.ExpiryDateTime.ToDateTimeUnspecified(),
         };
         Response.Cookies.Append(nameof(RefreshToken), newRefreshToken.Token, cookieOptions);
-    }
-
-    private ClaimsIdentity CreateClaims(UserDto user) {
-        var claims = new ClaimsIdentity();
-
-        claims.AddClaims([
-                new(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Email, user.Email),
-                new(JwtRegisteredClaimNames.Sub, user.Username),
-        ]);
-
-        if (!string.IsNullOrEmpty(user.FullName))
-        {
-            claims.AddClaim(new(JwtRegisteredClaimNames.Name, user.FullName));
-        }
-
-        return claims;
     }
 }

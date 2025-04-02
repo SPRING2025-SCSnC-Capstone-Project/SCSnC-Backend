@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
+using AutoMapper;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -14,29 +15,71 @@ namespace Infrastructure.Services.Jwt;
 public class JwtService(
         IOptions<JwtSettings> jwtOptions, 
         ECDsa signingKey, 
-        IApplicationDbContext context
+        IApplicationDbContext context,
+        IMapper mapper
 ) : IJwtSService {
     private readonly JwtSettings _jwtSettings = jwtOptions.Value;
     private readonly ECDsa _signingKey = signingKey;
     private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
-    public Task<(string, string)> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken) {
-        throw new NotImplementedException();
+    public async Task<(JwtSecurityToken, RefreshToken)> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken) {
+        var (storedRefreshToken, user) = await ValidateRefreshToken(refreshToken, cancellationToken);
+        if (storedRefreshToken.IsRevoked)
+        {
+            await RevokeDescendentRefreshToken(storedRefreshToken, cancellationToken,
+                reason: $"Attempted use of revoked ancestor token: {refreshToken}");
+            throw new SecurityTokenValidationException("Token has already been revoked.");
+        }
+        if (storedRefreshToken.IsUsed)
+        {
+            await RevokeDescendentRefreshToken(storedRefreshToken, cancellationToken,
+                reason: $"Attempted reuse of ancestor token: {refreshToken}");
+            throw new SecurityTokenValidationException("Token has already been used.");
+        }
+        if (storedRefreshToken.IsExpired)
+        {
+            throw new SecurityTokenValidationException("Token has expired.");
+        }
+
+        var (token, newRefreshToken) = GenerateTokens(user, cancellationToken).Result;
+
+        // Rotate the refresh token
+        storedRefreshToken.RevocationDateTime = LocalDateTime.FromDateTime(DateTime.UtcNow);
+        storedRefreshToken.ReplacedBy = newRefreshToken.Token;
+        storedRefreshToken.IsUsed = true;
+        storedRefreshToken.RevocationReason = "Rotated upon token renewal";
+        _context.RefreshTokens.Update(storedRefreshToken);
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return (token, newRefreshToken);        
     }
 
     public Task RevokeTokenAsync(string refreshToken, CancellationToken cancellationToken) {
         throw new NotImplementedException();
     }
 
-    public async Task<(JwtSecurityToken, RefreshToken)> SignInAsync(UserDto user, ClaimsIdentity claims, CancellationToken cancellationToken) {
-        var (jwtToken, refreshToken) = await GenerateTokens(user, claims, cancellationToken);
+    public async Task<(JwtSecurityToken, RefreshToken)> SignInAsync(UserDto user, CancellationToken cancellationToken) {
+        var (jwtToken, refreshToken) = await GenerateTokens(user, cancellationToken);
         
         await _context.SaveChangesAsync(cancellationToken);
 
         return (jwtToken, refreshToken);
     }
 
-    private async Task<(JwtSecurityToken, RefreshToken)> GenerateTokens(UserDto user, ClaimsIdentity claims, CancellationToken cancellationToken) {
+    private async Task<(JwtSecurityToken, RefreshToken)> GenerateTokens(UserDto user, CancellationToken cancellationToken) {
+        var claims = new ClaimsIdentity();
+
+        claims.AddClaims([
+            new(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Sub, user.Username),
+            new(JwtRegisteredClaimNames.Email, user.Email),
+        ]);
+
+        if (user.FullName != null) {
+            claims.AddClaim(new(JwtRegisteredClaimNames.Name, user.FullName));
+        }
+
         var jwtToken = GenerateJwtToken(claims);
         var refreshToken = await GenerateUniqueRefreshToken(user);
 
@@ -90,5 +133,52 @@ public class JwtService(
         }
 
         return refreshToken;
+    }
+
+    private async Task<(RefreshToken, UserDto)> ValidateRefreshToken(string refreshToken, CancellationToken cancellationToken)
+    {
+        var storedRefreshToken = await _context.RefreshTokens
+            .SingleOrDefaultAsync(e => e.Token == refreshToken, cancellationToken)
+            ?? throw new SecurityTokenValidationException("Invalid token.");
+
+        var user = await _context.Users
+            .SingleOrDefaultAsync(e => e.Id == storedRefreshToken.UserId, cancellationToken)
+            ?? throw new SecurityTokenValidationException("User associated with token does not exist.");
+
+        return (storedRefreshToken, _mapper.Map<UserDto>(user));
+    }
+    
+    private async Task RevokeDescendentRefreshToken(
+        RefreshToken refreshToken, CancellationToken cancellationToken,
+        string? reason = null)
+    {
+        // Recursively traverse the refresh token chain and ensure all descendants are revoked
+        if (!string.IsNullOrEmpty(refreshToken.ReplacedBy))
+        {
+            var childToken = await _context.RefreshTokens
+                                       .SingleOrDefaultAsync(e => e.Token == refreshToken.ReplacedBy, cancellationToken);
+
+            // A descendent token is always newer than the one it replaced, there can never be a situation where
+            // a token is preserved but its replacement has been removed.
+            if (!childToken!.IsActive)
+            {
+                await RevokeDescendentRefreshToken(childToken, cancellationToken, reason);
+            }
+            else
+            {
+                RevokeRefreshTokenInternal(childToken, cancellationToken, reason);
+            }
+        }
+    }
+    
+    private void RevokeRefreshTokenInternal(
+        RefreshToken refreshToken, CancellationToken cancellationToken,
+        string? reason = null, RefreshToken? replacementToken = null)
+    {
+        refreshToken.RevocationDateTime = LocalDateTime.FromDateTime(DateTime.UtcNow);
+        refreshToken.RevocationReason = reason;
+        refreshToken.ReplacedBy = replacementToken?.Token;
+
+        _context.RefreshTokens.Update(refreshToken);
     }
 }
