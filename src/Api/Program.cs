@@ -13,7 +13,14 @@ try
         .AddInfrastructureServices(builder.Configuration)
         .AddApiServices(builder.Configuration);
     var app = builder.Build();
-
+    
+    app.UseCors(builder =>
+        builder
+            //.WithOrigins("http://localhost:3000")
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+    
     app.UseInfrastructure(builder.Configuration);
 
     app.Run();
