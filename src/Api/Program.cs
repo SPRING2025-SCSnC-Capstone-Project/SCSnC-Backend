@@ -16,10 +16,7 @@ try
     
     app.UseCors(builder =>
         builder
-            //.WithOrigins("http://localhost:3000")
-            .AllowCredentials()
-            .AllowAnyHeader()
-            .AllowAnyMethod());
+            .SetIsOriginAllowed(_ => true));
     
     app.UseInfrastructure(builder.Configuration);
 
