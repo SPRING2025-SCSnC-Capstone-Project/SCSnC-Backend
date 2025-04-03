@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
@@ -8,6 +9,7 @@ namespace Application.ItemCategories.Commands.CreateItemCategory;
 public record CreateItemCategoryCommand: IRequest<ItemCategoryDto>
 {
     public string Name { get; init; }
+    public string[]? Categories { get; init; } = [];
 }
 
 public class CreateItemCategoryCommandHandler : IRequestHandler<CreateItemCategoryCommand, ItemCategoryDto>
@@ -23,17 +25,46 @@ public class CreateItemCategoryCommandHandler : IRequestHandler<CreateItemCatego
     
     public async Task<ItemCategoryDto> Handle(CreateItemCategoryCommand request, CancellationToken cancellationToken)
     {
-        var itemCategory = new ItemCategory
+        // Credits to TriHTM171368 for patching this code
+        try
         {
-            CategoryName = request.Name,
-            IsActive = true,
-            CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-            LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
-        };
+            dynamic res = "";
+            if (request.Categories?.Length > 0 && _context.ItemCategories.ToList().Count <= 0)
+            {
+                for (int i = 0; i < request.Categories.Length; i++)
+                {
+                    var itemCategory = new ItemCategory
+                    {
+                        CategoryName = request.Categories[i],
+                        IsActive = true,
+                        CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                        LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
+                    };
+                    res = await _context.ItemCategories.AddAsync(itemCategory, cancellationToken);
+                }
+            }
+            else
+            {
+                var itemCategory = new ItemCategory
+                {
+                    CategoryName = request.Name,
+                    IsActive = true,
+                    CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                    LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
+                };
+
+                res = await _context.ItemCategories.AddAsync(itemCategory, cancellationToken);
         
-        await _context.ItemCategories.AddAsync(itemCategory, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-        
-        return _mapper.Map<ItemCategoryDto>(itemCategory);
+                
+            }
+            
+            await _context.SaveChangesAsync(cancellationToken);
+            return _mapper.Map<ItemCategoryDto>(res.Entity);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+            throw new Exception(ex.InnerException.Message);
+        }
     }
 }
