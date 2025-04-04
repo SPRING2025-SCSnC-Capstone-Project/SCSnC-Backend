@@ -24,9 +24,9 @@ public class GetSlotsPaginatedQueryHandler: IRequestHandler<GetSlotsPaginatedQue
     }
 
     public async Task<PaginatedList<SlotDto>> Handle(GetSlotsPaginatedQuery request, CancellationToken cancellationToken) {
-        var tables = _context.Slots.AsQueryable().Where(x => x.IsActive);
+        var slots = _context.Slots.AsQueryable().Where(x => x.IsActive);
 
-        return await tables.ListPaginateWithSortAsync<Slot, SlotDto>(
+        return await slots.ListPaginateWithSortAsync<Slot, SlotDto>(
             request.Page,
             request.Size,
             request.SortBy,

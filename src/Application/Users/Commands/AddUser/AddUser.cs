@@ -32,8 +32,8 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserDto> {
     }
 
     public async Task<UserDto> Handle(AddUserCommand request, CancellationToken cancellationToken) {
-        var username_used = await _context.Users.FirstOrDefaultAsync(x => x.Username.Equals(request.Username.Trim()), cancellationToken);
-        var email_used = await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(request.Email.Trim()), cancellationToken);
+        var username_used = await _context.Users.FirstOrDefaultAsync(x => x.Username.Equals(request.Username.Trim()) && x.IsActive, cancellationToken);
+        var email_used = await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(request.Email.Trim()) && x.IsActive, cancellationToken);
 
         if (string.IsNullOrEmpty(request.Type) && 
                 string.IsNullOrEmpty(request.Password)) {
@@ -66,7 +66,7 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserDto> {
         };
 
         if (string.IsNullOrEmpty(request.Type)) {
-            var hashedPassword = _securityService.Hash(request.Password!, salt, request.Username);
+            var hashedPassword = _securityService.Hash(request.Password!, salt, request.Email);
             var b64HashedPassword = Convert.ToBase64String(hashedPassword);
             user.PasswordHash = $"{salt}{b64HashedPassword}";
         }
