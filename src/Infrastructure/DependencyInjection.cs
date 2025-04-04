@@ -26,7 +26,8 @@ public static class DependencyInjection
             .AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!)
             .AddTransient<ISecurityService, SecurityService>()
             .AddScoped<IIdentityService, IdentityService>()
-            .AddScoped<IJwtSService, JwtService>();
+            .AddScoped<IJwtSService, JwtService>()
+            .AddHttpClient<IDeepSeekService, DeepSeekService>();
 
         return services;
     }
