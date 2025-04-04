@@ -36,6 +36,20 @@ public class UsersController : ApiControllerBase {
         return Ok(Result<UserDto>.Succeed(result));
     }
 
+    [HttpGet]
+    public async Task<ActionResult<Result<PaginatedList<UserDto>>>> GetUsers([FromQuery] GetUsersPaginatedRequest request) {
+        var command = new GetUsersPaginatedQuery() {
+            Page = request.Page,
+            Size = request.Size,
+            SortBy = request.SortBy,
+            SortOrder = request.SortOrder,
+            SearchTerm = request.SearchTerm
+        };
+
+        var result = await Mediator.Send(command);
+        return Ok(Result<PaginatedList<UserDto>>.Succeed(result));
+    }
+
     [HttpPut("{userid:guid}")]
     public async Task<ActionResult<Result<UserDto>>> UpdateUser([FromRoute] Guid userId, [FromBody] UpdateUserRequest request) {
         var command = new UpdateUserCommand() {
