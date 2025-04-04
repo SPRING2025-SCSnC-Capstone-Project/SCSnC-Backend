@@ -46,9 +46,12 @@ public class DeepSeekService(
             throw new HttpRequestException("DeepSeek API request failed: " + responseString);
         }
 
-        var result = string.IsNullOrEmpty(JsonConvert.DeserializeObject<ChatbotResponse>(responseString).Response)? 
-            throw new HttpRequestException("DeepSeek API request failed: " + responseString) : JsonConvert.DeserializeObject<ChatbotResponse>(responseString);
-        
-        return result;
+        var result = JsonConvert.DeserializeObject<dynamic>(responseString);
+
+        var chatbotResponse = new ChatbotResponse
+        {
+            Response = JsonConvert.DeserializeObject<dynamic>(responseString).choices[0].message.content.ToString(),
+        };
+        return chatbotResponse;
     }
 }
