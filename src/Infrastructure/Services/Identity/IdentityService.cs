@@ -32,7 +32,7 @@ public class IdentityService : IIdentityService {
         }
 
         var base64Salt = user.PasswordHash![..20];
-        var hashedInputPassword = _securityService.Hash(password, base64Salt, user.Username);
+        var hashedInputPassword = _securityService.Hash(password, base64Salt, user.Email);
 
         var base64HashedPassword = user.PasswordHash[20..];
         var hashedPassword = Convert.FromBase64String(base64HashedPassword);
