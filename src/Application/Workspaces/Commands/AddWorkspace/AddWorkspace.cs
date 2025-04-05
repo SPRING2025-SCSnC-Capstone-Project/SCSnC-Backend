@@ -40,7 +40,6 @@ public class AddWorkspaceCommandHandler: IRequestHandler<AddWorkspaceCommand, Wo
             IsActive = true,
             //WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
-            WorkspaceType = workspaceType
         };
 
         var result = await _context.Workspaces.AddAsync(entity, cancellationToken);

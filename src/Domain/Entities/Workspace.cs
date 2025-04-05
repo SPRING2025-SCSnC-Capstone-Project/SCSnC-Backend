@@ -10,6 +10,7 @@ public class Workspace : BaseEntity
         Reservations = new HashSet<Reservation>();
         Orders = new HashSet<Order>();
         WorkspaceMedias = new HashSet<WorkspaceMedia>();
+        Events = new HashSet<Event>();
     }
     public int WorkspaceNumber { get; set; }
     [ForeignKey("WorkspaceTypeId")]
@@ -22,4 +23,5 @@ public class Workspace : BaseEntity
     public virtual ICollection<Reservation> Reservations { get; set; }
     public virtual ICollection<Order> Orders { get; set; }
     public virtual ICollection<WorkspaceMedia> WorkspaceMedias { get; set; }
+    public virtual ICollection<Event> Events { get; set; }
 }
