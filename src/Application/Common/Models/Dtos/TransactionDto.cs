@@ -5,7 +5,7 @@ namespace Application.Common.Models.Dtos;
 
 public class TransactionDto: BaseDto, IMapFrom<Transaction>
 {
-    public Guid PaymentId { get; set; }
+    //public Guid PaymentId { get; set; }
     public string TransactionStatus { get; set; }
     public DateTime TransactionDate { get; set; }
     public Guid OrderId { get; set; }
@@ -19,7 +19,7 @@ public class TransactionDto: BaseDto, IMapFrom<Transaction>
 
 public class DetailTransactionDto: BaseDto, IMapFrom<Transaction>
 {
-    public Guid PaymentId { get; set; }
+    //public Guid PaymentId { get; set; }
     public string TransactionStatus { get; set; }
     public DateTime TransactionDate { get; set; }
     public Guid OrderId { get; set; }
