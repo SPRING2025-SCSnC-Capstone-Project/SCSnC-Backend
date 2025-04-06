@@ -7,13 +7,13 @@ using NodaTime;
 namespace Application.Events.Commands;
 
 public record AddEventCommand : IRequest<EventDto> {
-    public string EventTitle { get; init; }
-    public string EventDescription { get; init; }
+    public string EventTitle { get; init; } = null!;
+    public string EventDescription { get; init; } = null!;
     public string? CoverImageLink { get; init; }
     public double EntranceFee { get; init; }
-    public DateTime EventStartDate { get; init; }
-    public DateTime EventEndDate { get; init; }
-    public Guid WorkspaceId { get; init; }
+    public TimeOnly EventStartTime { get; init; }
+    public TimeOnly EventEndTime { get; init; }
+    public Guid ReservationId { get; init; }
     public Guid UserId { get; init; }
 }
 
@@ -28,56 +28,50 @@ public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
     }
     
     public async Task<EventDto> Handle(AddEventCommand request, CancellationToken cancellationToken) {
-        var @event = await _context.Events.FirstOrDefaultAsync(x => x.EventTitle.Equals(request.EventTitle) 
-            && x.IsActive, cancellationToken);
-
-        var workspace = await _context.Workspaces.FirstOrDefaultAsync(x => x.Id == request.WorkspaceId && x.IsActive, cancellationToken);
-        
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.UserId && x.IsActive, cancellationToken);
 
-        if (@event is not null) {
-            throw new ConflictException($"Event with title {request.EventTitle} already exists");
-        }
+        var reservation = await _context.Reservations
+            .FirstOrDefaultAsync(x => x.Id == request.ReservationId &&
+                    x.UserId == request.UserId, cancellationToken);
 
-        if (workspace is null) {
-            throw new KeyNotFoundException($"Workspace with Id {request.WorkspaceId} does not exist");
+        if (reservation is null) {
+            throw new KeyNotFoundException($"Reservation with Id {request.ReservationId} does not exist");
         }
 
         if (user is null) {
             throw new KeyNotFoundException($"User with Id {request.UserId} does not exist");
         }
 
-        if (await CheckConflict(request, cancellationToken)) {
-            throw new ConflictException($"Event conflicts with another registered event"); 
+        if (reservation.StartTime > LocalTime.FromTimeOnly(request.EventStartTime) || reservation.EndTime < LocalTime.FromTimeOnly(request.EventEndTime)
+                || reservation.EndTime < LocalTime.FromTimeOnly(request.EventStartTime) || reservation.StartTime > LocalTime.FromTimeOnly(request.EventEndTime)) {
+            throw new ConflictException($"Event time range must be registered within reserved time range"); 
         }
 
-        var event_to_add = new Event() {
+        var entity = new Event() {
             EventTitle = request.EventTitle,
             EventDescription = request.EventDescription,
             CoverImageLink = "",
             EntranceFee = request.EntranceFee,
-            EventStartDate = LocalDateTime.FromDateTime(request.EventStartDate),
-            EventEndDate = LocalDateTime.FromDateTime(request.EventEndDate),
+            EventStartTime = LocalTime.FromTimeOnly(request.EventStartTime),
+            EventEndTime = LocalTime.FromTimeOnly(request.EventEndTime),
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-            WorkspaceId = request.WorkspaceId,
-            UserId = request.UserId,
+            ReservationId = request.ReservationId, 
             IsActive = true,
             Status = "Accepted"
         };
 
-        var result = await _context.Events.AddAsync(event_to_add, cancellationToken);
+        var result = await _context.Events.AddAsync(entity, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<EventDto>(result.Entity);
-    }
+        var added_event = _context.Events
+            .Include(x => x.Reservation)
+            .ThenInclude(y => y.Workspace)
+            .ThenInclude(z => z.WorkspaceType)
+            .Include(x => x.Reservation)
+            .ThenInclude(y => y.User)
+            .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken); 
 
-    private async Task<bool> CheckConflict(AddEventCommand request, CancellationToken cancellationToken) {
-        var conflict = await _context.Events.Include(x => x.Workspace).FirstOrDefaultAsync(x => x.Workspace.Id == request.WorkspaceId &&
-            (( x.EventStartDate <= LocalDateTime.FromDateTime(request.EventStartDate) && x.EventEndDate >= LocalDateTime.FromDateTime(request.EventStartDate) )
-                || ( x.EventEndDate >= LocalDateTime.FromDateTime(request.EventEndDate) && x.EventStartDate <= LocalDateTime.FromDateTime(request.EventEndDate) ))
-        , cancellationToken);
-
-        return conflict is not null;
+        return _mapper.Map<EventDto>(added_event);
     }
 }

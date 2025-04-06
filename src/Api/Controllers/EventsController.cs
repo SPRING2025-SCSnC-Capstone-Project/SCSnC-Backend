@@ -2,6 +2,9 @@ using Api.Controllers.Payload.Requests;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Application.Events.Commands;
+using Application.Events.Queries.GetEventById;
+using Application.Events.Queries.GetEventsByUserPaginated;
+using Application.Events.Queries.GetEventsPaginated;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,16 +14,55 @@ public class EventsController : ApiControllerBase {
     [HttpPost]
     public async Task<ActionResult<Result<EventDto>>> CreateEvent([FromBody] CreateEventRequest request) {
         var command = new AddEventCommand() {
-            UserId = request.UserId,
             EventTitle = request.EventTitle,
             EntranceFee = request.EntranceFee,
-            WorkspaceId = request.WorkspaceId,
-            EventEndDate = request.EventEndDate,
-            EventStartDate = request.EventStartDate,
-            EventDescription = request.EventDescription
+            EventEndTime = request.EventEndTime,
+            EventStartTime = request.EventStartTime,
+            EventDescription = request.EventDescription,
+            ReservationId = request.ReservationId,
+            UserId = request.CurrentUserId
         };
 
         var result = await Mediator.Send(command);
         return Ok(Result<EventDto>.Succeed(result));
+    }
+
+    [HttpGet("{eventid:guid}")]
+    public async Task<ActionResult<Result<EventDto>>> GetEventById([FromRoute] Guid eventid) {
+        var query = new GetEventByIdQuery() {
+            Id = eventid
+        };
+
+        var result = await Mediator.Send(query);
+        return Ok(Result<EventDto>.Succeed(result));
+    }
+
+    [HttpGet("user/{userid:guid}")]
+    public async Task<ActionResult<Result<PaginatedList<EventDto>>>> GetEventsByUserPaginated([FromRoute] Guid userid, [FromQuery] GetEventsPaginatedRequest request) {
+        var command = new GetEventsByUserPaginatedQuery() {
+            UserId = userid,
+            Page = request.Page,
+            Size = request.Size,
+            Filter = request.Filter,
+            SortBy = request.SortBy,
+            SortOrder = request.SortOrder,
+        };
+
+        var result = await Mediator.Send(command);
+        return Ok(Result<PaginatedList<EventDto>>.Succeed(result));
+    }
+
+    [HttpGet()]
+    public async Task<ActionResult<Result<PaginatedList<EventDto>>>> GetEventsPaginated([FromQuery] GetEventsPaginatedRequest request) {
+        var command = new GetEventsPaginatedQuery() {
+            Page = request.Page,
+            Size = request.Size,
+            Filter = request.Filter,
+            SortBy = request.SortBy,
+            SortOrder = request.SortOrder,
+        };
+
+        var result = await Mediator.Send(command);
+        return Ok(Result<PaginatedList<EventDto>>.Succeed(result));
     }
 }
