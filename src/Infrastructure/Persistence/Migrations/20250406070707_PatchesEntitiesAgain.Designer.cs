@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250406070707_PatchesEntitiesAgain")]
+    partial class PatchesEntitiesAgain
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -440,6 +443,9 @@ namespace Infrastructure.Persistence
                     b.Property<LocalDate>("ReservationDate")
                         .HasColumnType("date");
 
+                    b.Property<Guid?>("SlotId")
+                        .HasColumnType("uuid");
+
                     b.Property<LocalTime>("StartTime")
                         .HasColumnType("time");
 
@@ -453,6 +459,8 @@ namespace Infrastructure.Persistence
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SlotId");
 
                     b.HasIndex("UserId");
 
@@ -976,6 +984,10 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.Reservation", b =>
                 {
+                    b.HasOne("Domain.Entities.Slot", null)
+                        .WithMany("Reservations")
+                        .HasForeignKey("SlotId");
+
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Reservations")
                         .HasForeignKey("UserId")
@@ -1090,6 +1102,11 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity("Domain.Entities.Size", b =>
                 {
                     b.Navigation("ItemWithSizes");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Slot", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("Domain.Entities.Table", b =>

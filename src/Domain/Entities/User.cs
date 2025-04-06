@@ -12,7 +12,6 @@ public class User : BaseEntity
         JoinEvents = new HashSet<JoinEvent>();
         Reservations = new HashSet<Reservation>();
         Blogs = new HashSet<Blog>();
-        Events = new HashSet<Event>();
     }
     public string AccountType { get; set; }
     public string Username { get; set; }
@@ -28,7 +27,6 @@ public class User : BaseEntity
     public LocalDateTime LastUpdatedAt { get; set; }
     public virtual ICollection<Order> Orders { get; set; }
     public virtual ICollection<UserVoucher> UserVouchers { get; set; }
-    public virtual ICollection<Event> Events { get; set; }
     public virtual ICollection<JoinEvent> JoinEvents { get; set; }
     public virtual ICollection<Reservation> Reservations { get; set; }
     public virtual ICollection<Blog> Blogs { get; set; }

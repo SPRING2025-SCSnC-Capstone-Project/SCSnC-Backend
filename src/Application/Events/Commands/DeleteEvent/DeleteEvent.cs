@@ -23,7 +23,7 @@ public class DeleteEventCommandHandler : IRequestHandler<DeleteEventCommand, Eve
     public async Task<EventDto> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.Events
-            .FirstOrDefaultAsync(e => e.Id == request.EventId, cancellationToken);
+            .FirstOrDefaultAsync(e => e.Id == request.EventId && e.IsActive, cancellationToken);
 
         if (entity == null)
         {
