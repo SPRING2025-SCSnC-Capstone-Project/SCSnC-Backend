@@ -16,7 +16,7 @@ public class ItemsController : ApiControllerBase
     #region Basic CRUD Operations
     
     [HttpGet]
-    public async Task<ActionResult<Result<PaginatedList<ItemDto>>>> GetItems([FromQuery] PaginatedQueryParameters request)
+    public async Task<ActionResult<Result<PaginatedList<ItemDto>>>> GetItems([FromQuery] PaginatedItemsQueryParams request)
     {
         var query = new GetItemsPaginatedQuery()
         {
@@ -25,7 +25,6 @@ public class ItemsController : ApiControllerBase
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
             FilterByCategory = request.FilterByCategory
-
         };
 
         var result = await Mediator.Send(query);

@@ -25,4 +25,9 @@ public static class PaymentHelper
         _context.Transactions.Update(transaction);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    // public static void CreateTransaction()
+    // {
+    //     
+    // }
 }

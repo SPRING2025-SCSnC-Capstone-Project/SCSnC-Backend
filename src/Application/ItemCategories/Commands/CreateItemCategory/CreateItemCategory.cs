@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
@@ -9,7 +10,7 @@ namespace Application.ItemCategories.Commands.CreateItemCategory;
 public record CreateItemCategoryCommand: IRequest<ItemCategoryDto>
 {
     public string Name { get; init; }
-    public string[]? Catagories { get; init; } = [];
+    public string[]? Categories { get; init; } = [];
 }
 
 public class CreateItemCategoryCommandHandler : IRequestHandler<CreateItemCategoryCommand, ItemCategoryDto>
@@ -25,17 +26,17 @@ public class CreateItemCategoryCommandHandler : IRequestHandler<CreateItemCatego
     
     public async Task<ItemCategoryDto> Handle(CreateItemCategoryCommand request, CancellationToken cancellationToken)
     {
-
+        // Credits to TriHTM171368 for patching this code
         try
         {
             dynamic res = "";
-            if (request.Catagories?.Length > 0 && _context.ItemCategories.ToList().Count <= 0)
+            if (request.Categories?.Length > 0 && _context.ItemCategories.ToList().Count <= 0)
             {
-                for (int i = 0; i < request.Catagories.Length; i++)
+                for (int i = 0; i < request.Categories.Length; i++)
                 {
                     var itemCategory = new ItemCategory
                     {
-                        CategoryName = request.Catagories[i],
+                        CategoryName = request.Categories[i],
                         IsActive = true,
                         CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                         LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
@@ -54,11 +55,12 @@ public class CreateItemCategoryCommandHandler : IRequestHandler<CreateItemCatego
                 };
 
                 res = await _context.ItemCategories.AddAsync(itemCategory, cancellationToken);
+        
+                
             }
-
+            
             await _context.SaveChangesAsync(cancellationToken);
             return _mapper.Map<ItemCategoryDto>(res.Entity);
-
         }
         catch (Exception ex)
         {

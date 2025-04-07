@@ -28,12 +28,20 @@ public class GetItemsPaginatedQueryHandler : IRequestHandler<GetItemsPaginatedQu
     
     public async Task<PaginatedList<ItemDto>> Handle(GetItemsPaginatedQuery request, CancellationToken cancellationToken)
     {
-        var query = string.IsNullOrEmpty(request.FilterByCategory) ?
-                _context.Items.Include(x => x.ItemCategory).Include(x => x.ItemWithSizes).ThenInclude(y => y.Size).AsQueryable()
-                :
-                _context.Items.Where(x => x.ItemCategory.CategoryName == request.FilterByCategory).Include(x => x.ItemCategory).Include(x => x.ItemWithSizes).ThenInclude(y => y.Size).AsQueryable()
-                ;
-
+        var query = string.IsNullOrEmpty(request.FilterByCategory)?
+            _context.Items
+                .Include(x => x.ItemCategory)
+                .Include(x => x.ItemWithSizes)
+                .ThenInclude(y => y.Size)
+                .AsQueryable():
+            _context.Items
+                .Include(x => x.ItemCategory)
+                .Include(x => x.ItemCategory)
+                .Include(x => x.ItemWithSizes)
+                .ThenInclude(y => y.Size)
+                .Where(x => x.ItemCategory.CategoryName == request.FilterByCategory)
+                .AsQueryable();
+        
         return await query.ListPaginateWithSortAsync<Item, ItemDto>(
             request.Page, 
             request.Size, 

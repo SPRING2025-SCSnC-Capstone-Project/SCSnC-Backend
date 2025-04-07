@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
@@ -27,6 +28,7 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
     
     public async Task<ToppingDto> Handle(AddToppingCommand request, CancellationToken cancellationToken)
     {
+        // Credits to TriHTM171368 for patching this code
         try
         {
             dynamic result = "";
@@ -57,9 +59,10 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
                     CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                     LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                 };
+        
                 result = await _context.Toppings.AddAsync(topping, cancellationToken);
             }
-
+            
             await _context.SaveChangesAsync(cancellationToken);
             return _mapper.Map<ToppingDto>(result.Entity);
         }

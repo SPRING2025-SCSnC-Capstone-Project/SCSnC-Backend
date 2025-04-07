@@ -341,24 +341,36 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
          
                  var paymentUrl = await _vnpayService.GetPaymentLink(vnPayRequest);
                  result.PaymentLink = paymentUrl;
+                 
+                 var transactionVNPay = new Transaction
+                 {
+                     OrderId = order.Id,
+                     TransactionStatus = "Pending",
+                     TransactionDate = LocalDateTime.FromDateTime(DateTime.Now),
+                     Amount = result.TotalPrice,
+                     PaymentMethod = request.PaymentMethod
+                 };
+                 await _context.Transactions.AddAsync(transactionVNPay, cancellationToken);
+                 await _context.SaveChangesAsync(cancellationToken);
+                 
                  break;
              
              case "Cash":
-                 result.PaymentLink = string.Empty;
+                 result.PaymentLink = "Please pay at the cashier";
+                 
+                 var transactionCash = new Transaction
+                 {
+                     OrderId = order.Id,
+                     TransactionStatus = "Success",
+                     TransactionDate = LocalDateTime.FromDateTime(DateTime.Now),
+                     Amount = result.TotalPrice,
+                     PaymentMethod = request.PaymentMethod
+                 };
+                 await _context.Transactions.AddAsync(transactionCash, cancellationToken);
+                 await _context.SaveChangesAsync(cancellationToken);
+                 
                  break;
          }
-         
-         var transaction = new Transaction
-         {
-             OrderId = order.Id,
-             TransactionStatus = "Pending",
-             TransactionDate = LocalDateTime.FromDateTime(DateTime.Now),
-             Amount = result.TotalPrice,
-             PaymentMethod = request.PaymentMethod
-         };
-         
-         await _context.Transactions.AddAsync(transaction, cancellationToken);
-         await _context.SaveChangesAsync(cancellationToken);
          
          return result;
      }

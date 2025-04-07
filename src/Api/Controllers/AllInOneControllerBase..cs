@@ -18,7 +18,7 @@ namespace Api.Controllers
             var categoriesCommand = new CreateItemCategoryCommand()
             {
                 Name = "bullshit",
-                Catagories = "cà phê,trà,trà sữa,nước ép,sinh tố,latte,matcha,bánh ngọt,bánh mặn".Split(',')
+                Categories = "cà phê,trà,trà sữa,nước ép,sinh tố,latte,matcha,bánh ngọt,bánh mặn".Split(',')
             };
 
             var resultCategories = await Mediator.Send(categoriesCommand);

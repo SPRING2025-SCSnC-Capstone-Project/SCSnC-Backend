@@ -100,31 +100,57 @@ namespace Infrastructure.Persistence
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CoverImageLink")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<LocalDateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("EntranceFee")
                         .HasColumnType("double precision");
 
-                    b.Property<LocalDateTime>("EventDate")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<string>("EventDescription")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<LocalDateTime>("EventEndDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<double>("EventFee")
+                        .HasColumnType("double precision");
+
+                    b.Property<LocalDateTime>("EventStartDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("EventTitle")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ImgCover")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<LocalDateTime>("LastUpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<int>("NumberOfPeople")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WorkspaceId");
 
                     b.ToTable("Events");
                 });
@@ -709,6 +735,10 @@ namespace Infrastructure.Persistence
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<double>("PricePerHour")
                         .HasColumnType("double precision");
 
@@ -807,6 +837,25 @@ namespace Infrastructure.Persistence
                         .IsRequired();
 
                     b.Navigation("Blog");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Event", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("Events")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Workspace", "Workspace")
+                        .WithMany("Events")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Workspace");
                 });
 
             modelBuilder.Entity("Domain.Entities.Feedback", b =>
@@ -1092,6 +1141,8 @@ namespace Infrastructure.Persistence
                 {
                     b.Navigation("Blogs");
 
+                    b.Navigation("Events");
+
                     b.Navigation("JoinEvents");
 
                     b.Navigation("Orders");
@@ -1110,6 +1161,8 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.Workspace", b =>
                 {
+                    b.Navigation("Events");
+
                     b.Navigation("Orders");
 
                     b.Navigation("Reservations");

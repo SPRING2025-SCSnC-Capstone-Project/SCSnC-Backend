@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
@@ -26,7 +27,7 @@ public class AddSizeCommandHandler : IRequestHandler<AddSizeCommand, SizeDto>
     
     public async Task<SizeDto> Handle(AddSizeCommand request, CancellationToken cancellationToken)
     {
-
+        // Credits to TriHTM171368 for patching this code
         try
         {
             dynamic result = "";
@@ -55,8 +56,10 @@ public class AddSizeCommandHandler : IRequestHandler<AddSizeCommand, SizeDto>
                     CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                     LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
                 };
+        
                 result = await _context.Sizes.AddAsync(size);
             }
+            
             await _context.SaveChangesAsync(cancellationToken);
             return _mapper.Map<SizeDto>(result.Entity);
         }

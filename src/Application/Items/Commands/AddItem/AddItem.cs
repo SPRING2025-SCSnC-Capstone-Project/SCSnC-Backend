@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Application.ItemWithSizes.Commands.CreateItemWithSize;
@@ -7,7 +8,7 @@ using System.Diagnostics;
 
 namespace Application.Items.Commands.AddItem;
 
-public class AddItemCommand : IRequest<ItemDto>
+public record AddItemCommand : IRequest<ItemDto>
 {
     public string Name { get; init; }
     public string Description { get; init; }
@@ -16,7 +17,6 @@ public class AddItemCommand : IRequest<ItemDto>
     public Guid CategoryId { get; init; }
     public List<Guid> SizeIds { get; init; }
     public bool? AutoCreate { get; init; } = false;
-
 }
 
 public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
@@ -32,6 +32,7 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
 
     public async Task<ItemDto> Handle(AddItemCommand request, CancellationToken cancellationToken)
     {
+        // Credits to TriHTM171368 for patching this code
         try
         {
             List<ItemCategory> categories = _context.ItemCategories.ToList();
@@ -84,7 +85,7 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                     ItemName = request.Name,
                     ItemDescription = request.Description,
                     ItemBasePrice = request.Price,
-                    ItemCategoryId = request.CategoryId,
+                    ItemCategoryId =request.CategoryId,
                     ItemImg = request.Img,
                     IsActive = true,
                     CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
@@ -92,9 +93,10 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                 };
 
                 var result = await _context.Items.AddAsync(entity, cancellationToken);
-
-                await _context.SaveChangesAsync(cancellationToken);
-
+        
+                await _context.SaveChangesAsync(cancellationToken); 
+                
+//              Note: add to ItemWithSize table when adding new item
                 foreach (var size in request.SizeIds)
                 {
                     var itemWithSize = new ItemWithSize
@@ -103,14 +105,14 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                         SizeId = size,
                         IsActive = true
                     };
-
+            
                     await _context.ItemWithSizes.AddAsync(itemWithSize, cancellationToken);
-                }
-
+                } 
+//              Note: end
                 await _context.SaveChangesAsync(cancellationToken);
+        
                 return _mapper.Map<ItemDto>(result.Entity);
             }
-
         }
         catch (Exception ex)
         {

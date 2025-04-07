@@ -14,14 +14,14 @@ public class ItemDto : BaseDto, IMapFrom<Item>
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
     public List<SizeDto> Sizes { get; set; }
-
+    
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Item, ItemDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ItemCategory.CategoryName))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt.ToDateTimeUnspecified()))
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => src.LastUpdatedAt.ToDateTimeUnspecified()))
-            .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.ItemWithSizes.Select(x => x.Size).ToList()))
+            .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.ItemWithSizes.Select(iws => iws.Size).ToList()))
             .ReverseMap();
     }
 }

@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using Application.Common.Interfaces;
 using Ardalis.GuardClauses;
 using Infrastructure.Data;
+using Infrastructure.Services.Deepseek;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Jwt;
 using Infrastructure.Services.Security;
@@ -21,10 +22,12 @@ public static class DependencyInjection
             .AddApplicationDbContext(configuration)
             .AddJwtAuthentication(configuration)
             .AddVNPayService(configuration)
+            .AddDeepseekService(configuration)
             .AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!)
             .AddTransient<ISecurityService, SecurityService>()
             .AddScoped<IIdentityService, IdentityService>()
-            .AddScoped<IJwtSService, JwtService>();
+            .AddScoped<IJwtSService, JwtService>()
+            .AddHttpClient<IDeepSeekService, DeepSeekService>();
 
         return services;
     }
@@ -70,6 +73,19 @@ public static class DependencyInjection
         services.Configure<VNPayConfig>(configuration.GetSection(VNPayConfig.Section));
         services.AddTransient<IPaymentService, VNPayService>();
 
+        return services;
+    }
+    
+    private static IServiceCollection AddDeepseekService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<DeepSeekConfig>(configuration.GetSection(DeepSeekConfig.Section));
+        services.AddTransient<IDeepSeekService, DeepSeekService>();
+
+        services.AddOptions<DeepSeekConfig>()
+            .Bind(configuration.GetSection(DeepSeekConfig.Section))
+            .Validate(config => !string.IsNullOrEmpty(config.ApiKey))
+            .ValidateOnStart();
+        
         return services;
     }
 }

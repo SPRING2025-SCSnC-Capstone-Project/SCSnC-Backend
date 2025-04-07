@@ -12,6 +12,7 @@ public class WorkspacesController: ApiControllerBase {
     public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request) {
         var command = new AddWorkspaceCommand() {
             WorkspaceNumber = request.WorkspaceNumber,
+            Name = request.Name,
             WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
         };
@@ -36,6 +37,7 @@ public class WorkspacesController: ApiControllerBase {
     public async Task<ActionResult<Result<WorkspaceDto>>> UpdateWorkspace([FromRoute] Guid id, [FromBody] UpdateWorkspaceRequest request) {
         var command = new UpdateWorkspaceCommand() {
             Id = id,
+            Name = request.Name,
             WorkspaceNumber = request.WorkspaceNumber,
             WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,

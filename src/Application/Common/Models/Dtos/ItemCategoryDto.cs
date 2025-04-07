@@ -25,7 +25,7 @@ public class ItemCategoryDto: BaseDto, IMapFrom<ItemCategory>
     public string CategoryName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
-
+    
     public void Mapping(Profile profile)
     {
         profile.CreateMap<ItemCategory, ItemCategoryDto>()

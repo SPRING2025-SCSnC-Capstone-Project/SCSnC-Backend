@@ -10,6 +10,7 @@ public record AddWorkspaceCommand: IRequest<WorkspaceDto> {
     public int WorkspaceNumber { get; init; }
     public Guid WorkspaceTypeId { get; init; }
     public string? WorkspaceImageUrl { get; init; }
+    public string Name { get; init; }
 }
 
 public class AddWorkspaceCommandHandler: IRequestHandler<AddWorkspaceCommand, WorkspaceDto> {
@@ -36,11 +37,11 @@ public class AddWorkspaceCommandHandler: IRequestHandler<AddWorkspaceCommand, Wo
 
         var entity = new Workspace() {
             WorkspaceNumber = request.WorkspaceNumber,
+            Name = request.Name,
             IsAvailable = true,
             IsActive = true,
             //WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
-            WorkspaceType = workspaceType
         };
 
         var result = await _context.Workspaces.AddAsync(entity, cancellationToken);

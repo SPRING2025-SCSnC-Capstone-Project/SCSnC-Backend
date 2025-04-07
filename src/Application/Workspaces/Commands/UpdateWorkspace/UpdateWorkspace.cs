@@ -10,6 +10,7 @@ public record UpdateWorkspaceCommand: IRequest<WorkspaceDto> {
     public int WorkspaceNumber { get; init; }
     public Guid WorkspaceTypeId { get; init; }
     public string? WorkspaceImageUrl { get; init; }
+    public string Name { get; init; }
 }
 
 public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceCommand, WorkspaceDto> {
@@ -41,6 +42,7 @@ public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceComma
         }
 
         workspace.WorkspaceNumber = request.WorkspaceNumber;
+        workspace.Name = request.Name;
         //workspace.WorkspaceImageUrl = request.WorkspaceImageUrl;
         workspace.WorkspaceType = workspaceType;
         workspace.WorkspaceTypeId = request.WorkspaceTypeId;
