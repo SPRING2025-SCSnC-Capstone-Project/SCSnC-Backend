@@ -15,12 +15,11 @@ public class ReservationsController : ApiControllerBase {
     public async Task<ActionResult<Result<ReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request) {
         var command = new CreateReservationCommand() {
             ReservationDate = request.ReservationDate,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
             TotalPrice = request.TotalPrice,
             Deposit = request.Deposit,
             WorkspaceId = request.WorkspaceId,
             UserId = request.UserId,
+            SlotIds = request.SlotIds
         };
 
         var result = await Mediator.Send(command);
