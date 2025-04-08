@@ -27,6 +27,8 @@ public class GetEventByIdQueryHandler: IRequestHandler<GetEventByIdQuery, EventD
             .ThenInclude(z => z.WorkspaceType)
             .Include(x => x.Reservation)
             .ThenInclude(y => y.User)
+            .Include(x => x.EventSlots)
+            .ThenInclude(y => y.Slot)
             .FirstOrDefaultAsync(x => x.IsActive == true && x.Id == request.Id, cancellationToken);
         
         if (entity is null)

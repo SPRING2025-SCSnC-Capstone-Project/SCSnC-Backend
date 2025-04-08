@@ -5,16 +5,16 @@ namespace Domain.Entities;
 
 public class Reservation : BaseEntity
 {
-    public LocalDate ReservationDate { get; set; }
+    public Reservation() {
+        ReservedSlots = new HashSet<ReservedSlot>();
+    }
+
+    public LocalDate ReserveDate { get; set; }
     [ForeignKey("WorkspaceId")]
     public Guid WorkspaceId { get; set; }
     public double Deposit { get; set; }
-    //[ForeignKey("SlotId")]
-    //public Guid SlotId { get; set; }
     [ForeignKey("UserId")]
     public Guid UserId { get; set; }
-    public LocalTime StartTime { get; set; }
-    public LocalTime EndTime { get; set; }
     public bool IsFullPaid{ get; set; }
     public double TotalPrice { get; set; }
     // public LocalDateTime CreatedAt { get; set; }
@@ -23,4 +23,5 @@ public class Reservation : BaseEntity
     
     public virtual Workspace Workspace { get; set; }
     public virtual User User { get; set; }
+    public virtual ICollection<ReservedSlot> ReservedSlots { get; set; } 
 }

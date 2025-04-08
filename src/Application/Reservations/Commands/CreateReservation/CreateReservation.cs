@@ -2,6 +2,7 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http.HttpResults;
 using NodaTime;
 
 namespace Application.Reservations.Commands;
@@ -10,10 +11,9 @@ public record CreateReservationCommand : IRequest<ReservationDto> {
     public DateOnly ReservationDate { get; init; }
     public Guid WorkspaceId { get; init; }
     public double Deposit { get; init; }
-    public TimeOnly StartTime { get; init; }
-    public TimeOnly EndTime { get; init; }
     public Guid UserId { get; init; }
     public double TotalPrice { get; init; }
+    public Guid[] SlotIds { get; init; } = null!;
 }
 
 public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ReservationDto> {
@@ -39,40 +39,59 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             throw new KeyNotFoundException($"User with Id {request.UserId} does not exist");
         }
 
-        if (await CheckConflict(request, cancellationToken)) {
-            throw new ConflictException($"Conflicts between reservations time range");
+        var reservedSlotsToAdd = new List<ReservedSlot>(); 
+
+        foreach (var slotId in request.SlotIds) {
+            var slot = await _context.Slots.FirstOrDefaultAsync(x => x.Id == slotId && x.IsActive, cancellationToken);
+            
+            if (slot is null) {
+                throw new KeyNotFoundException($"Slot with Id {slotId} does not exist");
+            }
+
+            if (await CheckConflict(request.ReservationDate, slotId, cancellationToken)) {
+                throw new ConflictException("One or more slots have already been reserved");
+            }
         }
 
-        var entity = new Reservation() {
+        var reservation = new Reservation() {
             UserId = request.UserId,
             WorkspaceId = request.WorkspaceId,
-            ReservationDate = LocalDate.FromDateOnly(request.ReservationDate),
-            StartTime = LocalTime.FromTimeOnly(request.StartTime),
-            EndTime = LocalTime.FromTimeOnly(request.EndTime),
             Deposit = request.Deposit,
             IsFullPaid = false,
             TotalPrice = request.TotalPrice,
+            ReserveDate = LocalDate.FromDateOnly(request.ReservationDate)
         };
 
-        var result = await _context.Reservations.AddAsync(entity, cancellationToken);
+        var result = await _context.Reservations.AddAsync(reservation, cancellationToken);
+
+        foreach (var slotId in request.SlotIds) {
+            var reservedSlot = new ReservedSlot() {
+                SlotId = slotId,
+                ReservationId = result.Entity.Id,
+            };
+            
+            reservedSlotsToAdd.Add(reservedSlot);
+        };
+
+        await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
+
         await _context.SaveChangesAsync(cancellationToken);
 
-        var created_reservation = await _context.Reservations
+        var createdReservation = await _context.Reservations
             .Include(x => x.Workspace)
             .ThenInclude(y => y.WorkspaceType)
             .Include(x => x.User)
+            .Include(x => x.ReservedSlots)
+            .ThenInclude(y => y.Slot)
             .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken);
 
-        return _mapper.Map<ReservationDto>(created_reservation);
+        return _mapper.Map<ReservationDto>(createdReservation);
     }
 
-    private async Task<bool> CheckConflict(CreateReservationCommand request, CancellationToken cancellationToken) {
-        var conflict = await _context.Reservations
-            .Include(x => x.Workspace)
-            .FirstOrDefaultAsync(x => x.Workspace.Id == request.WorkspaceId && x.ReservationDate == LocalDate.FromDateOnly(request.ReservationDate) &&
-            (( x.StartTime <= LocalTime.FromTimeOnly(request.StartTime) && x.EndTime >= LocalTime.FromTimeOnly(request.StartTime) )
-                || ( x.EndTime >= LocalTime.FromTimeOnly(request.EndTime) && x.StartTime <= LocalTime.FromTimeOnly(request.EndTime) ))
-        , cancellationToken);
+    private async Task<bool> CheckConflict(DateOnly reservationDate, Guid slotId, CancellationToken cancellationToken) {
+        var conflict = await _context.ReservedSlots.Include(x => x.Reservation).FirstOrDefaultAsync(x => 
+                x.Reservation!.ReserveDate == LocalDate.FromDateOnly(reservationDate) && 
+                x.SlotId == slotId, cancellationToken);
 
         return conflict is not null;
     }

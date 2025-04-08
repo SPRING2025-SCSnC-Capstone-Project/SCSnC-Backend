@@ -29,47 +29,17 @@ public class GetEventsByUserPaginatedQueryHandler : IRequestHandler<GetEventsByU
     
     public async Task<PaginatedList<EventDto>> Handle(GetEventsByUserPaginatedQuery request, CancellationToken cancellationToken)
     {
-        IQueryable<Event> query = new List<Event>().AsQueryable();
-        
-        switch(request.Filter)
-        {
-            case "Upcoming":
+        IQueryable<Event> query = 
                 query = _context.Events
                     .Include(x => x.Reservation)
                     .ThenInclude(y => y.Workspace)
                     .ThenInclude(z => z.WorkspaceType)
                     .Include(x => x.Reservation)
                     .ThenInclude(y => y.User)
-                    .Where(x => (x.Reservation.ReservationDate.ToDateOnly() > DateOnly.FromDateTime(DateTime.Now) ||
-                            (x.Reservation.ReservationDate.ToDateOnly() == DateOnly.FromDateTime(DateTime.Now) &&
-                            x.EventStartTime.ToTimeOnly() > TimeOnly.FromDateTime(DateTime.Now))) && 
-                            x.IsActive && x.Reservation.UserId == request.UserId)
-                    .AsQueryable();
-                break;
-            case "Finished":
-                query = _context.Events
-                    .Include(x => x.Reservation)
-                    .ThenInclude(y => y.Workspace)
-                    .ThenInclude(z => z.WorkspaceType)
-                    .Include(x => x.Reservation)
-                    .ThenInclude(y => y.User)
-                    .Where(x => (x.Reservation.ReservationDate.ToDateOnly() < DateOnly.FromDateTime(DateTime.Now) ||
-                                (x.Reservation.ReservationDate.ToDateOnly() == DateOnly.FromDateTime(DateTime.Now) &&
-                                 x.EventEndTime.ToTimeOnly() < TimeOnly.FromDateTime(DateTime.Now))) && 
-                            x.IsActive && x.Reservation.UserId == request.UserId)
-                    .AsQueryable();
-                break;
-            default:
-                query = _context.Events
-                    .Include(x => x.Reservation)
-                    .ThenInclude(y => y.Workspace)
-                    .ThenInclude(z => z.WorkspaceType)
-                    .Include(x => x.Reservation)
-                    .ThenInclude(y => y.User)
+                    .Include(x => x.EventSlots)
+                    .ThenInclude(y => y.Slot)
                     .Where(x => x.Reservation.UserId == request.UserId)
                     .AsQueryable();
-                break;
-        }
         
         return await query.ListPaginateWithSortAsync<Event, EventDto>(
             request.Page, 
