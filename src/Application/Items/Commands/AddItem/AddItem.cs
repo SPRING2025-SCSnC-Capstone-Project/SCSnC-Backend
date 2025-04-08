@@ -47,7 +47,7 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                         {
                             ItemName = categories[i].CategoryName + " " + (j + 1),
                             ItemDescription = categories[i].CategoryName + " " + (j + 1),
-                            ItemBasePrice = 65.000,
+                            //ItemBasePrice = 65.000,
                             ItemCategoryId = categories[i].Id,
                             ItemImg = request.Img,
                             IsActive = true,
@@ -83,7 +83,6 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                 {
                     ItemName = request.Name,
                     ItemDescription = request.Description,
-                    ItemBasePrice = request.Price,
                     ItemCategoryId =request.CategoryId,
                     ItemImg = request.Img,
                     IsActive = true,
@@ -109,7 +108,23 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                 } 
 //              Note: end
                 await _context.SaveChangesAsync(cancellationToken);
-        
+                
+//              Note: add default price to ItemPriceAtBranch table when adding new item
+                foreach (var branch in _context.Branches.Select(x => x.Id).ToList())
+                {
+                    var itemPriceAtBranch = new ItemPriceAtBranch
+                    {
+                        ItemId = result.Entity.Id,
+                        BranchId = branch,
+                        Price = request.Price,
+                        CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                        LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
+                    };
+                    
+                    await _context.ItemPricesAtBranches.AddAsync(itemPriceAtBranch, cancellationToken);
+                }
+                await _context.SaveChangesAsync(cancellationToken);
+                
                 return _mapper.Map<ItemDto>(result.Entity);
             }
         }

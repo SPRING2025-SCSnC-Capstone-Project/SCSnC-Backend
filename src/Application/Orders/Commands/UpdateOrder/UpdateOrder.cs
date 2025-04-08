@@ -68,7 +68,9 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand, Ord
                 throw new KeyNotFoundException($"Item with id {orderDetail.ItemId} not found");
             }
             
-            orderDetailPrice += item.ItemBasePrice + size.PriceAdjustment;
+            //orderDetailPrice += item.ItemBasePrice + size.PriceAdjustment;
+            orderDetailPrice += _context.ItemPricesAtBranches.FirstOrDefaultAsync(x => 
+                x.BranchId == order.BranchId && x.ItemId == item.Id, cancellationToken).Result.Price + size.PriceAdjustment;
             //totalPrice += item.ItemBasePrice + size.PriceAdjustment;
 
             foreach (var includeTopping in orderDetail.ToppingIds)

@@ -8,10 +8,10 @@ public class Item : BaseEntity
     public Item()
     {
         ItemWithSizes = new HashSet<ItemWithSize>();
+        ItemPricesAtBranches = new HashSet<ItemPriceAtBranch>();
     }
     public string ItemName { get; set; }
     public string ItemDescription { get; set; }
-    public double ItemBasePrice { get; set; }
     public string ItemImg { get; set; }
     [ForeignKey("ItemCategoryId")]
     public Guid ItemCategoryId { get; set; }
@@ -21,4 +21,5 @@ public class Item : BaseEntity
     
     public virtual ItemCategory ItemCategory { get; set; }
     public virtual ICollection<ItemWithSize> ItemWithSizes { get; set; }
+    public virtual ICollection<ItemPriceAtBranch> ItemPricesAtBranches { get; set; }
 }

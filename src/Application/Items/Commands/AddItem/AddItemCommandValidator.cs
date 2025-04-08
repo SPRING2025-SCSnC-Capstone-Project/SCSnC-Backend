@@ -17,5 +17,9 @@ public class AddItemCommandValidator : AbstractValidator<AddItemCommand>
         RuleFor(x => x.CategoryId)
             .NotEmpty().WithMessage("Category is required")
             .WithMessage("Category is not valid");
+        
+        RuleFor(x => x.Img)
+            .NotEmpty().WithMessage("Image URL is required")
+            .WithMessage("Image URL is not valid");
     }
 }

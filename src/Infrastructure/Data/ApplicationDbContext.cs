@@ -13,11 +13,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     
     public DbSet<Blog> Blogs => Set<Blog>();
     public DbSet<BlogMedia> BlogMedias => Set<BlogMedia>();
+    public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<IncludeTopping> IncludeToppings => Set<IncludeTopping>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemCategory> ItemCategories => Set<ItemCategory>();
+    public DbSet<ItemPriceAtBranch> ItemPricesAtBranches => Set<ItemPriceAtBranch>();
     public DbSet<ItemWithSize> ItemWithSizes => Set<ItemWithSize>();
     public DbSet<JoinEvent> JoinEvents => Set<JoinEvent>();
     public DbSet<Order> Orders => Set<Order>();
