@@ -7,7 +7,7 @@ namespace Application.Common.Helpers;
 
 public static class PaymentHelper
 {
-    public static void UpdateStatus(string entityId, string switcher, IApplicationDbContext _context, CancellationToken cancellationToken)
+    public static async Task UpdateStatus(string entityId, string switcher, IApplicationDbContext _context, CancellationToken cancellationToken)
     {
         switch (switcher)
         {
@@ -21,13 +21,13 @@ public static class PaymentHelper
                 order.PaymentStatus = true;
                 order.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
                 _context.Orders.Update(order);
-                _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 
                 var orderTransaction = _context.Transactions.FirstOrDefault(x => x.OrderId == Guid.Parse(entityId));
                 orderTransaction.TransactionStatus = "Success";
                 orderTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
                 _context.Transactions.Update(orderTransaction);
-                _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 
                 break;
             case "Reservation":
@@ -39,18 +39,15 @@ public static class PaymentHelper
                 
                 reservation.IsFullPaid = true;
                 _context.Reservations.Update(reservation);
-                _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 
                 var reservationTransaction = _context.Transactions.FirstOrDefault(x => x.ReservationId == Guid.Parse(entityId));
                 reservationTransaction.TransactionStatus = "Success";
                 reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
                 _context.Transactions.Update(reservationTransaction);
-                _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 break;
         }
-        
-        
-        
     }
 
     public static async Task<TransactionCreateStatus> CreateTransaction(
