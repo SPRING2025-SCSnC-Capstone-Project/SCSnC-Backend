@@ -28,14 +28,20 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
     {
         PaymentResponse paymentResponse = new PaymentResponse();
 
-        paymentResponse.OrderId = request.vnpayResponse.vnp_TxnRef;
+        paymentResponse.EntityId = request.vnpayResponse.vnp_TxnRef;
         paymentResponse.Amount = request.vnpayResponse.vnp_Amount;
 
         bool isValid = await _paymentService.IsValidSignature(request.vnpayResponse);
         if (isValid)
         {
-            if (await _context.Orders.FirstOrDefaultAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef)) !=
-                null)
+            string tag = "";
+
+            if (_context.Orders.Any(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef))) tag = "Order";
+            else if (_context.Reservations.Any(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef))) tag = "Reservation";
+
+            paymentResponse.EntityType = tag;
+            
+            if (string.IsNullOrEmpty(tag) == false)
             {
                 if (request.vnpayResponse.vnp_ResponseCode == "00")
                 {
@@ -50,7 +56,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                 {
                     case "00":
                         paymentResponse.PaymentMessage = "Successful transaction.";
-                        PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, _context, cancellationToken);
+                        PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken);
                         break;
                     case "07":
                         paymentResponse.PaymentMessage =

@@ -7,25 +7,50 @@ namespace Application.Common.Helpers;
 
 public static class PaymentHelper
 {
-    public static void UpdateStatus(string orderId, IApplicationDbContext _context, CancellationToken cancellationToken)
+    public static void UpdateStatus(string entityId, string switcher, IApplicationDbContext _context, CancellationToken cancellationToken)
     {
-        var order = _context.Orders.FirstOrDefault(x => x.Id == Guid.Parse(orderId));
-        if (order == null)
+        switch (switcher)
         {
-            throw new KeyNotFoundException($"Order with order id {orderId} not found");
+            case "Order":
+                var order = _context.Orders.FirstOrDefault(x => x.Id == Guid.Parse(entityId));
+                if (order == null)
+                {
+                    throw new KeyNotFoundException($"Order with order id {entityId} not found");
+                }
+        
+                order.PaymentStatus = true;
+                order.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
+                _context.Orders.Update(order);
+                _context.SaveChangesAsync(cancellationToken);
+                
+                var orderTransaction = _context.Transactions.FirstOrDefault(x => x.OrderId == Guid.Parse(entityId));
+                orderTransaction.TransactionStatus = "Success";
+                orderTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
+                _context.Transactions.Update(orderTransaction);
+                _context.SaveChangesAsync(cancellationToken);
+                
+                break;
+            case "Reservation":
+                var reservation = _context.Reservations.FirstOrDefault(x => x.Id == Guid.Parse(entityId));
+                if (reservation == null)
+                {
+                    throw new KeyNotFoundException($"Reservation with reservation id {entityId} not found");
+                }
+                
+                reservation.IsFullPaid = true;
+                _context.Reservations.Update(reservation);
+                _context.SaveChangesAsync(cancellationToken);
+                
+                var reservationTransaction = _context.Transactions.FirstOrDefault(x => x.ReservationId == Guid.Parse(entityId));
+                reservationTransaction.TransactionStatus = "Success";
+                reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
+                _context.Transactions.Update(reservationTransaction);
+                _context.SaveChangesAsync(cancellationToken);
+                break;
         }
         
-        order.PaymentStatus = true;
-        order.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
-        _context.Orders.Update(order);
-        _context.SaveChangesAsync(cancellationToken);
         
-        var transaction = _context.Transactions.FirstOrDefault(x => x.OrderId == Guid.Parse(orderId));
-        transaction.TransactionStatus = "Success";
-        transaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
         
-        _context.Transactions.Update(transaction);
-        _context.SaveChangesAsync(cancellationToken);
     }
 
     public static async Task<TransactionCreateStatus> CreateTransaction(
