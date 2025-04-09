@@ -12,7 +12,7 @@ public static class PaymentHelper
         switch (switcher)
         {
             case "Order":
-                var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == Guid.Parse(entityId));
+                var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == Guid.Parse(entityId), cancellationToken);
                 if (order == null)
                 {
                     throw new KeyNotFoundException($"Order with order id {entityId} not found");
@@ -21,9 +21,8 @@ public static class PaymentHelper
                 order.PaymentStatus = true;
                 order.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
                 _context.Orders.Update(order);
-                await _context.SaveChangesAsync(cancellationToken);
                 
-                var orderTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.OrderId == Guid.Parse(entityId));
+                var orderTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.OrderId == Guid.Parse(entityId), cancellationToken);
                 orderTransaction.TransactionStatus = "Success";
                 orderTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
                 _context.Transactions.Update(orderTransaction);
@@ -31,7 +30,7 @@ public static class PaymentHelper
                 
                 break;
             case "Reservation":
-                var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == Guid.Parse(entityId));
+                var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == Guid.Parse(entityId), cancellationToken);
                 if (reservation == null)
                 {
                     throw new KeyNotFoundException($"Reservation with reservation id {entityId} not found");
@@ -39,7 +38,6 @@ public static class PaymentHelper
                 
                 reservation.IsFullPaid = true;
                 _context.Reservations.Update(reservation);
-                await _context.SaveChangesAsync(cancellationToken);
                 
                 var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
                 reservationTransaction.TransactionStatus = "Success";
@@ -60,8 +58,8 @@ public static class PaymentHelper
         try
         {
             var result = new TransactionCreateStatus();
-            bool checkOrder = orderId.HasValue && _context.Orders.Any(x => x.Id == orderId);
-            bool checkReservation = reservationId.HasValue && _context.Reservations.Any(x => x.Id == reservationId);
+            bool checkOrder = orderId.HasValue && await _context.Orders.AnyAsync(x => x.Id == orderId, cancellationToken);
+            bool checkReservation = reservationId.HasValue && await _context.Reservations.AnyAsync(x => x.Id == reservationId, cancellationToken);
 
             switch (checkOrder, checkReservation)
             {

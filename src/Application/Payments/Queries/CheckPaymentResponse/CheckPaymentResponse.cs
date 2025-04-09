@@ -36,8 +36,8 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
         {
             string tag = "";
 
-            if (_context.Orders.Any(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef))) tag = "Order";
-            else if (_context.Reservations.Any(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef))) tag = "Reservation";
+            if (await _context.Orders.AnyAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef), cancellationToken)) tag = "Order";
+            else if (await _context.Reservations.AnyAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef), cancellationToken)) tag = "Reservation";
 
             paymentResponse.EntityType = tag;
             
@@ -56,7 +56,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                 {
                     case "00":
                         paymentResponse.PaymentMessage = "Successful transaction.";
-                        PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken);
+                        await PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken);
                         break;
                     case "07":
                         paymentResponse.PaymentMessage =
