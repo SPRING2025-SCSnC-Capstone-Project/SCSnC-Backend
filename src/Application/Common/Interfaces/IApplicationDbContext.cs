@@ -24,6 +24,7 @@ public interface IApplicationDbContext
     public DbSet<EventSlot> EventSlots { get; }
     public DbSet<Table> Tables { get; }
     public DbSet<Topping> Toppings { get; }
+    public DbSet<ToppingPriceAtBranch> ToppingPricesAtBranches { get; }
     public DbSet<Transaction> Transactions { get; }
     public DbSet<User> Users { get; }
     public DbSet<UserVoucher> UserVouchers { get; }

@@ -31,6 +31,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<EventSlot> EventSlots => Set<EventSlot>();
     public DbSet<Table> Tables => Set<Table>();
     public DbSet<Topping> Toppings => Set<Topping>();
+    public DbSet<ToppingPriceAtBranch> ToppingPricesAtBranches { get; set; }
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserVoucher> UserVouchers => Set<UserVoucher>();

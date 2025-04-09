@@ -5,6 +5,7 @@ public class Branch: BaseEntity
     public Branch()
     {
         ItemPricesAtBranches = new HashSet<ItemPriceAtBranch>();
+        ToppingPricesAtBranches = new HashSet<ToppingPriceAtBranch>();
         Orders = new HashSet<Order>();
     }
     
@@ -19,5 +20,6 @@ public class Branch: BaseEntity
     public LocalDateTime LastUpdatedAt { get; set; }
     
     public virtual ICollection<ItemPriceAtBranch> ItemPricesAtBranches { get; set; }
+    public virtual ICollection<ToppingPriceAtBranch> ToppingPricesAtBranches { get; set; }
     public virtual ICollection<Order> Orders { get; set; }
 }

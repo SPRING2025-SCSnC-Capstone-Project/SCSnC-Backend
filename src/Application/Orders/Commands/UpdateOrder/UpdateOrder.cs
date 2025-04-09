@@ -81,7 +81,7 @@ public class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderCommand, Ord
                 {
                     throw new KeyNotFoundException($"IncludeTopping with id {topping} not found");
                 }
-                orderDetailPrice += topping.Price;
+                orderDetailPrice += _context.ToppingPricesAtBranches.FirstOrDefaultAsync(x => x.BranchId == order.BranchId && x.ToppingId == topping.Id).Result.ToppingPrice;
                 //totalPrice += topping.Price;
 
                 var newincludeTopping = new IncludeTopping
