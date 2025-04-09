@@ -8,9 +8,12 @@ public class Transaction : BaseEntity
     public string TransactionStatus { get; set; }
     public LocalDateTime TransactionDate { get; set; }
     [ForeignKey("OrderId")]
-    public Guid OrderId { get; set; }
+    public Guid? OrderId { get; set; }
+    [ForeignKey("ReservationId")]
+    public Guid? ReservationId { get; set; }
     public double Amount { get; set; }
     public string PaymentMethod { get; set; }
     
     public virtual Order Order { get; set; }
+    public virtual Reservation Reservation { get; set; }
 }

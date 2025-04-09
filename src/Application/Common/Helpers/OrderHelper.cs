@@ -6,6 +6,7 @@ public static class OrderHelper
 {
     public static async Task<double> CalculateTotalPrice(Guid orderId, CancellationToken cancellationToken, IApplicationDbContext _context)
     {
+        var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderId, cancellationToken);
         var orderDetails = await _context.OrderDetails.Where(x => x.OrderId == orderId).ToListAsync(cancellationToken);
         double totalPrice = 0;
         
@@ -21,9 +22,12 @@ public static class OrderHelper
             foreach (var includeTopping in includeToppings)
             {
                 var topping = await _context.Toppings.FirstOrDefaultAsync(x => x.Id == includeTopping.ToppingId, cancellationToken);
-                toppingPrice += topping.Price;
+                toppingPrice += _context.ToppingPricesAtBranches.FirstOrDefaultAsync(x => x.BranchId == order.BranchId && x.ToppingId == topping.Id).Result.ToppingPrice;
             }
-            totalPrice += (item.ItemBasePrice + size.PriceAdjustment + toppingPrice) * orderDetail.Quantity;
+            //totalPrice += (item.ItemBasePrice + size.PriceAdjustment + toppingPrice) * orderDetail.Quantity;
+            totalPrice += (_context.ItemPricesAtBranches.FirstOrDefaultAsync(x => x.BranchId == order.BranchId && x.ItemId == item.Id).Result.Price 
+                           + size.PriceAdjustment 
+                           + toppingPrice) * orderDetail.Quantity;
         }
 
         return totalPrice;

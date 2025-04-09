@@ -20,6 +20,8 @@ public class Order : BaseEntity
     public Guid UserId { get; set; }
     [ForeignKey("VoucherId")]
     public Guid? VoucherId { get; set; }
+    [ForeignKey("BranchId")]
+    public Guid BranchId { get; set; }
     public bool PaymentStatus { get; set; }
     public bool IsActive { get; set; }
     public LocalDateTime CreatedAt { get; set; }
@@ -29,6 +31,7 @@ public class Order : BaseEntity
     public virtual Workspace Workspace { get; set; }
     public virtual User User { get; set; }
     public virtual Voucher? Voucher { get; set; }
+    public virtual Branch Branch { get; set; }
     public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     public virtual Feedback Feedback { get; set; }
     public virtual ICollection<Transaction> Transactions { get; set; }

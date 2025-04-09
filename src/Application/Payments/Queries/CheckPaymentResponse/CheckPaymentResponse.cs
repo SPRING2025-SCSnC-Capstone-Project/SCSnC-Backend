@@ -28,14 +28,20 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
     {
         PaymentResponse paymentResponse = new PaymentResponse();
 
-        paymentResponse.OrderId = request.vnpayResponse.vnp_TxnRef;
+        paymentResponse.EntityId = request.vnpayResponse.vnp_TxnRef;
         paymentResponse.Amount = request.vnpayResponse.vnp_Amount;
 
         bool isValid = await _paymentService.IsValidSignature(request.vnpayResponse);
         if (isValid)
         {
-            if (await _context.Orders.FirstOrDefaultAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef)) !=
-                null)
+            string tag = "";
+
+            if (await _context.Orders.AnyAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef), cancellationToken)) tag = "Order";
+            else if (await _context.Reservations.AnyAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef), cancellationToken)) tag = "Reservation";
+
+            paymentResponse.EntityType = tag;
+            
+            if (string.IsNullOrEmpty(tag) == false)
             {
                 if (request.vnpayResponse.vnp_ResponseCode == "00")
                 {
@@ -50,7 +56,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                 {
                     case "00":
                         paymentResponse.PaymentMessage = "Successful transaction.";
-                        PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, _context, cancellationToken);
+                        await PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken);
                         break;
                     case "07":
                         paymentResponse.PaymentMessage =

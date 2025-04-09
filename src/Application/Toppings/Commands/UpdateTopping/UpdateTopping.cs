@@ -9,7 +9,6 @@ public record UpdateToppingCommand : IRequest<ToppingDto>
     public Guid Id { get; init; }
     public string Name { get; init; }
     public string Description { get; init; }
-    public double Price { get; init; }
     public bool IsActive { get; init; }
 }
 
@@ -35,7 +34,6 @@ public class UpdateToppingCommandHandler : IRequestHandler<UpdateToppingCommand,
         
         topping.ToppingName = request.Name;
         topping.ToppingDescription = request.Description;
-        topping.Price = request.Price;
         topping.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
         topping.IsActive = request.IsActive;
         

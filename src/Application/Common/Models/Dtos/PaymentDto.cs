@@ -2,7 +2,8 @@ namespace Application.Common.Models.Dtos;
 
 public class PaymentResponse
 {
-    public string OrderId { get; set; }
+    public string EntityId { get; set; }
+    public string EntityType { get; set; }
     public string? PaymentStatus { get; set; }
     public string? PaymentMessage { get; set; }
     public decimal? Amount { get; set; }

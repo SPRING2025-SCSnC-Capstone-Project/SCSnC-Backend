@@ -12,18 +12,19 @@ namespace Api.Controllers;
 
 public class ReservationsController : ApiControllerBase {
     [HttpPost]
-    public async Task<ActionResult<Result<ReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request) {
+    public async Task<ActionResult<Result<ResponseReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request) {
         var command = new CreateReservationCommand() {
             ReservationDate = request.ReservationDate,
             TotalPrice = request.TotalPrice,
             Deposit = request.Deposit,
             WorkspaceId = request.WorkspaceId,
             UserId = request.UserId,
-            SlotIds = request.SlotIds
+            SlotIds = request.SlotIds,
+            PaymentMethod = request.PaymentMethod
         };
 
         var result = await Mediator.Send(command);
-        return Ok(Result<ReservationDto>.Succeed(result));
+        return Ok(Result<ResponseReservationDto>.Succeed(result));
     }
 
     [HttpGet("{reservationid:guid}")]

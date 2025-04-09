@@ -9,6 +9,7 @@ using ValidationException = System.ComponentModel.DataAnnotations.ValidationExce
 namespace Application.Orders.Commands.CreateOrder;
 
 #region Code flow: create order and return link, calculate total price, including order details and discount and store data on BE, FE doesn't need to calculate
+
 //
 // public record CreateOrderCommand : IRequest<OrderDto>
 // {
@@ -194,7 +195,6 @@ namespace Application.Orders.Commands.CreateOrder;
 
 #endregion
 
-
 #region Code flow: create order and return payment link on BE, calculate total price, including order details and discount on FE and send to BE for storing data
 
 public record CreateOrderCommand : IRequest<OrderDto>
@@ -203,176 +203,169 @@ public record CreateOrderCommand : IRequest<OrderDto>
     public Guid? WorkspaceId { get; init; }
     public Guid UserId { get; init; }
     public Guid? VoucherId { get; init; }
+    public Guid BranchId { get; init; }
     public double TotalPrice { get; init; }
     public List<CreateOrderDetailDto> OrderDetails { get; init; }
-    public string PaymentMethod { get; init;  }
+    public string PaymentMethod { get; init; }
 }
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, OrderDto>
 {
     private readonly IApplicationDbContext _context;
-     private readonly IMapper _mapper;
-     private readonly IPaymentService _vnpayService;
+    private readonly IMapper _mapper;
+    private readonly IPaymentService _vnpayService;
 
-     public CreateOrderCommandHandler(IApplicationDbContext context, IMapper mapper, IPaymentService vnPayService)
-     {
-         _context = context;
-         _mapper = mapper;
-         _vnpayService = vnPayService;
-     }
-     
-     public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
-     {
-         #region Manual Validation (temporary)
-         // Will need another way to validate order either have tableId or workspaceId
-         
-         // if both are null, throw exception
-         if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
-         {
-             throw new ValidationException("TableId or WorkspaceId must be provided");
-         }
-         
-         // if both are not null, throw exception
-         if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
-         {
-             throw new ValidationException("TableId or WorkspaceId must be provided");
-         }
-         
-         //validate voucher used or expired
-         if (request.VoucherId != null)
-         {
-             var uservoucher = await _context.UserVouchers
-                 .Include(x => x.Voucher)
-                 .FirstOrDefaultAsync(x => x.UserId == request.UserId && x.VoucherId == request.VoucherId,
-                     cancellationToken);
+    public CreateOrderCommandHandler(IApplicationDbContext context, IMapper mapper, IPaymentService vnPayService)
+    {
+        _context = context;
+        _mapper = mapper;
+        _vnpayService = vnPayService;
+    }
 
-             if (uservoucher.RedeemStatus == true ||
-                 uservoucher.Voucher.ExpiredDate <= LocalDateTime.FromDateTime(DateTime.Now))
-             {
-                 throw new ValidationException("Voucher is used or expired");
-             }
-         }
-         
-         
-         #endregion
-         
-         var order = new Order
-         {
-             TableId = request.TableId,
-             WorkspaceId = request.WorkspaceId,
-             UserId = request.UserId,
-             VoucherId = request.VoucherId,
-             TotalPrice = request.TotalPrice,
-             
-             IsActive = true,
-             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-             PaymentStatus = false
-         };
-         
-         await _context.Orders.AddAsync(order, cancellationToken);
-         await _context.SaveChangesAsync(cancellationToken);
-         
-         foreach (var orderDetail in request.OrderDetails)
-         {
-             var newOrderDetail = new OrderDetail
-             {
-                 ItemWithSizeId = _context.ItemWithSizes.FirstOrDefaultAsync(x =>
-                     x.ItemId == orderDetail.ItemId && x.SizeId == orderDetail.SizeId, cancellationToken).Result.Id,
-                 OrderId = order.Id,
-                 Quantity = orderDetail.Quantity,
-                 TotalPrice = orderDetail.OrderDetailPrice
-             };
-             
-             await _context.OrderDetails.AddAsync(newOrderDetail, cancellationToken);
-             await _context.SaveChangesAsync(cancellationToken);
-             
-             foreach (var includeTopping in orderDetail.ToppingIds)
-             {
-                 var newincludeTopping = new IncludeTopping
-                 {
-                     OrderDetailId = newOrderDetail.Id,
-                     ToppingId = includeTopping
-                 };
-                 
-                 await _context.IncludeToppings.AddAsync(newincludeTopping, cancellationToken);
-                 await _context.SaveChangesAsync(cancellationToken);
-             }
-         }
-         
-         var get = await _context.Orders
-             .Include(o => o.Table)
-             .Include(o => o.User)
-             .Include(o => o.Voucher)
-             // .Include(o => o.OrderDetails)
-             // .ThenInclude(od => od.ItemWithSizes)
-             .FirstOrDefaultAsync(o => o.Id == order.Id, cancellationToken);
+    public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    {
+        #region Manual Validation (temporary)
 
-         var result = _mapper.Map<OrderDto>(get);
-         
-         result.OrderDetails = _context.OrderDetails
-             .Include(od => od.ItemWithSize)
-             .Include(od => od.ItemWithSize.Item)
-             .Include(od => od.ItemWithSize.Size)
-             .Include(od => od.IncludeToppings)
-             .ThenInclude(t => t.Topping)
-             .Where(od => od.OrderId == order.Id)
-             .Select(od => _mapper.Map<OrderDetailDto>(od))
-             .ToList();
-         
-         //create payment here
+        // Will need another way to validate order either have tableId or workspaceId
 
-         switch (request.PaymentMethod)
-         {
-             case "VNPay":
-                 
-                 VNPayRequest vnPayRequest = new VNPayRequest()
-                 {
-                     vnp_CreateDate = DateTime.Now.ToString("yyyyMMddHHmmss"),
-                     vnp_IpAddr = IPAddressHelper.GetLocalIPAddress(),
-                     vnp_Amount = (decimal) get.TotalPrice * 100,
-                     vnp_OrderType = "other",
-                     vnp_OrderInfo = $"Date: {DateTime.Now.ToString("yyyyMMddHHmmss")}; Total Price: {get.TotalPrice}",
-                     vnp_TxnRef = order.Id.ToString(),
-                     vnp_Command = "pay",
-                     vnp_ExpireDate = DateTime.Now.AddMinutes(5).ToString("yyyyMMddHHmmss"),
-                 };
-         
-                 var paymentUrl = await _vnpayService.GetPaymentLink(vnPayRequest);
-                 result.PaymentLink = paymentUrl;
-                 
-                 var transactionVNPay = new Transaction
-                 {
-                     OrderId = order.Id,
-                     TransactionStatus = "Pending",
-                     TransactionDate = LocalDateTime.FromDateTime(DateTime.Now),
-                     Amount = result.TotalPrice,
-                     PaymentMethod = request.PaymentMethod
-                 };
-                 await _context.Transactions.AddAsync(transactionVNPay, cancellationToken);
-                 await _context.SaveChangesAsync(cancellationToken);
-                 
-                 break;
-             
-             case "Cash":
-                 result.PaymentLink = "Please pay at the cashier";
-                 
-                 var transactionCash = new Transaction
-                 {
-                     OrderId = order.Id,
-                     TransactionStatus = "Success",
-                     TransactionDate = LocalDateTime.FromDateTime(DateTime.Now),
-                     Amount = result.TotalPrice,
-                     PaymentMethod = request.PaymentMethod
-                 };
-                 await _context.Transactions.AddAsync(transactionCash, cancellationToken);
-                 await _context.SaveChangesAsync(cancellationToken);
-                 
-                 break;
-         }
-         
-         return result;
-     }
+        // if both are null, throw exception
+        if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
+        {
+            throw new ValidationException("TableId or WorkspaceId must be provided");
+        }
+
+        // if both are not null, throw exception
+        if ((request.TableId.HasValue == false) && (request.WorkspaceId.HasValue == false))
+        {
+            throw new ValidationException("TableId or WorkspaceId must be provided");
+        }
+
+        //validate voucher used or expired
+        if (request.VoucherId != null)
+        {
+            var uservoucher = await _context.UserVouchers
+                .Include(x => x.Voucher)
+                .FirstOrDefaultAsync(x => x.UserId == request.UserId && x.VoucherId == request.VoucherId,
+                    cancellationToken);
+
+            if (uservoucher.RedeemStatus == true ||
+                uservoucher.Voucher.ExpiredDate <= LocalDateTime.FromDateTime(DateTime.Now))
+            {
+                throw new ValidationException("Voucher is used or expired");
+            }
+        }
+
+        #endregion
+
+        var order = new Order
+        {
+            TableId = request.TableId,
+            WorkspaceId = request.WorkspaceId,
+            UserId = request.UserId,
+            VoucherId = request.VoucherId,
+            TotalPrice = request.TotalPrice,
+            BranchId = request.BranchId,
+
+            IsActive = true,
+            CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+            LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+            PaymentStatus = false
+        };
+
+        await _context.Orders.AddAsync(order, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        foreach (var orderDetail in request.OrderDetails)
+        {
+            var newOrderDetail = new OrderDetail
+            {
+                ItemWithSizeId = _context.ItemWithSizes.FirstOrDefaultAsync(x =>
+                    x.ItemId == orderDetail.ItemId && x.SizeId == orderDetail.SizeId, cancellationToken).Result.Id,
+                OrderId = order.Id,
+                Quantity = orderDetail.Quantity,
+                TotalPrice = orderDetail.OrderDetailPrice
+            };
+
+            await _context.OrderDetails.AddAsync(newOrderDetail, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            foreach (var includeTopping in orderDetail.ToppingIds)
+            {
+                var newincludeTopping = new IncludeTopping
+                {
+                    OrderDetailId = newOrderDetail.Id,
+                    ToppingId = includeTopping
+                };
+
+                await _context.IncludeToppings.AddAsync(newincludeTopping, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        var get = await _context.Orders
+            .Include(o => o.Table)
+            .Include(o => o.User)
+            .Include(o => o.Voucher)
+            // .Include(o => o.OrderDetails)
+            // .ThenInclude(od => od.ItemWithSizes)
+            .FirstOrDefaultAsync(o => o.Id == order.Id, cancellationToken);
+
+        var result = _mapper.Map<OrderDto>(get);
+
+        result.OrderDetails = _context.OrderDetails
+            .Include(od => od.ItemWithSize)
+            .Include(od => od.ItemWithSize.Item)
+            .Include(od => od.ItemWithSize.Size)
+            .Include(od => od.IncludeToppings)
+            .ThenInclude(t => t.Topping)
+            .Where(od => od.OrderId == order.Id)
+            .Select(od => _mapper.Map<OrderDetailDto>(od))
+            .ToList();
+
+        //create payment here
+
+        switch (request.PaymentMethod)
+        {
+            case "VNPay":
+
+                VNPayRequest vnPayRequest = new VNPayRequest()
+                {
+                    vnp_CreateDate = DateTime.Now.ToString("yyyyMMddHHmmss"),
+                    vnp_IpAddr = IPAddressHelper.GetLocalIPAddress(),
+                    vnp_Amount = (decimal)get.TotalPrice * 100,
+                    vnp_OrderType = "other",
+                    vnp_OrderInfo = $"Date: {DateTime.Now.ToString("yyyyMMddHHmmss")}; Total Price: {get.TotalPrice}",
+                    vnp_TxnRef = order.Id.ToString(),
+                    vnp_Command = "pay",
+                    vnp_ExpireDate = DateTime.Now.AddMinutes(5).ToString("yyyyMMddHHmmss"),
+                };
+
+                var paymentUrl = await _vnpayService.GetPaymentLink(vnPayRequest);
+                result.PaymentLink = paymentUrl;
+
+                var statusVNPay = await PaymentHelper.CreateTransaction(order.Id, null, result.TotalPrice,
+                    request.PaymentMethod, _context, cancellationToken);
+
+                if (statusVNPay.IsSuccess == true)
+                {
+                    break;
+                }
+                throw new Exception(statusVNPay.Message);
+            
+            case "Cash":
+                result.PaymentLink = "Please pay at the cashier";
+
+                var statusCash = await PaymentHelper.CreateTransaction(order.Id, null, result.TotalPrice,
+                    request.PaymentMethod, _context, cancellationToken);
+
+                if (statusCash.IsSuccess == true)
+                {
+                    break;
+                }
+                throw new Exception(statusCash.Message);
+        }
+        return result;
+    }
 }
 
 #endregion

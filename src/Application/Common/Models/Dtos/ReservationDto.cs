@@ -17,3 +17,19 @@ public class ReservationDto : BaseDto, IMapFrom<Reservation> {
             .ForMember(dest => dest.ReserveDate, opt => opt.MapFrom(src => src.ReserveDate.ToDateOnly()));
     }
 }
+
+public class ResponseReservationDto : BaseDto, IMapFrom<Reservation> {
+    public DateOnly ReserveDate { get; set; }
+    public WorkspaceDto Workspace { get; set; } = null!;
+    public double Deposit { get; set; }
+    public UserDto User { get; set; } = null!;
+    public bool IsFullPaid { get; set; }
+    public double TotalPrice { get; set; }
+    public string PaymentLink { get; set; }
+    public HashSet<ReservedSlotDto> ReservedSlots { get; set; } = null!;
+
+    public void Mapping(Profile profile) {
+        profile.CreateMap<Reservation, ResponseReservationDto>()
+            .ForMember(dest => dest.ReserveDate, opt => opt.MapFrom(src => src.ReserveDate.ToDateOnly()));
+    }
+}
