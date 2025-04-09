@@ -12,7 +12,7 @@ public static class PaymentHelper
         switch (switcher)
         {
             case "Order":
-                var order = _context.Orders.FirstOrDefault(x => x.Id == Guid.Parse(entityId));
+                var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == Guid.Parse(entityId));
                 if (order == null)
                 {
                     throw new KeyNotFoundException($"Order with order id {entityId} not found");
@@ -23,7 +23,7 @@ public static class PaymentHelper
                 _context.Orders.Update(order);
                 await _context.SaveChangesAsync(cancellationToken);
                 
-                var orderTransaction = _context.Transactions.FirstOrDefault(x => x.OrderId == Guid.Parse(entityId));
+                var orderTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.OrderId == Guid.Parse(entityId));
                 orderTransaction.TransactionStatus = "Success";
                 orderTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
                 _context.Transactions.Update(orderTransaction);
@@ -31,7 +31,7 @@ public static class PaymentHelper
                 
                 break;
             case "Reservation":
-                var reservation = _context.Reservations.FirstOrDefault(x => x.Id == Guid.Parse(entityId));
+                var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == Guid.Parse(entityId));
                 if (reservation == null)
                 {
                     throw new KeyNotFoundException($"Reservation with reservation id {entityId} not found");
@@ -41,7 +41,7 @@ public static class PaymentHelper
                 _context.Reservations.Update(reservation);
                 await _context.SaveChangesAsync(cancellationToken);
                 
-                var reservationTransaction = _context.Transactions.FirstOrDefault(x => x.ReservationId == Guid.Parse(entityId));
+                var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
                 reservationTransaction.TransactionStatus = "Success";
                 reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
                 _context.Transactions.Update(reservationTransaction);
