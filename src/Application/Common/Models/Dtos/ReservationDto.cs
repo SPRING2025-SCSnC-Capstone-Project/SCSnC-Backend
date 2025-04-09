@@ -29,7 +29,7 @@ public class ResponseReservationDto : BaseDto, IMapFrom<Reservation> {
     public HashSet<ReservedSlotDto> ReservedSlots { get; set; } = null!;
 
     public void Mapping(Profile profile) {
-        profile.CreateMap<Reservation, ReservationDto>()
+        profile.CreateMap<Reservation, ResponseReservationDto>()
             .ForMember(dest => dest.ReserveDate, opt => opt.MapFrom(src => src.ReserveDate.ToDateOnly()));
     }
 }

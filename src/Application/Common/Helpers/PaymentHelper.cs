@@ -39,7 +39,7 @@ public static class PaymentHelper
         {
             var result = new TransactionCreateStatus();
             bool checkOrder = orderId.HasValue && _context.Orders.Any(x => x.Id == orderId);
-            bool checkReservation = reservationId.HasValue && _context.Transactions.Any(x => x.Id == reservationId);
+            bool checkReservation = reservationId.HasValue && _context.Reservations.Any(x => x.Id == reservationId);
 
             switch (checkOrder, checkReservation)
             {
