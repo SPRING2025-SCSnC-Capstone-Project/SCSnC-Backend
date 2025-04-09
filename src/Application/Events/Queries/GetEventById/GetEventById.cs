@@ -22,6 +22,11 @@ public class GetEventByIdQueryHandler: IRequestHandler<GetEventByIdQuery, EventD
     public async Task<EventDto> Handle(GetEventByIdQuery request, CancellationToken cancellationToken)
     {
         var entity = _context.Events
+            .Include(x => x.Reservation)
+            .ThenInclude(y => y.Workspace)
+            .ThenInclude(z => z.WorkspaceType)
+            .Include(x => x.Reservation)
+            .ThenInclude(y => y.User)
             .FirstOrDefaultAsync(x => x.IsActive == true && x.Id == request.Id, cancellationToken);
         
         if (entity is null)
