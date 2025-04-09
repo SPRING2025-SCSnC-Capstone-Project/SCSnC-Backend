@@ -1,4 +1,5 @@
 using Application.Common.Exceptions;
+using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
@@ -7,26 +8,29 @@ using NodaTime;
 
 namespace Application.Reservations.Commands;
 
-public record CreateReservationCommand : IRequest<ReservationDto> {
+public record CreateReservationCommand : IRequest<ResponseReservationDto> {
     public DateOnly ReservationDate { get; init; }
     public Guid WorkspaceId { get; init; }
     public double Deposit { get; init; }
     public Guid UserId { get; init; }
     public double TotalPrice { get; init; }
     public Guid[] SlotIds { get; init; } = null!;
+    public string PaymentMethod { get; init; }
 }
 
-public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ReservationDto> {
+public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ResponseReservationDto> {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IPaymentService _vnpayService;
 
-    public CreateReservationCommandHandler(IMapper mapper, IApplicationDbContext context)
+    public CreateReservationCommandHandler(IMapper mapper, IApplicationDbContext context, IPaymentService vnpayService)
     {
         _mapper = mapper;
         _context = context;
+        _vnpayService = vnpayService;
     }
 
-    public async Task<ReservationDto> Handle(CreateReservationCommand request, CancellationToken cancellationToken) {
+    public async Task<ResponseReservationDto> Handle(CreateReservationCommand request, CancellationToken cancellationToken) {
         var workspace = await _context.Workspaces.FirstOrDefaultAsync(x => x.Id == request.WorkspaceId && x.IsActive, cancellationToken);
         
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.UserId && x.IsActive, cancellationToken);
@@ -85,7 +89,48 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             .ThenInclude(y => y.Slot)
             .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken);
 
-        return _mapper.Map<ReservationDto>(createdReservation);
+        var returnReservationData = _mapper.Map<ResponseReservationDto>(createdReservation);
+
+        switch (request.PaymentMethod)
+        {
+            case "VNPay":
+                VNPayRequest vnPayRequest = new VNPayRequest()
+                {
+                    vnp_CreateDate = DateTime.Now.ToString("yyyyMMddHHmmss"),
+                    vnp_IpAddr = IPAddressHelper.GetLocalIPAddress(),
+                    vnp_Amount = (decimal)createdReservation.Deposit * 100,
+                    vnp_OrderType = "other",
+                    vnp_OrderInfo = $"Date: {DateTime.Now.ToString("yyyyMMddHHmmss")}; Total Price: {createdReservation.Deposit}",
+                    vnp_TxnRef = createdReservation.Id.ToString(),
+                    vnp_Command = "pay",
+                    vnp_ExpireDate = DateTime.Now.AddMinutes(5).ToString("yyyyMMddHHmmss"),
+                };
+                var paymentUrl = await _vnpayService.GetPaymentLink(vnPayRequest);
+                returnReservationData.PaymentLink = paymentUrl;
+                
+                var statusVNPay = await PaymentHelper.CreateTransaction(null, returnReservationData.Id, createdReservation.Deposit,
+                    request.PaymentMethod, _context, cancellationToken);
+
+                if (statusVNPay.IsSuccess)
+                {
+                    break;
+                }
+                throw new Exception(statusVNPay.Message);
+            
+            case "Cash":
+                returnReservationData.PaymentLink = "Please pay at the cashier in the next 15 minutes. If no confirmation is received, the reservation will be canceled.";
+                
+                var statusCash = await PaymentHelper.CreateTransaction(null, returnReservationData.Id, createdReservation.Deposit,
+                    request.PaymentMethod, _context, cancellationToken);
+
+                if (statusCash.IsSuccess)
+                {
+                    break;
+                }
+                throw new Exception(statusCash.Message);
+        }
+        
+        return returnReservationData;
     }
 
     private async Task<bool> CheckConflict(DateOnly reservationDate, Guid slotId, CancellationToken cancellationToken) {

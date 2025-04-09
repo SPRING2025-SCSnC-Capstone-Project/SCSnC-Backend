@@ -6,7 +6,10 @@ namespace Domain.Entities;
 public class Reservation : BaseEntity
 {
     public Reservation() {
+        
         ReservedSlots = new HashSet<ReservedSlot>();
+        Transactions = new HashSet<Transaction>();
+        
     }
 
     public LocalDate ReserveDate { get; set; }
@@ -24,4 +27,5 @@ public class Reservation : BaseEntity
     public virtual Workspace Workspace { get; set; }
     public virtual User User { get; set; }
     public virtual ICollection<ReservedSlot> ReservedSlots { get; set; } 
+    public virtual ICollection<Transaction> Transactions { get; set; }
 }

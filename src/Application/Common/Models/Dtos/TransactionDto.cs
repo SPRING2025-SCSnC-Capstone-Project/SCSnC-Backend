@@ -32,3 +32,9 @@ public class DetailTransactionDto: BaseDto, IMapFrom<Transaction>
             .ForMember(d => d.Order, opt => opt.MapFrom(s => s.Order));
     }
 }
+
+public class TransactionCreateStatus
+{
+    public string? Message { get; set; }
+    public bool IsSuccess { get; set; }
+}

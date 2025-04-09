@@ -7,4 +7,5 @@ public class CreateReservationRequest {
     public Guid UserId { get; set; }
     public double TotalPrice { get; set; }
     public Guid[] SlotIds { get; set; }
+    public string PaymentMethod { get; set; }
 } 
