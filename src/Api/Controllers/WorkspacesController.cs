@@ -10,10 +10,19 @@ namespace Api.Controllers;
 public class WorkspacesController: ApiControllerBase {
     [HttpPost]
     public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request) {
+        var mediaTypes = new List<string>();
+        var mediaUrls = new List<string>();
+
+        for (var i = 0; i < request.WorkspaceMedias.Length; i++) {
+            mediaTypes.Add(request.WorkspaceMedias[i].MediaType);
+            mediaUrls.Add(request.WorkspaceMedias[i].MediaUrl);
+        }
+        
         var command = new AddWorkspaceCommand() {
             WorkspaceNumber = request.WorkspaceNumber,
-            WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
+            MediaTypes = mediaTypes,
+            MediaUrls = mediaUrls
         };
 
         var result = await Mediator.Send(command);
@@ -37,7 +46,6 @@ public class WorkspacesController: ApiControllerBase {
         var command = new UpdateWorkspaceCommand() {
             Id = id,
             WorkspaceNumber = request.WorkspaceNumber,
-            WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
         };
 

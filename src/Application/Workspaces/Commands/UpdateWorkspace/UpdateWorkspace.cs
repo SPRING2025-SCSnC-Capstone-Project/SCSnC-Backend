@@ -9,7 +9,6 @@ public record UpdateWorkspaceCommand: IRequest<WorkspaceDto> {
     public Guid Id { get; init; }
     public int WorkspaceNumber { get; init; }
     public Guid WorkspaceTypeId { get; init; }
-    public string? WorkspaceImageUrl { get; init; }
 }
 
 public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceCommand, WorkspaceDto> {
@@ -34,14 +33,13 @@ public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceComma
             throw new ConflictException($"Workspace with number {request.WorkspaceNumber} already exists");
         }
 
-        var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.Id == request.WorkspaceTypeId && x.IsActive);
+        var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.Id == request.WorkspaceTypeId && x.IsActive, cancellationToken);
 
         if (workspaceType is null) {
             throw new KeyNotFoundException($"Workspace type with Id {request.WorkspaceTypeId} does not exist");
         }
 
         workspace.WorkspaceNumber = request.WorkspaceNumber;
-        //workspace.WorkspaceImageUrl = request.WorkspaceImageUrl;
         workspace.WorkspaceType = workspaceType;
         workspace.WorkspaceTypeId = request.WorkspaceTypeId;
 
