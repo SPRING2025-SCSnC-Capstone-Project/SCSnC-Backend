@@ -1,6 +1,6 @@
-namespace Api.Controllers.Payload.Requests.Items;
+namespace Api.Controllers.Payload.Requests.Toppings;
 
-public class PaginatedItemsQueryParams
+public class PaginatedToppingQueryParameters
 {
     /// <summary>
     /// Page number
@@ -18,9 +18,5 @@ public class PaginatedItemsQueryParams
     /// Sort direction
     /// </summary>
     public string? SortOrder { get; set; }
-    /// <summary>
-    /// Sort by category
-    /// </summary>
-    public string? FilterByCategory { get; set; }
     public Guid BranchId { get; set; }
 }

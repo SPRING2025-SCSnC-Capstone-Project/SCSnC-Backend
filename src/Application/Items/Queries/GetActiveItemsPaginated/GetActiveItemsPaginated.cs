@@ -33,11 +33,15 @@ public class GetActiveItemsPaginatedQueryHandler : IRequestHandler<GetActiveItem
         var query = string.IsNullOrEmpty(request.FilterByCategory) ? 
             _context.Items
             .Include(x => x.ItemCategory)
-            .Include(x => x.ItemPricesAtBranches.FirstOrDefault(y => y.BranchId == request.BranchId && y.ItemId == x.Id))
+            .Include(x => x.ItemWithSizes)
+            .ThenInclude(x => x.Size)
+            .Include(x => x.ItemPricesAtBranches.Where(y => y.BranchId == request.BranchId))
             .AsQueryable() :
             _context.Items
             .Include(x => x.ItemCategory)
-            .Include(x => x.ItemPricesAtBranches.FirstOrDefault(y => y.BranchId == request.BranchId && y.ItemId == x.Id))
+            .Include(x => x.ItemWithSizes)
+            .ThenInclude(x => x.Size)
+            .Include(x => x.ItemPricesAtBranches.Where(y => y.BranchId == request.BranchId))
             .Where(x => x.ItemCategory.CategoryName.ToLower().Contains(request.FilterByCategory.ToLower()))
             .AsQueryable();
 

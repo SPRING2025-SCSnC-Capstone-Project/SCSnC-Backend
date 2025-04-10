@@ -16,6 +16,7 @@ public class ToppingDto: BaseDto, IMapFrom<Topping>
         profile.CreateMap<Topping, ToppingDto>()
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt.ToDateTimeUnspecified()))
             .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => src.LastUpdatedAt.ToDateTimeUnspecified()))
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.ToppingPricesAtBranches.FirstOrDefault(x => x.ToppingId == src.Id).ToppingPrice))
             .ReverseMap();
     }
 }
