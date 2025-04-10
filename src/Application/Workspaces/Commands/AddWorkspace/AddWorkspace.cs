@@ -6,10 +6,13 @@ using NodaTime;
 
 namespace Application.Workspaces.Commands;
 
+
+
 public record AddWorkspaceCommand: IRequest<WorkspaceDto> {
     public int WorkspaceNumber { get; init; }
     public Guid WorkspaceTypeId { get; init; }
-    public string? WorkspaceImageUrl { get; init; }
+    public List<string> MediaTypes { get; init; } = null!;
+    public List<string> MediaUrls { get; init; } = null!;
 }
 
 public class AddWorkspaceCommandHandler: IRequestHandler<AddWorkspaceCommand, WorkspaceDto> {
@@ -34,18 +37,42 @@ public class AddWorkspaceCommandHandler: IRequestHandler<AddWorkspaceCommand, Wo
             throw new KeyNotFoundException($"Workspace type with Id {request.WorkspaceTypeId} does not exists");
         }
 
+        foreach (var mediaType in request.MediaTypes) {
+            if (!mediaType.Trim().ToLower().Equals("3d model") 
+                    && !mediaType.Trim().ToLower().Equals("image")) {
+                throw new InvalidDataException($"Invalid media type: {mediaType}");
+            }
+        }
+
         var entity = new Workspace() {
             WorkspaceNumber = request.WorkspaceNumber,
             IsAvailable = true,
             IsActive = true,
-            //WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
         };
 
         var result = await _context.Workspaces.AddAsync(entity, cancellationToken);
+        
+        var workspaceMediasToAdd = new List<WorkspaceMedia>();
+
+        for (var i = 0; i < request.MediaTypes.Count; i++) {
+            var workspaceMedia = new WorkspaceMedia() {
+                WorkspaceId = result.Entity.Id,
+                MediaType = request.MediaTypes.ElementAt(i),
+                MediaUrl = request.MediaUrls.ElementAt(i),
+            };
+
+            workspaceMediasToAdd.Add(workspaceMedia);
+        } 
+
+        await _context.WorkspaceMedias.AddRangeAsync(workspaceMediasToAdd, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<WorkspaceDto>(result.Entity);
+        var addedWorkspace = await _context.Workspaces
+            .Include(x => x.WorkspaceMedias)
+            .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken);
+
+        return _mapper.Map<WorkspaceDto>(addedWorkspace);
     }
 }

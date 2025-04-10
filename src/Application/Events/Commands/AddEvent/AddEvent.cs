@@ -70,7 +70,6 @@ public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
             EventTitle = request.EventTitle,
             EventDescription = request.EventDescription,
             EventDate = reservation.ReserveDate,
-            CoverImageLink = "",
             EntranceFee = request.EntranceFee,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
@@ -78,6 +77,8 @@ public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
             IsActive = true,
             Status = "Accepted",
         };
+
+        entity.CoverImageLink = request.CoverImageLink ?? "";
 
         var result = await _context.Events.AddAsync(entity, cancellationToken);
         
