@@ -20,7 +20,7 @@ public class ItemsController : ApiControllerBase
     #region Basic CRUD Operations
     
     [HttpGet]
-    public async Task<ActionResult<Result<PaginatedList<ItemDto>>>> GetItems([FromQuery] PaginatedItemsQueryParams request)
+    public async Task<ActionResult<Result<PaginatedList<ItemDto>>>> GetItems([FromBody] PaginatedItemsQueryParams request)
     {
         var query = new GetActiveItemsPaginatedQuery()
         {
@@ -28,7 +28,8 @@ public class ItemsController : ApiControllerBase
             Size = request.Size,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
-            FilterByCategory = request.FilterByCategory
+            FilterByCategory = request.FilterByCategory,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(query);
