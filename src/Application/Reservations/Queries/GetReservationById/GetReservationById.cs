@@ -25,6 +25,8 @@ public class GetReservationByIdQueryHandler: IRequestHandler<GetReservationByIdQ
             .Include (x => x.Workspace)
             .ThenInclude (y => y.WorkspaceType)
             .Include(x => x.User)
+            //.Include(x => x.ReservedSlots)
+            //.ThenInclude(y => y.Slot)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         
         if (entity is null)

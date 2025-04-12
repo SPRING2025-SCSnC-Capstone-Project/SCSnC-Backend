@@ -7,21 +7,48 @@ using Application.Reservations.Queries.GetReservationsByUserPaginated;
 using Application.Reservations.Queries.GetReservationsPaginated;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Api.Controllers;
 
 public class ReservationsController : ApiControllerBase {
     [HttpPost]
     public async Task<ActionResult<Result<ReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request) {
-        var command = new CreateReservationCommand() {
+        Debug.WriteLine(request.ReservationDate);
+        var command = !request.includeEvent ? new CreateReservationCommand() {
             ReservationDate = request.ReservationDate,
-            StartTime = request.StartTime,
-            EndTime = request.EndTime,
             TotalPrice = request.TotalPrice,
             Deposit = request.Deposit,
+            WorkspaceTypeId = request.WorkspaceTypeId,
             WorkspaceId = request.WorkspaceId,
             UserId = request.UserId,
-        };
+            Note = request.Note,
+            Email = request.Email,
+            Phone = request.Phone,
+            //startDate = request.startDate,
+            //endDate = request.endDate
+            SlotIds = request.SlotIds
+        } :
+        new CreateReservationCommand()
+        {
+            ReservationDate = request.ReservationDate,
+            TotalPrice = request.TotalPrice,
+            Deposit = request.Deposit,
+            WorkspaceTypeId = request.WorkspaceTypeId,
+            WorkspaceId = request.WorkspaceId,
+            UserId = request.UserId,
+            Note = request.Note,
+            Email = request.Email,
+            Phone = request.Phone,
+            //startDate = request.startDate,
+            //endDate = request.endDate,
+            includeEvent = request.includeEvent,
+            EntranceFee = request.EntranceFee,
+            EventDescription = request.EventDescription,
+            EventTitle = request.EventTitle,
+            SlotIds = request.SlotIds
+        }
+        ;
 
         var result = await Mediator.Send(command);
         return Ok(Result<ReservationDto>.Succeed(result));

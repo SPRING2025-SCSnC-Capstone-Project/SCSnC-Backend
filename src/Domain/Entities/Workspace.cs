@@ -14,7 +14,6 @@ public class Workspace : BaseEntity
     public int WorkspaceNumber { get; set; }
     [ForeignKey("WorkspaceTypeId")]
     public Guid WorkspaceTypeId { get; set; }
-    public string Name { get; set; }
     public bool IsAvailable { get; set; }
     public bool IsActive { get; set; }
     public double PricePerHour { get; set; }

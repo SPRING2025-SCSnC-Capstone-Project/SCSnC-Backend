@@ -1,8 +1,9 @@
-using Application.Common.Exceptions;
+﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
 using NodaTime;
+using System.Diagnostics;
 
 namespace Application.Workspaces.Commands;
 
@@ -10,7 +11,6 @@ public record AddWorkspaceCommand: IRequest<WorkspaceDto> {
     public int WorkspaceNumber { get; init; }
     public Guid WorkspaceTypeId { get; init; }
     public string? WorkspaceImageUrl { get; init; }
-    public string Name { get; init; }
 }
 
 public class AddWorkspaceCommandHandler: IRequestHandler<AddWorkspaceCommand, WorkspaceDto> {
@@ -35,16 +35,43 @@ public class AddWorkspaceCommandHandler: IRequestHandler<AddWorkspaceCommand, Wo
             throw new KeyNotFoundException($"Workspace type with Id {request.WorkspaceTypeId} does not exists");
         }
 
-        var entity = new Workspace() {
-            WorkspaceNumber = request.WorkspaceNumber,
-            Name = request.Name,
-            IsAvailable = true,
-            IsActive = true,
-            //WorkspaceImageUrl = request.WorkspaceImageUrl,
-            WorkspaceTypeId = request.WorkspaceTypeId,
-        };
+        string[] workspaces = "phòng họp:l:200000,phòng cặp đôi:s:50000,phòng trà:m:100000,phòng đơn:xs:30000".Split(',');
+        List<WorkspaceType> workspaceTypes = _context.WorkspaceTypes.ToList();
+        dynamic result = "";
 
-        var result = await _context.Workspaces.AddAsync(entity, cancellationToken);
+        Debug.WriteLine(_context.Workspaces.ToList().Count);
+
+        if(_context.Workspaces.ToList().Count <= 0)
+        {
+            for (int i = 0; i < workspaces.Length; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    var entity = new Workspace()
+                    {
+                        WorkspaceNumber = j + 1,
+                        IsAvailable = true,
+                        IsActive = true,
+                        PricePerHour = double.Parse(workspaces[i].Split(":")[2]),
+                        //WorkspaceImageUrl = request.WorkspaceImageUrl,
+                        WorkspaceTypeId = workspaceTypes.FirstOrDefault(x => x.WorkspaceTypeName.Equals(workspaces[i].Split(":")[1])).Id,
+                    };
+                    result = await _context.Workspaces.AddAsync(entity, cancellationToken);
+                }
+            }
+        }
+        else
+        {
+            var entity = new Workspace()
+            {
+                WorkspaceNumber = request.WorkspaceNumber,
+                IsAvailable = true,
+                IsActive = true,
+                //WorkspaceImageUrl = request.WorkspaceImageUrl,
+                WorkspaceTypeId = request.WorkspaceTypeId,
+            };
+            result = await _context.Workspaces.AddAsync(entity, cancellationToken);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

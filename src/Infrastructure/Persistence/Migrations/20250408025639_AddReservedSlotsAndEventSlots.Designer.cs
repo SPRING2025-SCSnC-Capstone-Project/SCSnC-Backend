@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250406041301_AddNumberOfPeopleToEvent")]
-    partial class AddNumberOfPeopleToEvent
+    [Migration("20250408025639_AddReservedSlotsAndEventSlots")]
+    partial class AddReservedSlotsAndEventSlots
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -117,12 +117,6 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<LocalDateTime>("EventEndDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<LocalDateTime>("EventStartDate")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<string>("EventTitle")
                         .IsRequired()
                         .HasColumnType("text");
@@ -133,26 +127,39 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<LocalDateTime>("LastUpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("NumberOfPeople")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ReservationId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("UserId")
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("Events");
+                });
+
+            modelBuilder.Entity("Domain.Entities.EventSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("WorkspaceId")
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SlotId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("EventId");
 
-                    b.HasIndex("WorkspaceId");
+                    b.HasIndex("SlotId");
 
-                    b.ToTable("Events");
+                    b.ToTable("EventSlots");
                 });
 
             modelBuilder.Entity("Domain.Entities.Feedback", b =>
@@ -445,12 +452,6 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsFullPaid")
                         .HasColumnType("boolean");
 
-                    b.Property<LocalDateTime>("ReservationDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("SlotId")
-                        .HasColumnType("uuid");
-
                     b.Property<double>("TotalPrice")
                         .HasColumnType("double precision");
 
@@ -462,13 +463,35 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SlotId");
-
                     b.HasIndex("UserId");
 
                     b.HasIndex("WorkspaceId");
 
                     b.ToTable("Reservations");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ReservedSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ReservationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<LocalDate>("ReserveDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("SlotId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationId");
+
+                    b.HasIndex("SlotId");
+
+                    b.ToTable("ReservedSlots");
                 });
 
             modelBuilder.Entity("Domain.Entities.Size", b =>
@@ -837,21 +860,32 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Event", b =>
                 {
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("Events")
-                        .HasForeignKey("UserId")
+                    b.HasOne("Domain.Entities.Reservation", "Reservation")
+                        .WithMany()
+                        .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Workspace", "Workspace")
-                        .WithMany("Events")
-                        .HasForeignKey("WorkspaceId")
+                    b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("Domain.Entities.EventSlot", b =>
+                {
+                    b.HasOne("Domain.Entities.Event", "Event")
+                        .WithMany("EventSlots")
+                        .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("Domain.Entities.Slot", "Slot")
+                        .WithMany("EventSlots")
+                        .HasForeignKey("SlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Workspace");
+                    b.Navigation("Event");
+
+                    b.Navigation("Slot");
                 });
 
             modelBuilder.Entity("Domain.Entities.Feedback", b =>
@@ -994,12 +1028,6 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Reservation", b =>
                 {
-                    b.HasOne("Domain.Entities.Slot", "Slot")
-                        .WithMany("Reservations")
-                        .HasForeignKey("SlotId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Reservations")
                         .HasForeignKey("UserId")
@@ -1012,11 +1040,28 @@ namespace Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Slot");
-
                     b.Navigation("User");
 
                     b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ReservedSlot", b =>
+                {
+                    b.HasOne("Domain.Entities.Reservation", "Reservation")
+                        .WithMany("ReservedSlots")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Slot", "Slot")
+                        .WithMany("ReservedSlots")
+                        .HasForeignKey("SlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+
+                    b.Navigation("Slot");
                 });
 
             modelBuilder.Entity("Domain.Entities.Transaction", b =>
@@ -1080,6 +1125,8 @@ namespace Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("Blogs");
 
+                    b.Navigation("EventSlots");
+
                     b.Navigation("JoinEvents");
                 });
 
@@ -1113,6 +1160,11 @@ namespace Infrastructure.Persistence.Migrations
                     b.Navigation("IncludeToppings");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Reservation", b =>
+                {
+                    b.Navigation("ReservedSlots");
+                });
+
             modelBuilder.Entity("Domain.Entities.Size", b =>
                 {
                     b.Navigation("ItemWithSizes");
@@ -1120,7 +1172,9 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Slot", b =>
                 {
-                    b.Navigation("Reservations");
+                    b.Navigation("EventSlots");
+
+                    b.Navigation("ReservedSlots");
                 });
 
             modelBuilder.Entity("Domain.Entities.Table", b =>
@@ -1136,8 +1190,6 @@ namespace Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.Navigation("Blogs");
-
-                    b.Navigation("Events");
 
                     b.Navigation("JoinEvents");
 
@@ -1157,8 +1209,6 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Workspace", b =>
                 {
-                    b.Navigation("Events");
-
                     b.Navigation("Orders");
 
                     b.Navigation("Reservations");

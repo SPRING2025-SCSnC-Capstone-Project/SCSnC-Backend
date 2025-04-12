@@ -6,15 +6,15 @@ public class Event : BaseEntity
     {
         JoinEvents = new HashSet<JoinEvent>();
         Blogs = new HashSet<Blog>();
+        EventSlots = new HashSet<EventSlot>();
     }
     public string EventTitle { get; set; }
     public string EventDescription { get; set; }
+    public LocalDate EventDate { get; set; }
     public string CoverImageLink { get; set; }
     public double EntranceFee { get; set; }
     [ForeignKey("ReservationId")]
     public Guid ReservationId { get; set; }
-    public LocalTime EventStartTime { get; set; }
-    public LocalTime EventEndTime { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
 
@@ -24,4 +24,5 @@ public class Event : BaseEntity
     public virtual Reservation Reservation { get; set; }
     public virtual ICollection<JoinEvent> JoinEvents { get; set; }
     public virtual ICollection<Blog> Blogs { get; set; }
+    public virtual ICollection<EventSlot> EventSlots { get; set; }
 }

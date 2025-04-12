@@ -8,6 +8,8 @@ public record UpdateWorkspaceTypeCommand : IRequest<WorkspaceTypeDto> {
     public Guid Id { get; init; }
     public string WorkspaceTypeName { get; init; } = null!;
     public int MaxCapacity { get; init; }
+    public double PricePerHour { get; set; }
+
 }
 
 public class UpdateWorkspaceTypeComamndHandler : IRequestHandler<UpdateWorkspaceTypeCommand, WorkspaceTypeDto> {

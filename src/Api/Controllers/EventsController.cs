@@ -25,11 +25,10 @@ public class EventsController : ApiControllerBase {
         var command = new AddEventCommand() {
             EventTitle = request.EventTitle,
             EntranceFee = request.EntranceFee,
-            EventEndTime = request.EventEndTime,
-            EventStartTime = request.EventStartTime,
             EventDescription = request.EventDescription,
             ReservationId = request.ReservationId,
-            UserId = request.CurrentUserId
+            UserId = request.CurrentUserId,
+            //SlotIds = request.SlotIds
         };
 
         var result = await Mediator.Send(command);

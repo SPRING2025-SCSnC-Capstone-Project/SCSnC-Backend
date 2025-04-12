@@ -5,14 +5,14 @@
 namespace Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddEventFeeToEvent : Migration
+    public partial class AddPricePerHourForWorkspaceType : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<double>(
-                name: "EventFee",
-                table: "Events",
+                name: "PricePerHour",
+                table: "WorkspaceTypes",
                 type: "double precision",
                 nullable: false,
                 defaultValue: 0.0);
@@ -22,8 +22,8 @@ namespace Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "EventFee",
-                table: "Events");
+                name: "PricePerHour",
+                table: "WorkspaceTypes");
         }
     }
 }

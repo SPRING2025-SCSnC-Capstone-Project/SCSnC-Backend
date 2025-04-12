@@ -8,6 +8,8 @@ namespace Application.WorkspaceTypes.Commands;
 public record AddWorkspaceTypeCommand : IRequest<WorkspaceTypeDto> {
     public string WorkspaceTypeName { get; init; } = null!;
     public int MaxCapacity { get; init; }
+    public double PricePerHour { get; set; }
+
 }
 
 public class AddWorkspaceTypeComamndHandler : IRequestHandler<AddWorkspaceTypeCommand, WorkspaceTypeDto> {
@@ -29,6 +31,7 @@ public class AddWorkspaceTypeComamndHandler : IRequestHandler<AddWorkspaceTypeCo
         var entity = new WorkspaceType() {
             WorkspaceTypeName = request.WorkspaceTypeName,
             MaxCapacity = request.MaxCapacity,
+            PricePerHour = request.PricePerHour,
             IsActive = true,
         };
 

@@ -12,7 +12,8 @@ public class WorkspaceTypesController: ApiControllerBase {
     public async Task<ActionResult<Result<WorkspaceTypeDto>>> AddWorkspaceType([FromBody] AddWorkspaceTypeRequest request) {
         var command = new AddWorkspaceTypeCommand() {
             WorkspaceTypeName = request.WorkspaceTypeName,
-            MaxCapacity = request.MaxCapacity
+            MaxCapacity = request.MaxCapacity,
+            PricePerHour =request.PricePerHour
         };
 
         var result = await Mediator.Send(command);
@@ -37,6 +38,7 @@ public class WorkspaceTypesController: ApiControllerBase {
             Id = id,
             MaxCapacity = request.MaxCapacity,
             WorkspaceTypeName = request.WorkspaceTypeName,
+            PricePerHour = request.PricePerHour
         };
 
         var result = await Mediator.Send(command);

@@ -11,6 +11,7 @@ public class WorkspaceType : BaseEntity
     }
     public string WorkspaceTypeName { get; set; }
     public int MaxCapacity { get; set; }
+    public double PricePerHour { get; set; }
     public bool IsActive { get; set; }
     
     public virtual ICollection<Workspace> Workspaces { get; set; }

@@ -1,18 +1,31 @@
 using Api.Controllers.Payload.Requests;
+using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Application.Workspaces.Commands;
 using Application.Workspaces.Queries;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace Api.Controllers;
 
-public class WorkspacesController: ApiControllerBase {
+public class WorkspacesController : ApiControllerBase
+{
+    private IApplicationDbContext _context;
+
+    public WorkspacesController(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
     [HttpPost]
-    public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request) {
-        var command = new AddWorkspaceCommand() {
+    public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request)
+    {
+        var command = new AddWorkspaceCommand()
+        {
             WorkspaceNumber = request.WorkspaceNumber,
-            Name = request.Name,
             WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
         };
@@ -23,8 +36,10 @@ public class WorkspacesController: ApiControllerBase {
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult<Result<WorkspaceDto>>> RemoveWorkspace([FromRoute] Guid id) {
-        var command = new RemoveWorkspaceCommand() {
+    public async Task<ActionResult<Result<WorkspaceDto>>> RemoveWorkspace([FromRoute] Guid id)
+    {
+        var command = new RemoveWorkspaceCommand()
+        {
             Id = id
         };
 
@@ -34,23 +49,26 @@ public class WorkspacesController: ApiControllerBase {
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<Result<WorkspaceDto>>> UpdateWorkspace([FromRoute] Guid id, [FromBody] UpdateWorkspaceRequest request) {
-        var command = new UpdateWorkspaceCommand() {
+    public async Task<ActionResult<Result<WorkspaceDto>>> UpdateWorkspace([FromRoute] Guid id, [FromBody] UpdateWorkspaceRequest request)
+    {
+        var command = new UpdateWorkspaceCommand()
+        {
             Id = id,
-            Name = request.Name,
             WorkspaceNumber = request.WorkspaceNumber,
             WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
         };
 
         var result = await Mediator.Send(command);
-        
+
         return Ok(Result<WorkspaceDto>.Succeed(result));
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<Result<WorkspaceDto>>> GetWorkspaceById([FromRoute] Guid id) {
-        var query = new GetWorkspaceByIdQuery() {
+    public async Task<ActionResult<Result<WorkspaceDto>>> GetWorkspaceById([FromRoute] Guid id)
+    {
+        var query = new GetWorkspaceByIdQuery()
+        {
             Id = id
         };
 
@@ -60,10 +78,12 @@ public class WorkspacesController: ApiControllerBase {
     }
 
     [HttpGet]
-    public async Task<ActionResult<Result<PaginatedList<WorkspaceDto>>>> GetWorkspacesPaginated([FromQuery] GetWorkspacesPaginatedRequest request) {
-        var query = new GetWorkspacesPaginatedQuery() {
+    public async Task<ActionResult<Result<PaginatedList<WorkspaceDto>>>> GetWorkspacesPaginated([FromQuery] GetWorkspacesPaginatedRequest request)
+    {
+        var query = new GetWorkspacesPaginatedQuery()
+        {
             Page = request.Page,
-            Size = request.Size,
+            Size = 1000,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
             Filter = request.Filter,

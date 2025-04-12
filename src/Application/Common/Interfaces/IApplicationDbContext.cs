@@ -18,6 +18,8 @@ public interface IApplicationDbContext
     public DbSet<Reservation> Reservations { get; }
     public DbSet<Size> Sizes { get; }
     public DbSet<Slot> Slots { get; }
+    public DbSet<ReservedSlot> ReservedSlots { get; }
+    public DbSet<EventSlot> EventSlots { get; }
     public DbSet<Table> Tables { get; }
     public DbSet<Topping> Toppings { get; }
     public DbSet<Transaction> Transactions { get; }

@@ -29,7 +29,13 @@ public class GetReservationsByUserPaginatedQueryHandler : IRequestHandler<GetRes
     
     public async Task<PaginatedList<ReservationDto>> Handle(GetReservationsByUserPaginatedQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Reservations.Where(x => x.UserId == request.UserId).AsQueryable();
+        var query = _context.Reservations
+            .Include (x => x.Workspace)
+            .ThenInclude (y => y.WorkspaceType)
+            .Include(x => x.User)
+            //.Include(x => x.ReservedSlots)
+            //.ThenInclude(y => y.Slot)
+            .Where(x => x.UserId == request.UserId).AsQueryable();
         
         return await query.ListPaginateWithSortAsync<Reservation, ReservationDto>(
             request.Page, 

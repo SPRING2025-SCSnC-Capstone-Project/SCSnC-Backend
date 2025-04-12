@@ -32,6 +32,8 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
             .Include (x => x.Workspace)
             .ThenInclude (y => y.WorkspaceType)
             .Include(x => x.User)
+            ////.Include(x => x.ReservedSlots)
+            //.ThenInclude(y => y.Slot)
             .AsQueryable(); 
         
         return await query.ListPaginateWithSortAsync<Reservation, ReservationDto>(

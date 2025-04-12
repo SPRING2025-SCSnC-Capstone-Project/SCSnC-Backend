@@ -5,14 +5,16 @@ namespace Domain.Entities;
 
 public class Slot : BaseEntity
 {
-    //public Slot()
-    //{
-    //    Reservations = new HashSet<Reservation>();
-    //}
+    public Slot()
+    {
+        ReservedSlots = new HashSet<ReservedSlot>();
+        EventSlots = new HashSet<EventSlot>();
+    }
     public int SlotNumber { get; set; }
     public LocalTime TimeStart { get; set; }
     public LocalTime TimeEnd { get; set; }
     public bool IsActive { get; set; }
     
-    //public virtual ICollection<Reservation> Reservations { get; set; }
+    public virtual ICollection<ReservedSlot> ReservedSlots { get; set; }
+    public virtual ICollection<EventSlot> EventSlots { get; set; }
 }

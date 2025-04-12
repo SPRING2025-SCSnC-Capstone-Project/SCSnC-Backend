@@ -25,6 +25,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<Size> Sizes => Set<Size>();
     public DbSet<Slot> Slots => Set<Slot>();
+    public DbSet<ReservedSlot> ReservedSlots => Set<ReservedSlot>();
+    public DbSet<EventSlot> EventSlots => Set<EventSlot>();
     public DbSet<Table> Tables => Set<Table>();
     public DbSet<Topping> Toppings => Set<Topping>();
     public DbSet<Transaction> Transactions => Set<Transaction>();

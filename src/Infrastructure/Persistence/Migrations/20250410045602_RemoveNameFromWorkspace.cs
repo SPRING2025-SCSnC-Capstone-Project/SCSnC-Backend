@@ -5,25 +5,25 @@
 namespace Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddNumberOfPeopleToEvent : Migration
+    public partial class RemoveNameFromWorkspace : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "NumberOfPeople",
-                table: "Events",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.DropColumn(
+                name: "Name",
+                table: "Workspaces");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "NumberOfPeople",
-                table: "Events");
+            migrationBuilder.AddColumn<string>(
+                name: "Name",
+                table: "Workspaces",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
         }
     }
 }

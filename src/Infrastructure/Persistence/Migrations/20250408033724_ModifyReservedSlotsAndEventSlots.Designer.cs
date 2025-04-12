@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250408033724_ModifyReservedSlotsAndEventSlots")]
+    partial class ModifyReservedSlotsAndEventSlots
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -449,18 +452,8 @@ namespace Infrastructure.Persistence
                     b.Property<double>("Deposit")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsFullPaid")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Phone")
-                        .HasColumnType("text");
 
                     b.Property<LocalDate>("ReserveDate")
                         .HasColumnType("date");
@@ -828,9 +821,6 @@ namespace Infrastructure.Persistence
 
                     b.Property<int>("MaxCapacity")
                         .HasColumnType("integer");
-
-                    b.Property<double>("PricePerHour")
-                        .HasColumnType("double precision");
 
                     b.Property<string>("WorkspaceTypeName")
                         .IsRequired()

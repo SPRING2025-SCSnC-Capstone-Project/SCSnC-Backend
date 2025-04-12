@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
 using NodaTime;
+using NodaTime.Extensions;
 
 namespace Application.Events.Commands;
 
@@ -12,10 +13,9 @@ public record AddEventCommand : IRequest<EventDto>
     public string EventDescription { get; init; } = null!;
     public string? CoverImageLink { get; init; }
     public double EntranceFee { get; init; }
-    public TimeOnly EventStartTime { get; init; }
-    public TimeOnly EventEndTime { get; init; }
-    public Guid ReservationId { get; init; }
     public Guid UserId { get; init; }
+    public Guid ReservationId { get; init; }
+    //public Guid[] SlotIds { get; init; } = null!; 
 }
 
 public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
@@ -47,37 +47,71 @@ public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
             throw new KeyNotFoundException($"User with Id {request.UserId} does not exist");
         }
 
-        if (reservation.StartTime > LocalTime.FromTimeOnly(request.EventStartTime) || reservation.EndTime < LocalTime.FromTimeOnly(request.EventEndTime)
-                || reservation.EndTime < LocalTime.FromTimeOnly(request.EventStartTime) || reservation.StartTime > LocalTime.FromTimeOnly(request.EventEndTime))
-        {
-            throw new ConflictException($"Event time range must be registered within reserved time range");
-        }
+        //foreach (var slotId in request.SlotIds) {
+        //    var slot = await _context.Slots.FirstOrDefaultAsync(x => x.Id == slotId && x.IsActive, cancellationToken);
+            
+        //    if (slot is null) {
+        //        throw new KeyNotFoundException($"Slot with Id {slotId} does not exist");
+        //    }
+
+        //    var reservedSlot = await _context.ReservedSlots.FirstOrDefaultAsync(x => 
+        //        x.ReservationId == request.ReservationId && 
+        //        x.SlotId == slotId, cancellationToken);
+
+        //    if (reservedSlot is null) {
+        //        throw new KeyNotFoundException("Event slots must be within the reserved slots");
+        //    }
+
+        //    var conflict = await _context.EventSlots
+        //        .Include(x => x.Event)
+        //        .FirstOrDefaultAsync(x => 
+        //        x.Event!.ReservationId == request.ReservationId && x.SlotId == slotId, cancellationToken);
+
+        //    if (conflict is not null) {
+        //        throw new ConflictException("Slot(s) has been taken for another event");
+        //    }
+        //} 
 
         var entity = new Event()
         {
             EventTitle = request.EventTitle,
             EventDescription = request.EventDescription,
+            //EventDate = reservation.ReserveDate.ToOffsetDateTime().Date,
             CoverImageLink = "",
             EntranceFee = request.EntranceFee,
-            EventStartTime = LocalTime.FromTimeOnly(request.EventStartTime),
-            EventEndTime = LocalTime.FromTimeOnly(request.EventEndTime),
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             ReservationId = request.ReservationId,
             IsActive = true,
-            Status = "Accepted"
+            Status = "Accepted",
         };
 
         var result = await _context.Events.AddAsync(entity, cancellationToken);
+        
+        //var eventSlotsToAdd = new List<EventSlot>();
+
+        //foreach (var slotId in request.SlotIds) {
+        //    var eventSlot = new EventSlot() {
+        //        SlotId = slotId,
+        //        EventId = result.Entity.Id,
+        //    };
+
+        //    eventSlotsToAdd.Add(eventSlot);
+        //}
+
+        //await _context.EventSlots.AddRangeAsync(eventSlotsToAdd, cancellationToken);
+
         await _context.SaveChangesAsync(cancellationToken);
 
-        var added_event = _context.Events
+        var added_event = await _context.Events
             .Include(x => x.Reservation)
             .ThenInclude(y => y.Workspace)
             .ThenInclude(z => z.WorkspaceType)
             .Include(x => x.Reservation)
             .ThenInclude(y => y.User)
-            .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken);
+            //.Include(x => x.EventSlots)
+            //.ThenInclude(y => y.Slot)
+            .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken); 
 
         return _mapper.Map<EventDto>(added_event);
     }

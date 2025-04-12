@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250409165249_RemoveReserveDateFromReservation")]
+    partial class RemoveReserveDateFromReservation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -453,6 +456,9 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("IsFullPaid")
                         .HasColumnType("boolean");
 
@@ -462,8 +468,8 @@ namespace Infrastructure.Persistence
                     b.Property<string>("Phone")
                         .HasColumnType("text");
 
-                    b.Property<LocalDate>("ReserveDate")
-                        .HasColumnType("date");
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<double>("TotalPrice")
                         .HasColumnType("double precision");
@@ -768,6 +774,10 @@ namespace Infrastructure.Persistence
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<double>("PricePerHour")
                         .HasColumnType("double precision");
 
@@ -828,9 +838,6 @@ namespace Infrastructure.Persistence
 
                     b.Property<int>("MaxCapacity")
                         .HasColumnType("integer");
-
-                    b.Property<double>("PricePerHour")
-                        .HasColumnType("double precision");
 
                     b.Property<string>("WorkspaceTypeName")
                         .IsRequired()
@@ -1061,7 +1068,7 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity("Domain.Entities.ReservedSlot", b =>
                 {
                     b.HasOne("Domain.Entities.Reservation", "Reservation")
-                        .WithMany("ReservedSlots")
+                        .WithMany()
                         .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1171,11 +1178,6 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity("Domain.Entities.OrderDetail", b =>
                 {
                     b.Navigation("IncludeToppings");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Reservation", b =>
-                {
-                    b.Navigation("ReservedSlots");
                 });
 
             modelBuilder.Entity("Domain.Entities.Size", b =>

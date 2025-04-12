@@ -57,5 +57,6 @@ namespace Api.Controllers
 
             return Ok(new {category = resultCategories, size = sizesCommand, item = itemsCommand, topping = toppingsCommand});
         }
+
     }
 }
