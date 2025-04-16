@@ -5,6 +5,7 @@ using Application.Common.Models.Dtos;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using NodaTime;
+using System.Diagnostics;
 
 namespace Application.Reservations.Commands;
 
@@ -75,11 +76,10 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 throw new ConflictException("One or more slots have already been reserved");
             }
         }
-        var availableWorkspace = await GetRoom(request.WorkspaceTypeId);
         var reservation = new Reservation()
         {
             UserId = request.UserId,
-            WorkspaceId = availableWorkspace.Id,
+            WorkspaceId = request.WorkspaceId,
             Deposit = request.TotalPrice,
             IsFullPaid = true,
             TotalPrice = request.TotalPrice,
@@ -112,6 +112,21 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             reservationEvent = entity;
         }
 
+        Debug.WriteLine(request.SlotIds[1]);
+
+        foreach (var slotId in request.SlotIds)
+        {
+            var reservedSlot = new ReservedSlot()
+            {
+                SlotId = slotId,
+                ReservationId = newReservation.Entity.Id,
+            };
+
+            reservedSlotsToAdd.Add(reservedSlot);
+        };
+
+        await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
+
         await _context.SaveChangesAsync(cancellationToken);
 
         var createdReservation = await _context.Reservations
@@ -142,19 +157,6 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
         result.Event = reservationEvent;
         result.PaymentLink = paymentUrl;
 
-        foreach (var slotId in request.SlotIds)
-        {
-            var reservedSlot = new ReservedSlot()
-            {
-                SlotId = slotId,
-                ReservationId = createdReservation.Id,
-            };
-
-            reservedSlotsToAdd.Add(reservedSlot);
-        };
-
-        await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
-
         return result;
     }
 
@@ -167,31 +169,4 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
         return conflict is not null;
     }
 
-    async Task<Workspace> GetRoom(Guid workspaceTypeId)
-    {
-        var firstWorkspace = _context.Workspaces.Include(x => x.WorkspaceType).First(x => x.WorkspaceTypeId == workspaceTypeId && x.WorkspaceNumber == 1);
-        bool isFirstRoomAvailable = !await _context.Reservations.AnyAsync(
-            r => r.Workspace.Id == firstWorkspace.Id);
-
-        if (isFirstRoomAvailable)
-        {
-            return firstWorkspace;
-        }
-
-        var rooms = await _context.Workspaces.Include(x => x.WorkspaceType).Where(x => x.WorkspaceTypeId == workspaceTypeId)
-                    .OrderBy(r => r.WorkspaceNumber)
-                    .ToListAsync();
-
-        foreach (var room in rooms)
-        {
-            bool isRoomAvailable = !await _context.Reservations
-                .AnyAsync(r => r.WorkspaceId == room.Id);
-
-            if (isRoomAvailable)
-            {
-                return room;
-            }
-        }
-        return null;
-    }
 }

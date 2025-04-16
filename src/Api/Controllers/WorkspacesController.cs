@@ -92,4 +92,23 @@ public class WorkspacesController : ApiControllerBase
         var result = await Mediator.Send(query);
         return Ok(Result<PaginatedList<WorkspaceDto>>.Succeed(result));
     }
+
+    [HttpPost("find-available-workspaces")]
+    public async Task<ActionResult<Result<List<WorkspaceDto>>>> GetWorkspacesByTimePaginated([FromBody] GetWorkspacesByTimeAndTypePaginatedRequest request)
+    {
+        var query = new GetWorkspacesByTimeAndTypeQuery()
+        {
+            Page = request.Page,
+            Size = 1000,
+            SortBy = request.SortBy,
+            SortOrder = request.SortOrder,
+            Filter = request.Filter,
+            WorkspaceTypeId = request.WorkspaceTypes,
+            ReservationDate = request.ReserveDate,
+            SlotIds = request.SlotIds
+        };
+
+        var result = await Mediator.Send(query);
+        return Ok(Result<List<WorkspaceDto>>.Succeed(result));
+    }
 }
