@@ -46,7 +46,7 @@ public class GetWorkspacesByTimePaginatedQueryHandler : IRequestHandler<GetWorks
                 workspaceDtos.Add(workspaceDto);
             }
 
-            return workspaceDtos;
+            return workspaceDtos.OrderBy(x => x.WorkspaceNumber).ToList();
         }
         catch (Exception ex)
         {

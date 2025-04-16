@@ -71,10 +71,10 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 throw new KeyNotFoundException($"Slot with Id {slotId} does not exist");
             }
 
-            if (await CheckConflict(request.ReservationDate, slotId, cancellationToken))
-            {
-                throw new ConflictException("One or more slots have already been reserved");
-            }
+            //if (await CheckConflict(request.ReservationDate, slotId, cancellationToken))
+            //{
+            //    throw new ConflictException("One or more slots have already been reserved");
+            //}
         }
         var reservation = new Reservation()
         {
@@ -145,7 +145,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             vnp_Amount = (decimal)createdReservation.TotalPrice * 100,
             vnp_OrderType = "other",
             vnp_OrderInfo = $"Date: {DateTime.Now.ToString("yyyyMMddHHmmss")}; Total Price: {createdReservation.TotalPrice}",
-            vnp_TxnRef = $"reservation:{createdReservation.Id}",
+            vnp_TxnRef = createdReservation.ToString(),
             vnp_Command = "pay",
             vnp_ReturnUrl = vnPayConfig.ReturnUrl,
             vnp_ExpireDate = DateTime.Now.AddMinutes(5).ToString("yyyyMMddHHmmss"),
