@@ -21,13 +21,20 @@ public class WorkspacesController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request)
-    {
-        var command = new AddWorkspaceCommand()
-        {
+    public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request) {
+        var mediaTypes = new List<string>();
+        var mediaUrls = new List<string>();
+
+        for (var i = 0; i < request.WorkspaceMedias.Length; i++) {
+            mediaTypes.Add(request.WorkspaceMedias[i].MediaType);
+            mediaUrls.Add(request.WorkspaceMedias[i].MediaUrl);
+        }
+        
+        var command = new AddWorkspaceCommand() {
             WorkspaceNumber = request.WorkspaceNumber,
-            WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
+            MediaTypes = mediaTypes,
+            MediaUrls = mediaUrls
         };
 
         var result = await Mediator.Send(command);
@@ -55,7 +62,6 @@ public class WorkspacesController : ApiControllerBase
         {
             Id = id,
             WorkspaceNumber = request.WorkspaceNumber,
-            WorkspaceImageUrl = request.WorkspaceImageUrl,
             WorkspaceTypeId = request.WorkspaceTypeId,
         };
 
@@ -98,11 +104,6 @@ public class WorkspacesController : ApiControllerBase
     {
         var query = new GetWorkspacesByTimeAndTypeQuery()
         {
-            Page = request.Page,
-            Size = 1000,
-            SortBy = request.SortBy,
-            SortOrder = request.SortOrder,
-            Filter = request.Filter,
             WorkspaceTypeId = request.WorkspaceTypes,
             ReservationDate = request.ReserveDate,
             SlotIds = request.SlotIds

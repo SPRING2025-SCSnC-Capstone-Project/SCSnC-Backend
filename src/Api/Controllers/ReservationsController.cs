@@ -13,7 +13,7 @@ namespace Api.Controllers;
 
 public class ReservationsController : ApiControllerBase {
     [HttpPost]
-    public async Task<ActionResult<Result<ReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request) {
+    public async Task<ActionResult<Result<ResponseReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request) {
         Debug.WriteLine(request.ReservationDate);
         var command = !request.includeEvent ? new CreateReservationCommand() {
             ReservationDate = request.ReservationDate,
@@ -27,7 +27,9 @@ public class ReservationsController : ApiControllerBase {
             Phone = request.Phone,
             //startDate = request.startDate,
             //endDate = request.endDate
-            SlotIds = request.SlotIds
+            SlotIds = request.SlotIds,
+            PaymentMethod = request.PaymentMethod,
+            IsEventPrivate = request.IsEventPrivate,
         } :
         new CreateReservationCommand()
         {
@@ -46,12 +48,13 @@ public class ReservationsController : ApiControllerBase {
             EntranceFee = request.EntranceFee,
             EventDescription = request.EventDescription,
             EventTitle = request.EventTitle,
-            SlotIds = request.SlotIds
-        }
-        ;
+            SlotIds = request.SlotIds,
+            PaymentMethod = request.PaymentMethod,
+            IsEventPrivate = request.IsEventPrivate
+        };
 
         var result = await Mediator.Send(command);
-        return Ok(Result<ReservationDto>.Succeed(result));
+        return Ok(Result<ResponseReservationDto>.Succeed(result));
     }
 
     [HttpGet("{reservationid:guid}")]

@@ -2,9 +2,13 @@ using Api.Controllers.Payload.Requests;
 using Api.Controllers.Payload.Requests.Items;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
+using Application.ItemPricesAtBranches.Commands.UpdateItemPriceAtBranch;
+using Application.ItemPricesAtBranches.Queries.GetItemPriceOfAllBranches;
 using Application.Items.Commands.AddItem;
 using Application.Items.Commands.DeleteItem;
 using Application.Items.Commands.UpdateItem;
+using Application.Items.Queries.GetActiveItemById;
+using Application.Items.Queries.GetActiveItemsPaginated;
 using Application.Items.Queries.GetItemById;
 using Application.Items.Queries.GetItemsPaginated;
 using Microsoft.AspNetCore.Mvc;
@@ -18,13 +22,14 @@ public class ItemsController : ApiControllerBase
     [HttpGet]
     public async Task<ActionResult<Result<PaginatedList<ItemDto>>>> GetItems([FromQuery] PaginatedItemsQueryParams request)
     {
-        var query = new GetItemsPaginatedQuery()
+        var query = new GetActiveItemsPaginatedQuery()
         {
             Page = request.Page,
             Size = request.Size,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
-            FilterByCategory = request.FilterByCategory
+            FilterByCategory = request.FilterByCategory,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(query);
@@ -33,11 +38,12 @@ public class ItemsController : ApiControllerBase
     }
     
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<Result<ItemDto>>> GetItemById([FromRoute] Guid id)
+    public async Task<ActionResult<Result<ItemDto>>> GetItemById([FromRoute] Guid id, [FromQuery] Guid branchId)
     {
-        var query = new GetItemByIdQuery()
+        var query = new GetActiveItemByIdQuery()
         {
-            Id = id
+            Id = id,
+            BranchId = branchId
         };
 
         var result = await Mediator.Send(query);
@@ -70,7 +76,6 @@ public class ItemsController : ApiControllerBase
         {
             Id = id,
             Name = request.Name,
-            Price = request.Price,
             CategoryId = request.CategoryId,
             Description = request.Description,
             Img = request.Img,
@@ -93,6 +98,38 @@ public class ItemsController : ApiControllerBase
         var result = await Mediator.Send(command);
 
         return Ok(Result<ItemDto>.Succeed(result));
+    }
+    
+    #endregion
+    
+    #region Extra CRUD Operations
+    
+    [HttpPut("{itemid:guid}/price")]
+    public async Task<ActionResult<Result<ItemPriceAtBranchDto>>> UpdateItemPrice([FromRoute] Guid itemid, [FromBody] UpdateItemPriceRequest request)
+    {
+        var command = new UpdateItemPriceAtBranchCommand()
+        {
+            ItemId = itemid,
+            BranchId = request.BranchId,
+            Price = request.Price
+        };
+
+        var result = await Mediator.Send(command);
+
+        return Ok(Result<ItemPriceAtBranchDto>.Succeed(result));
+    }
+    
+    [HttpGet("{itemid:guid}/branch-price")]
+    public async Task<ActionResult<Result<ItemPriceAtAllBranchesDto>>> GetItemPrice([FromRoute] Guid itemid)
+    {
+        var query = new GetItemPriceOfAllBranchesQuery()
+        {
+            ItemId = itemid
+        };
+
+        var result = await Mediator.Send(query);
+
+        return Ok(Result<ItemPriceAtAllBranchesDto>.Succeed(result));
     }
     
     #endregion

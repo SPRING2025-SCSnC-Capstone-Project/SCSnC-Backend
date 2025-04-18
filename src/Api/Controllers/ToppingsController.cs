@@ -2,6 +2,8 @@ using Api.Controllers.Payload.Requests;
 using Api.Controllers.Payload.Requests.Toppings;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
+using Application.ToppingPricesAtBranches.Commands.UpdateToppingPriceAtBranch;
+using Application.ToppingPricesAtBranches.Queries.GetToppingPriceOfAllBranches;
 using Application.Toppings.Commands.AddTopping;
 using Application.Toppings.Commands.DeleteTopping;
 using Application.Toppings.Commands.UpdateTopping;
@@ -16,7 +18,7 @@ public class ToppingsController: ApiControllerBase
     #region Basic CRUD Operations
     
     [HttpGet]
-    public async Task<ActionResult<Result<PaginatedList<ToppingDto>>>> GetToppings([FromQuery] PaginatedQueryParameters request)
+    public async Task<ActionResult<Result<PaginatedList<ToppingDto>>>> GetToppings([FromBody] PaginatedToppingQueryParameters request)
     {
         var query = new GetToppingsPaginatedQuery()
         {
@@ -24,6 +26,7 @@ public class ToppingsController: ApiControllerBase
             Size = request.Size,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(query);
@@ -32,11 +35,12 @@ public class ToppingsController: ApiControllerBase
     }
     
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<Result<ToppingDto>>> GetToppingById([FromRoute] Guid id)
+    public async Task<ActionResult<Result<ToppingDto>>> GetToppingById([FromRoute] Guid id, [FromBody] ToppingBranchRequest request)
     {
         var query = new GetToppingByIdQuery()
         {
-            Id = id
+            Id = id,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(query);
@@ -67,7 +71,6 @@ public class ToppingsController: ApiControllerBase
             Id = id,
             Name = request.ToppingName,
             Description = request.ToppingDescription,
-            Price = request.Price,
             IsActive = request.IsActive
         };
 
@@ -87,6 +90,38 @@ public class ToppingsController: ApiControllerBase
         var result = await Mediator.Send(command);
 
         return Ok(Result<ToppingDto>.Succeed(result));
+    }
+    
+    #endregion
+    
+    #region Extra CRUD Operations
+    
+    [HttpPut("{toppingid:guid}/price")]
+    public async Task<ActionResult<Result<ToppingPriceAtBranchDto>>> UpdateToppingPrice([FromRoute] Guid toppingid, [FromBody] UpdateToppingPriceRequest request)
+    {
+        var command = new UpdateToppingPriceAtBranchCommand()
+        {
+            ToppingId = toppingid,
+            BranchId = request.BranchId,
+            Price= request.Price
+        };
+
+        var result = await Mediator.Send(command);
+
+        return Ok(Result<ToppingPriceAtBranchDto>.Succeed(result));
+    }
+    
+    [HttpGet("{toppingid:guid}/branch-price")]
+    public async Task<ActionResult<Result<List<ToppingPriceAtBranchDto>>>> GetToppingPrice([FromRoute] Guid toppingid)
+    {
+        var query = new GetToppingPriceOfAllBranchesQuery()
+        {
+            ToppingId = toppingid
+        };
+
+        var result = await Mediator.Send(query);
+
+        return Ok(Result<List<ToppingPriceAtBranchDto>>.Succeed(result));
     }
     
     #endregion

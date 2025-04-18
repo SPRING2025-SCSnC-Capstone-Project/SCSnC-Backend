@@ -28,7 +28,8 @@ public class EventsController : ApiControllerBase {
             EventDescription = request.EventDescription,
             ReservationId = request.ReservationId,
             UserId = request.CurrentUserId,
-            //SlotIds = request.SlotIds
+            SlotIds = request.SlotIds,
+            IsEventPrivate = request.IsEventPrivate
         };
 
         var result = await Mediator.Send(command);

@@ -12,6 +12,7 @@ public class EventDto : BaseDto, IMapFrom<Event> {
     public ReservationDto Reservation { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
+    public bool IsPrivate { get; set; }
     public HashSet<EventSlotDto> EventSlots { get; set; } = null!;
 
     public void Mapping(Profile profile) {

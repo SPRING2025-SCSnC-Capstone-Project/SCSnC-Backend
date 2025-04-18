@@ -4,12 +4,16 @@ public class GetWorkspaceByTimePaginatedValidator : AbstractValidator<GetWorkspa
 {
     public GetWorkspaceByTimePaginatedValidator()
     {
-        RuleFor(x => x.Page)
-            .GreaterThan(-1)
-            .WithMessage("Page number can't be negative");
+        RuleFor(x => x.ReservationDate)
+            .NotEmpty()
+            .WithMessage("Reserve date cant be empty");
 
-        RuleFor(x => x.Size)
-            .GreaterThan(-1)
-            .WithMessage("Size can't be negative");
+        RuleFor(x => x.SlotIds)
+            .NotEmpty()
+            .WithMessage("SlotIds length must be greater than 0");
+
+        RuleFor(x => x.WorkspaceTypeId)
+            .NotEmpty()
+            .WithMessage("Workspace type Id must not be empty");
     }
 }

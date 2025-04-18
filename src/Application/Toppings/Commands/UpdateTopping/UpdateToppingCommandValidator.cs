@@ -12,8 +12,8 @@ public class UpdateToppingCommandValidator : AbstractValidator<UpdateToppingComm
         
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Topping Name is required");
-
-        RuleFor(x => x.Price)
-            .NotEmpty().WithMessage("Topping Price is required");
+        
+        RuleFor(x => x.IsActive)
+            .NotNull().WithMessage("IsActive is required");
     }
 }

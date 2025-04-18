@@ -17,6 +17,7 @@ public class Event : BaseEntity
     public Guid ReservationId { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
+    public bool IsPrivate { get; set; }
 
     public string Status { get; set; }
     public bool IsActive { get; set; }

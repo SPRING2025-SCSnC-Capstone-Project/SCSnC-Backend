@@ -11,11 +11,6 @@ namespace Application.Workspaces.Queries;
 
 public record GetWorkspacesByTimeAndTypeQuery : IRequest<List<WorkspaceDto>>
 {
-    public string? Filter { get; set; }
-    public int? Page { get; init; }
-    public int? Size { get; init; }
-    public string? SortBy { get; init; }
-    public string? SortOrder { get; init; }
     public Guid[] SlotIds { get; init; } = null!;
     public DateOnly ReservationDate { get; init; }
     public Guid WorkspaceTypeId { get; init; }
@@ -58,7 +53,7 @@ public class GetWorkspacesByTimePaginatedQueryHandler : IRequestHandler<GetWorks
 
     async Task<List<Workspace>> GetRoom(Guid workspaceTypeId, DateOnly reserveDate, Guid[] slotsId)
     {
-        var allReservationByWorkspaceTypeAndReservedDate = _context.Reservations.Include(x => x.ReservedSlots).ThenInclude(y => y.Slot).Include(x => x.Workspace).Where(x => x.Workspace.WorkspaceTypeId.Equals(workspaceTypeId) && x.ReserveDate.Equals(new LocalDate(reserveDate.Year, reserveDate.Month, reserveDate.Day))).AsQueryable();
+        var allReservationByWorkspaceTypeAndReservedDate = _context.Reservations.Include(x => x.ReservedSlots).ThenInclude(y => y.Slot).Include(x => x.Workspace).Where(x => x.Workspace.WorkspaceTypeId.Equals(workspaceTypeId) && x.ReserveDate.Equals(new LocalDate(reserveDate.Year, reserveDate.Month, reserveDate.Day)) && !x.IsFullPaid).AsQueryable();
         var requestedTimeSlot = _context.Slots.Where(x => slotsId.Contains(x.Id)).AsQueryable();
         int[] requestedTimeRange = requestedTimeSlot.Select(x => x.SlotNumber).ToArray();
         List<Workspace> reservedWorkspaces = new List<Workspace>();

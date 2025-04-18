@@ -33,8 +33,8 @@ public class GetReservationsByUserPaginatedQueryHandler : IRequestHandler<GetRes
             .Include (x => x.Workspace)
             .ThenInclude (y => y.WorkspaceType)
             .Include(x => x.User)
-            //.Include(x => x.ReservedSlots)
-            //.ThenInclude(y => y.Slot)
+            .Include(x => x.ReservedSlots)
+            .ThenInclude(y => y.Slot)
             .Where(x => x.UserId == request.UserId).AsQueryable();
         
         return await query.ListPaginateWithSortAsync<Reservation, ReservationDto>(

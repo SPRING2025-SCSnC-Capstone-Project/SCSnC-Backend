@@ -9,6 +9,6 @@ public class WorkspaceDto : BaseDto, IMapFrom<Workspace>
     public double PricePerHour { get; set; }
     public Guid WorkspaceTypeId { get; set; }
     public bool IsAvailable { get; set; }
-    public string? WorkspaceImageUrl { get; set; }
     public WorkspaceTypeDto WorkspaceType { get; set; } = null!;
+    public WorkspaceMediaDto[] WorkspaceMedias { get; set; } = null!;
 }

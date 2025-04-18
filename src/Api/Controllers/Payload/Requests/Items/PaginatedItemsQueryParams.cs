@@ -22,4 +22,5 @@ public class PaginatedItemsQueryParams
     /// Sort by category
     /// </summary>
     public string? FilterByCategory { get; set; }
+    public Guid BranchId { get; set; }
 }

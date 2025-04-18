@@ -36,6 +36,7 @@ public class GetEventsPaginatedQueryHandler : IRequestHandler<GetEventsPaginated
                     .ThenInclude(y => y.User)
                     .Include(x => x.EventSlots)
                     .ThenInclude(y => y.Slot)
+                    .Where(x => !x.IsPrivate)
                     .AsQueryable();
         
         return await query.ListPaginateWithSortAsync<Event, EventDto>(

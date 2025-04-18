@@ -12,6 +12,7 @@ public record GetToppingsPaginatedQuery : IRequest<PaginatedList<ToppingDto>>
     public int? Size { get; init; }
     public string? SortBy { get; init; }
     public string? SortOrder { get; init; }
+    public Guid BranchId { get; init; }
 }
 
 public class GetToppingsPaginatedQueryHandler : IRequestHandler<GetToppingsPaginatedQuery, PaginatedList<ToppingDto>>
@@ -27,13 +28,15 @@ public class GetToppingsPaginatedQueryHandler : IRequestHandler<GetToppingsPagin
     
     public async Task<PaginatedList<ToppingDto>> Handle(GetToppingsPaginatedQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Toppings.AsQueryable();
+        var query = _context.Toppings
+            .Include(x => x.ToppingPricesAtBranches.Where(y => y.BranchId == request.BranchId))
+            .AsQueryable();
         
         return await query.ListPaginateWithSortAsync<Topping, ToppingDto>(
             request.Page, 
             request.Size, 
             request.SortBy, 
-            request.SortOrder, 
+            request.SortOrder,
             _mapper.ConfigurationProvider, 
             cancellationToken
         );

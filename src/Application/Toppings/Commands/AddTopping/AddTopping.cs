@@ -40,7 +40,7 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
                     {
                         ToppingName = request.Toppings[i].Split(":")[0],
                         ToppingDescription = request.Toppings[i].Split(":")[0],
-                        Price = double.Parse(request.Toppings[i].Split(":")[1]),
+                        //Price = double.Parse(request.Toppings[i].Split(":")[1]),
                         IsActive = true,
                         CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                         LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
@@ -54,7 +54,6 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
                 {
                     ToppingName = request.ToppingName,
                     ToppingDescription = request.ToppingDescription,
-                    Price = request.Price,
                     IsActive = true,
                     CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                     LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
@@ -64,6 +63,22 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
             }
             
             await _context.SaveChangesAsync(cancellationToken);
+            
+            foreach (var branch in _context.Branches.Select(x => x.Id).ToList())
+            {
+                var toppingPriceAtBranch = new ToppingPriceAtBranch
+                {
+                    BranchId = branch,
+                    ToppingId = result.Entity.Id,
+                    ToppingPrice = request.Price,
+                    CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                    LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                };
+                
+                await _context.ToppingPricesAtBranches.AddAsync(toppingPriceAtBranch, cancellationToken);
+            }
+            await _context.SaveChangesAsync(cancellationToken);
+            
             return _mapper.Map<ToppingDto>(result.Entity);
         }
         catch (Exception ex)
