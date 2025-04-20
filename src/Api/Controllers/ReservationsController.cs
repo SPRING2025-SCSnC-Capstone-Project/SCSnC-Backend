@@ -1,6 +1,7 @@
 using Api.Controllers.Payload.Requests;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
+using Application.Reservations;
 using Application.Reservations.Commands;
 using Application.Reservations.Queries.GetReservationById;
 using Application.Reservations.Queries.GetReservationsByUserPaginated;
@@ -18,8 +19,11 @@ public class ReservationsController : ApiControllerBase {
             TotalPrice = request.TotalPrice,
             Deposit = request.Deposit,
             WorkspaceId = request.WorkspaceId,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
             UserId = request.UserId,
             SlotIds = request.SlotIds,
+            WorkspaceUtilityServiceIds = request.WorkspaceUtilityServiceIds,
             PaymentMethod = request.PaymentMethod
         };
 
@@ -65,5 +69,16 @@ public class ReservationsController : ApiControllerBase {
         var result = await Mediator.Send(command);
         return Ok(Result<PaginatedList<ReservationDto>>.Succeed(result));
     }
+    
+    [HttpPut("{reservationid:guid}")]
+    public async Task<ActionResult<Result<ReservationDto>>> UpdateReservation([FromRoute] Guid reservationid, [FromBody] UpdateReservationRequest request) {
+        var command = new UpdateReservationCommand() {
+            Id = reservationid,
+            Status = request.Status,
+            IsFullPaid = request.IsFullPaid,
+        };
 
+        var result = await Mediator.Send(command);
+        return Ok(Result<ReservationDto>.Succeed(result));
+    }
 }

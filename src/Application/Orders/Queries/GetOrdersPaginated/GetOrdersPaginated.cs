@@ -31,7 +31,6 @@ public class GetOrdersPaginatedQueryHandler : IRequestHandler<GetOrdersPaginated
             .Include(x => x.Table)
             .Include(x => x.Voucher)
             .Include(x => x.User)
-            .Include(x => x.Branch)
             .AsQueryable();
 
         return await query.ListPaginateWithSortAsync<Order, OrderDto>

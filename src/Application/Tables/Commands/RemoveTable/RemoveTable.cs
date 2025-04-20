@@ -8,8 +8,8 @@ public record RemoveTableCommand: IRequest<TableDto> {
 }
 
 public class RemoveTableCommandHandler: IRequestHandler<RemoveTableCommand, TableDto> {
-    private IApplicationDbContext _context;
-    private IMapper _mapper;
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
     public RemoveTableCommandHandler(IApplicationDbContext context, IMapper mapper) {
         _context = context;

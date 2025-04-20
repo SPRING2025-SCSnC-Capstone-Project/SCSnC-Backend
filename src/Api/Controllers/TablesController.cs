@@ -12,7 +12,8 @@ public class TablesController: ApiControllerBase {
     public async Task<ActionResult<Result<TableDto>>> AddTable([FromBody] AddTableRequest request) {
         var command = new AddTableCommand() {
             TableNumber = request.TableNumber,
-            SeatAmount = request.SeatAmount
+            SeatAmount = request.SeatAmount,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(command);
@@ -37,6 +38,8 @@ public class TablesController: ApiControllerBase {
             Id = id,
             TableNumber = request.TableNumber,
             SeatAmount = request.SeatAmount,
+            BranchId = request.BranchId,
+            IsAvailable = request.IsAvailable,
         };
 
         var result = await Mediator.Send(command);
