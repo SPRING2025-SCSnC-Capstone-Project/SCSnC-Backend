@@ -12,10 +12,13 @@ public record CreateReservationCommand : IRequest<ResponseReservationDto> {
     public DateOnly ReservationDate { get; init; }
     public Guid WorkspaceId { get; init; }
     public double Deposit { get; init; }
-    public Guid UserId { get; init; }
+    public Guid? UserId { get; init; }
+    public string PhoneNumber { get; init; } = null!;
+    public string Email { get; init; } = null!;
     public double TotalPrice { get; init; }
     public Guid[] SlotIds { get; init; } = null!;
-    public string PaymentMethod { get; init; }
+    public Guid[]? WorkspaceUtilityServiceIds { get; set; } 
+    public string PaymentMethod { get; init; } = null!;
 }
 
 public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ResponseReservationDto> {
@@ -44,9 +47,11 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
         }
 
         var reservedSlotsToAdd = new List<ReservedSlot>(); 
+        var reservationUtilityServicesToAdd = new List<ReservationUtilityService>();
 
         foreach (var slotId in request.SlotIds) {
-            var slot = await _context.Slots.FirstOrDefaultAsync(x => x.Id == slotId && x.IsActive, cancellationToken);
+            var slot = await _context.Slots.FirstOrDefaultAsync(x => x.Id == slotId 
+                    && x.IsActive, cancellationToken);
             
             if (slot is null) {
                 throw new KeyNotFoundException($"Slot with Id {slotId} does not exist");
@@ -57,13 +62,28 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             }
         }
 
+        if (request.WorkspaceUtilityServiceIds != null) {
+            foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds) {
+                var workspaceUtilityService = await _context.WorkspaceUtilityServices.FirstOrDefaultAsync(
+                    x => x.Id == workspaceUtilityServiceId, cancellationToken
+                );
+
+                if (workspaceUtilityService is null) {
+                    throw new KeyNotFoundException($"Workspace utility service with Id {workspaceUtilityServiceId} does not exist");
+                }
+            }
+        }
+
         var reservation = new Reservation() {
             UserId = request.UserId,
+            PhoneNumber = request.PhoneNumber,
+            Email = request.Email,
             WorkspaceId = request.WorkspaceId,
             Deposit = request.Deposit,
             IsFullPaid = false,
             TotalPrice = request.TotalPrice,
-            ReserveDate = LocalDate.FromDateOnly(request.ReservationDate)
+            ReserveDate = LocalDate.FromDateOnly(request.ReservationDate),
+            Status = "Pending",
         };
 
         var result = await _context.Reservations.AddAsync(reservation, cancellationToken);
@@ -79,6 +99,18 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
 
         await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
 
+        foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds) {
+            var reservationUtilityService = new ReservationUtilityService() {
+                ReservationId = result.Entity.Id,
+                WorkspaceUtilityServiceId = workspaceUtilityServiceId,
+            };
+
+
+            reservationUtilityServicesToAdd.Add(reservationUtilityService);
+        }
+
+        await _context.ReservationUtilityServices.AddRangeAsync(reservationUtilityServicesToAdd, cancellationToken);
+
         await _context.SaveChangesAsync(cancellationToken);
 
         var createdReservation = await _context.Reservations
@@ -87,6 +119,9 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             .Include(x => x.User)
             .Include(x => x.ReservedSlots)
             .ThenInclude(y => y.Slot)
+            .Include(x => x.ReservationUtilityServices)
+            .ThenInclude(y => y.WorkspaceUtilityService)
+            .ThenInclude(z => z.UtilityService)
             .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken);
 
         var returnReservationData = _mapper.Map<ResponseReservationDto>(createdReservation);
@@ -98,7 +133,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 {
                     vnp_CreateDate = DateTime.Now.ToString("yyyyMMddHHmmss"),
                     vnp_IpAddr = IPAddressHelper.GetLocalIPAddress(),
-                    vnp_Amount = (decimal)createdReservation.Deposit * 100,
+                    vnp_Amount = (decimal)createdReservation!.Deposit * 100,
                     vnp_OrderType = "other",
                     vnp_OrderInfo = $"Date: {DateTime.Now.ToString("yyyyMMddHHmmss")}; Total Price: {createdReservation.Deposit}",
                     vnp_TxnRef = createdReservation.Id.ToString(),
@@ -135,8 +170,9 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
 
     private async Task<bool> CheckConflict(DateOnly reservationDate, Guid slotId, CancellationToken cancellationToken) {
         var conflict = await _context.ReservedSlots.Include(x => x.Reservation).FirstOrDefaultAsync(x => 
-                x.Reservation!.ReserveDate == LocalDate.FromDateOnly(reservationDate) && 
-                x.SlotId == slotId, cancellationToken);
+                x.Reservation!.ReserveDate == LocalDate.FromDateOnly(reservationDate) 
+                && (x.Reservation.Status.Equals("Pending") || x.Reservation.Status.Equals("Booked"))
+                && x.SlotId == slotId, cancellationToken);
 
         return conflict is not null;
     }

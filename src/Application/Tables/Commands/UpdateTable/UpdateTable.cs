@@ -7,14 +7,15 @@ namespace Application.Tables.Commands;
 
 public record UpdateTableCommand: IRequest<TableDto> {
     public Guid Id { get; init; }
+    public Guid BranchId { get; init; }
     public int TableNumber { get; init; }
     public int SeatAmount { get; init; }
     public bool IsAvailable { get; init; }
 }
 
 public class UpdateTableCommandHandler: IRequestHandler<UpdateTableCommand, TableDto> {
-    private IApplicationDbContext _context;
-    private IMapper _mapper;
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
     public UpdateTableCommandHandler(IApplicationDbContext context, IMapper mapper) {
         _context = context;
@@ -22,7 +23,9 @@ public class UpdateTableCommandHandler: IRequestHandler<UpdateTableCommand, Tabl
     }
 
     public async Task<TableDto> Handle(UpdateTableCommand request, CancellationToken cancellationToken) {
-        var table = await _context.Tables.FirstOrDefaultAsync(x => x.Id == request.Id  && x.IsActive, cancellationToken);
+        var table = await _context.Tables.FirstOrDefaultAsync(x => x.Id == request.Id  
+            && x.BranchId == request.BranchId
+            && x.IsActive, cancellationToken);
 
         if (table is null) {
             throw new KeyNotFoundException($"Table with Id {request.Id} does not exist.");
@@ -34,6 +37,7 @@ public class UpdateTableCommandHandler: IRequestHandler<UpdateTableCommand, Tabl
             throw new ConflictException($"Table with number {request.TableNumber} already exists");
         }
 
+        table.BranchId = request.BranchId;
         table.TableNumber = request.TableNumber;
         table.SeatAmount = request.SeatAmount;
         table.IsAvailable = request.IsAvailable;
