@@ -11,11 +11,14 @@ public class Table : BaseEntity
         Orders = new HashSet<Order>();
     }
     public int TableNumber { get; set; }
+    [ForeignKey("BranchId")]
+    public Guid BranchId { get; set; }
     public int SeatAmount { get; set; }
     public bool IsAvailable { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
     public bool IsActive { get; set; }
 
+    public virtual Branch Branch { get; set; }
     public virtual ICollection<Order> Orders { get; set; }
 }

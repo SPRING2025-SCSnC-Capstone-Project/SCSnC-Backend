@@ -22,7 +22,10 @@ public class WorkspacesController: ApiControllerBase {
             WorkspaceNumber = request.WorkspaceNumber,
             WorkspaceTypeId = request.WorkspaceTypeId,
             MediaTypes = mediaTypes,
-            MediaUrls = mediaUrls
+            MediaUrls = mediaUrls,
+            WorkspaceName = request.WorkspaceName,
+            Description = request.Description,
+            BranchId = request.BranchId,
         };
 
         var result = await Mediator.Send(command);
@@ -47,6 +50,9 @@ public class WorkspacesController: ApiControllerBase {
             Id = id,
             WorkspaceNumber = request.WorkspaceNumber,
             WorkspaceTypeId = request.WorkspaceTypeId,
+            WorkspaceName = request.WorkspaceName,
+            Description = request.Description,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(command);
