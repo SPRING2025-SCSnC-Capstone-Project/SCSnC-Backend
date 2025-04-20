@@ -6,7 +6,8 @@ public class Branch: BaseEntity
     {
         ItemPricesAtBranches = new HashSet<ItemPriceAtBranch>();
         ToppingPricesAtBranches = new HashSet<ToppingPriceAtBranch>();
-        Orders = new HashSet<Order>();
+        Workspaces = new HashSet<Workspace>();
+        Tables = new HashSet<Table>();
     }
     
     public string BranchName { get; set; }
@@ -21,5 +22,6 @@ public class Branch: BaseEntity
     
     public virtual ICollection<ItemPriceAtBranch> ItemPricesAtBranches { get; set; }
     public virtual ICollection<ToppingPriceAtBranch> ToppingPricesAtBranches { get; set; }
-    public virtual ICollection<Order> Orders { get; set; }
+    public virtual ICollection<Workspace> Workspaces { get; set; }
+    public virtual ICollection<Table> Tables { get; set; }
 }
