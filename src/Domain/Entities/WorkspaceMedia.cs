@@ -4,11 +4,8 @@ public class WorkspaceMedia: BaseEntity
 {
     [ForeignKey("WorkspaceId")]
     public Guid WorkspaceId { get; set; }
-    public string MediaType { get; set; }
-    public string MediaUrl { get; set; }
-    public bool IsActive { get; set; }
-    public LocalDateTime CreatedAt { get; set; }
-    public LocalDateTime LastUpdatedAt { get; set; }
+    public string MediaType { get; set; } = null!;
+    public string MediaUrl { get; set; } = null!;
     
     public virtual Workspace Workspace { get; set; }
 }

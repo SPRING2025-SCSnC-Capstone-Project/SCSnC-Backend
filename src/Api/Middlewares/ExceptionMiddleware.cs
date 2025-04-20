@@ -30,7 +30,8 @@ public class ExceptionMiddleware: IMiddleware {
             { typeof(ConflictException), HandleConflictException },
             { typeof(RequestValidationException), HandleValidationException },
             { typeof(AuthenticationFailureException), HandleAuthenticationFailureException },
-            { typeof(SecurityTokenValidationException), HandleSecurityTokenValidationException }
+            { typeof(SecurityTokenValidationException), HandleSecurityTokenValidationException },
+            { typeof(InvalidDataException), HandleInvalidDataException }
         };
     }
 
@@ -88,6 +89,11 @@ public class ExceptionMiddleware: IMiddleware {
     private static async void HandleSecurityTokenValidationException(HttpContext context, Exception ex)
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        await WriteExceptionMessageAsync(context, ex);
+    }
+
+    private static async void HandleInvalidDataException(HttpContext context, Exception ex) {
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
         await WriteExceptionMessageAsync(context, ex);
     }
 
