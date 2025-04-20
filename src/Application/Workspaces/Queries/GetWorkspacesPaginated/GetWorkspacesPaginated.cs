@@ -32,13 +32,13 @@ public class GetWorkspacesPaginatedQueryHandler : IRequestHandler<GetWorkspacesP
     {
         try
         {
-            var workspaces = _context.Workspaces.Include(x => x.WorkspaceType)
+            var workspaces = _context.Workspaces.Include(x => x.WorkspaceTypeAtBranch.WorkspaceType)
                 .Where(x => x.IsActive)
                 .AsQueryable();
 
             if (request.Filter != null && !request.Filter.Equals(string.Empty))
             {
-                workspaces = workspaces.Where(x => x.WorkspaceType.WorkspaceTypeName == request.Filter);
+                workspaces = workspaces.Where(x => x.WorkspaceTypeAtBranch.WorkspaceType.WorkspaceTypeName == request.Filter);
             }
 
             return await workspaces.ListPaginateWithSortAsync<Workspace, WorkspaceDto>(

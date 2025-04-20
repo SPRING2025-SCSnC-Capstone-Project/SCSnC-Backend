@@ -19,7 +19,6 @@ public class ReservationDto : BaseDto, IMapFrom<Reservation> {
     public string PaymentLink { get; set; }
     public Event? Event { get; set; }
 
-
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Reservation, ReservationDto>()
@@ -42,6 +41,7 @@ public class ResponseReservationDto : BaseDto, IMapFrom<Reservation> {
     //public DateTimeOffset StartDate { get; set; }
     //public DateTimeOffset EndDate { get; set; }
     public Event? Event { get; set; }
+    public BranchDto Branch { get; set; }
 
     public void Mapping(Profile profile) {
         profile.CreateMap<Reservation, ResponseReservationDto>()

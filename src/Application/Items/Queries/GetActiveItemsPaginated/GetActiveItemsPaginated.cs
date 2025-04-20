@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
+using System.Diagnostics;
 
 namespace Application.Items.Queries.GetActiveItemsPaginated;
 
@@ -30,28 +31,36 @@ public class GetActiveItemsPaginatedQueryHandler : IRequestHandler<GetActiveItem
     public async Task<PaginatedList<ItemDto>> Handle(GetActiveItemsPaginatedQuery request,
         CancellationToken cancellationToken)
     {
-        var query = string.IsNullOrEmpty(request.FilterByCategory) ? 
-            _context.Items
-            .Include(x => x.ItemCategory)
-            .Include(x => x.ItemWithSizes)
-            .ThenInclude(x => x.Size)
-            .Include(x => x.ItemPricesAtBranches.Where(y => y.BranchId == request.BranchId))
-            .AsQueryable() :
-            _context.Items
-            .Include(x => x.ItemCategory)
-            .Include(x => x.ItemWithSizes)
-            .ThenInclude(x => x.Size)
-            .Include(x => x.ItemPricesAtBranches.Where(y => y.BranchId == request.BranchId))
-            .Where(x => x.ItemCategory.CategoryName.ToLower().Contains(request.FilterByCategory.ToLower()))
-            .AsQueryable();
+        try
+        {
+            var query = string.IsNullOrEmpty(request.FilterByCategory) ?
+                _context.Items
+                .Include(x => x.ItemCategory)
+                .Include(x => x.ItemWithSizes)
+                .ThenInclude(x => x.Size)
+                .Include(x => x.ItemPricesAtBranches.Where(y => y.BranchId == request.BranchId))
+                .AsQueryable() :
+                _context.Items
+                .Include(x => x.ItemCategory)
+                .Include(x => x.ItemWithSizes)
+                .ThenInclude(x => x.Size)
+                .Include(x => x.ItemPricesAtBranches.Where(y => y.BranchId == request.BranchId))
+                .Where(x => x.ItemCategory.CategoryName.ToLower().Contains(request.FilterByCategory.ToLower()))
+                .AsQueryable();
 
-        return await query.ListPaginateWithSortAsync<Item, ItemDto>(
-            request.Page,
-            request.Size,
-            request.SortBy,
-            request.SortOrder,
-            _mapper.ConfigurationProvider,
-            cancellationToken
-        );
+            return await query.ListPaginateWithSortAsync<Item, ItemDto>(
+                request.Page,
+                request.Size,
+                request.SortBy,
+                request.SortOrder,
+                _mapper.ConfigurationProvider,
+                cancellationToken
+            );
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine( ex );
+            throw new Exception(ex.Message);
+        }
     }
 }

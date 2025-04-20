@@ -34,7 +34,8 @@ public class OrdersController: ApiControllerBase
             VoucherId = request.VoucherId,
             OrderDetails = request.OrderDetails,
             TotalPrice = request.TotalPrice,
-            PaymentMethod = request.PaymentMethod
+            PaymentMethod = request.PaymentMethod,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(command);

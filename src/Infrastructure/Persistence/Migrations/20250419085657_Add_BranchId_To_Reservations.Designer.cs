@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250419085657_Add_BranchId_To_Reservations")]
+    partial class Add_BranchId_To_Reservations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -890,15 +893,10 @@ namespace Infrastructure.Persistence
                     b.Property<int>("WorkspaceNumber")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("WorkspaceTypeAtBranchId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("WorkspaceTypeId")
+                    b.Property<Guid>("WorkspaceTypeId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("WorkspaceTypeAtBranchId");
 
                     b.HasIndex("WorkspaceTypeId");
 
@@ -951,36 +949,6 @@ namespace Infrastructure.Persistence
                     b.HasKey("Id");
 
                     b.ToTable("WorkspaceTypes");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WorkspaceTypeAtBranch", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("BranchId")
-                        .HasColumnType("uuid");
-
-                    b.Property<LocalDateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<LocalDateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<double>("PriceAdjust")
-                        .HasColumnType("double precision");
-
-                    b.Property<Guid>("WorkspaceTypeId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
-
-                    b.HasIndex("WorkspaceTypeId");
-
-                    b.ToTable("WorkspaceTypeAtBranches");
                 });
 
             modelBuilder.Entity("Domain.Entities.Blog", b =>
@@ -1309,17 +1277,13 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.Workspace", b =>
                 {
-                    b.HasOne("Domain.Entities.WorkspaceTypeAtBranch", "WorkspaceTypeAtBranch")
+                    b.HasOne("Domain.Entities.WorkspaceType", "WorkspaceType")
                         .WithMany("Workspaces")
-                        .HasForeignKey("WorkspaceTypeAtBranchId")
+                        .HasForeignKey("WorkspaceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.WorkspaceType", null)
-                        .WithMany("Workspaces")
-                        .HasForeignKey("WorkspaceTypeId");
-
-                    b.Navigation("WorkspaceTypeAtBranch");
+                    b.Navigation("WorkspaceType");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkspaceMedia", b =>
@@ -1331,25 +1295,6 @@ namespace Infrastructure.Persistence
                         .IsRequired();
 
                     b.Navigation("Workspace");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WorkspaceTypeAtBranch", b =>
-                {
-                    b.HasOne("Domain.Entities.Branch", "Branch")
-                        .WithMany("WorkspaceTypesAtBranches")
-                        .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.WorkspaceType", "WorkspaceType")
-                        .WithMany("WorkspacesAtBranches")
-                        .HasForeignKey("WorkspaceTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Branch");
-
-                    b.Navigation("WorkspaceType");
                 });
 
             modelBuilder.Entity("Domain.Entities.Blog", b =>
@@ -1366,8 +1311,6 @@ namespace Infrastructure.Persistence
                     b.Navigation("Reservations");
 
                     b.Navigation("ToppingPricesAtBranches");
-
-                    b.Navigation("WorkspaceTypesAtBranches");
                 });
 
             modelBuilder.Entity("Domain.Entities.Event", b =>
@@ -1472,13 +1415,6 @@ namespace Infrastructure.Persistence
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkspaceType", b =>
-                {
-                    b.Navigation("Workspaces");
-
-                    b.Navigation("WorkspacesAtBranches");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WorkspaceTypeAtBranch", b =>
                 {
                     b.Navigation("Workspaces");
                 });

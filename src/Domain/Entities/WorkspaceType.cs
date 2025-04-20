@@ -15,4 +15,6 @@ public class WorkspaceType : BaseEntity
     public bool IsActive { get; set; }
     
     public virtual ICollection<Workspace> Workspaces { get; set; }
+    public virtual ICollection<WorkspaceTypeAtBranch> WorkspacesAtBranches { get; set; }
+
 }

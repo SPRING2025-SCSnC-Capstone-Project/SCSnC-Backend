@@ -20,4 +20,5 @@ public class CreateReservationRequest {
     public Guid[] SlotIds { get; set; }
     public string PaymentMethod { get; set; }
     public bool IsEventPrivate { get; set; }
+    public Guid BranchId { get; set; }
 } 

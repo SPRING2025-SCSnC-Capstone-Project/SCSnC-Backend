@@ -23,6 +23,8 @@ public class Reservation : BaseEntity
     public string? Note { get; set; }
     public string Email { get; set; }
     public string? Phone { get; set; }
+    [ForeignKey("BranchId")]
+    public Guid BranchId { get; set; }
     //public DateTimeOffset StartDate { get; set; }
     //public DateTimeOffset EndDate { get; set; }
     // public LocalDateTime CreatedAt { get; set; }
@@ -31,6 +33,7 @@ public class Reservation : BaseEntity
 
     public virtual Workspace Workspace { get; set; }
     public virtual User User { get; set; }
+    public virtual Branch Branch { get; set; }
     public virtual ICollection<ReservedSlot> ReservedSlots { get; set; } 
     public virtual ICollection<Transaction> Transactions { get; set; }
 }

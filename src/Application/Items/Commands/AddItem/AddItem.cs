@@ -35,9 +35,12 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
         // Credits to TriHTM171368 for patching this code
         try
         {
+            double basePrice = 65.000;
+            double[] priceArr = [35.000, -15.000, -1.000];
             List<ItemCategory> categories = _context.ItemCategories.ToList();
             List<Size> sizes = _context.Sizes.ToList();
             List<Item> items = new List<Item>();
+            List<Branch> branches = _context.Branches.ToList();
             if (request.AutoCreate.Value)
             {
                 for (int i = 0; i < categories.Count; i++)
@@ -74,6 +77,23 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                         await _context.ItemWithSizes.AddAsync(itemWithSize, cancellationToken);
                     }
                 }
+
+                for(int i = 0; i < branches.Count; i++)
+                {
+                    for (int j = 0; j < items.Count; j++)
+                    {
+                        var itemPriceAtBranch = new ItemPriceAtBranch
+                        {
+                            ItemId = items[j].Id,
+                            BranchId = branches[i].Id,
+                            Price = basePrice + priceArr[i],
+                            CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                            LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
+                        };
+                        await _context.ItemPricesAtBranches.AddAsync(itemPriceAtBranch, cancellationToken);
+                    }
+                }
+
                 await _context.SaveChangesAsync(cancellationToken);
                 return _mapper.Map<ItemDto>(items[items.Count - 1]);
 

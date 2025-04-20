@@ -12,13 +12,13 @@ public class Workspace : BaseEntity
         WorkspaceMedias = new HashSet<WorkspaceMedia>();
     }
     public int WorkspaceNumber { get; set; }
-    [ForeignKey("WorkspaceTypeId")]
-    public Guid WorkspaceTypeId { get; set; }
+    [ForeignKey("WorkspaceTypeAtBranchId")]
+    public Guid WorkspaceTypeAtBranchId { get; set; }
     public bool IsAvailable { get; set; }
     public bool IsActive { get; set; }
     public double PricePerHour { get; set; }
     
-    public virtual WorkspaceType WorkspaceType { get; set; }
+    public virtual WorkspaceTypeAtBranch WorkspaceTypeAtBranch { get; set; }
     public virtual ICollection<Reservation> Reservations { get; set; }
     public virtual ICollection<Order> Orders { get; set; }
     public virtual ICollection<WorkspaceMedia> WorkspaceMedias { get; set; }

@@ -32,6 +32,7 @@ public interface IApplicationDbContext
     public DbSet<Workspace> Workspaces { get; }
     public DbSet<WorkspaceMedia> WorkspaceMedias { get; }
     public DbSet<WorkspaceType> WorkspaceTypes { get; }
+    public DbSet<WorkspaceTypeAtBranch> WorkspaceTypeAtBranches { get; }
     public DbSet<RefreshToken> RefreshTokens { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

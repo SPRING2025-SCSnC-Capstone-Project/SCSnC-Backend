@@ -23,12 +23,18 @@ public class GetEventByIdQueryHandler: IRequestHandler<GetEventByIdQuery, EventD
     {
         var entity = _context.Events
             .Include(x => x.Reservation)
-            .ThenInclude(y => y.Workspace)
-            .ThenInclude(z => z.WorkspaceType)
+                .ThenInclude(y => y.Workspace)
+                .ThenInclude(z => z.WorkspaceTypeAtBranch)
+                .ThenInclude(w => w.WorkspaceType)
             .Include(x => x.Reservation)
-            .ThenInclude(y => y.User)
+                .ThenInclude(y => y.Workspace)
+                .ThenInclude(z => z.WorkspaceTypeAtBranch)
+                .ThenInclude(w => w.Branch)
+            .AsNoTracking()
+            .Include(x => x.Reservation)
+                .ThenInclude(y => y.User)   
             .Include(x => x.EventSlots)
-            .ThenInclude(y => y.Slot)
+                .ThenInclude(y => y.Slot)
             .FirstOrDefaultAsync(x => x.IsActive == true && x.Id == request.Id, cancellationToken);
         
         if (entity is null)

@@ -46,6 +46,8 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
 
         string[] workspaces = "phòng họp:l:200000,phòng cặp đôi:s:50000,phòng trà:m:100000,phòng đơn:xs:30000".Split(',');
         List<WorkspaceType> workspaceTypes = _context.WorkspaceTypes.ToList();
+        List<Branch> branches = _context.Branches.ToList();
+        List<WorkspaceTypeAtBranch> workspaceTypeAtBranches = new List<WorkspaceTypeAtBranch>();
         dynamic result = "";
 
         var addedWorkspace = new Workspace();
@@ -54,27 +56,61 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
 
         if (_context.Workspaces.ToList().Count <= 0)
         {
-            for (int i = 0; i < workspaces.Length; i++)
+            //for (int i = 0; i < workspaces.Length; i++)
+            //{
+            //    for (int j = 0; j < 10; j++)
+            //    {
+            //        var entity = new Workspace()
+            //        {
+            //            WorkspaceNumber = j + 1,
+            //            IsAvailable = true,
+            //            IsActive = true,
+            //            PricePerHour = double.Parse(workspaces[i].Split(":")[2]),
+            //            //WorkspaceImageUrl = request.WorkspaceImageUrl,
+            //            WorkspaceTypeId = workspaceTypes.FirstOrDefault(x => x.WorkspaceTypeName.Equals(workspaces[i].Split(":")[1])).Id,
+            //        };
+            //        result = await _context.Workspaces.AddAsync(entity, cancellationToken);
+            //        addedWorkspace = await _context.Workspaces
+            //            .Include(x => x.WorkspaceMedias)
+            //            .FirstOrDefaultAsync(x => x.Id == entity.Id, cancellationToken);
+            //    }
+            //}
+
+            foreach (var branch in branches)
             {
-                for (int j = 0; j < 10; j++)
+                foreach (var wt in workspaceTypes)
+                {
+                    var entity = new WorkspaceTypeAtBranch()
+                    {
+                        BranchId = branch.Id,
+                        WorkspaceTypeId = wt.Id,
+                        PriceAdjust = wt.PricePerHour - 0,
+                        CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                        LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
+                    };
+                    result = await _context.WorkspaceTypeAtBranches.AddAsync(entity, cancellationToken);
+                    workspaceTypeAtBranches.Add(result.Entity);
+                }
+            }
+            foreach (var workspaceTypeAtBranch in workspaceTypeAtBranches)
+            {
+                for(int i = 0; i < 10; i++)
                 {
                     var entity = new Workspace()
                     {
-                        WorkspaceNumber = j + 1,
+                        WorkspaceNumber = i + 1,
                         IsAvailable = true,
                         IsActive = true,
-                        PricePerHour = double.Parse(workspaces[i].Split(":")[2]),
+                        PricePerHour = 0,
                         //WorkspaceImageUrl = request.WorkspaceImageUrl,
-                        WorkspaceTypeId = workspaceTypes.FirstOrDefault(x => x.WorkspaceTypeName.Equals(workspaces[i].Split(":")[1])).Id,
+                        WorkspaceTypeAtBranchId = workspaceTypeAtBranch.Id,
                     };
-                    result = await _context.Workspaces.AddAsync(entity, cancellationToken);
-                    addedWorkspace = await _context.Workspaces
-                        .Include(x => x.WorkspaceMedias)
-                        .FirstOrDefaultAsync(x => x.Id == entity.Id, cancellationToken);
+                    await _context.Workspaces.AddAsync(entity, cancellationToken);
                 }
+
             }
         }
-        else
+        /*else
         {
             foreach (var mediaType in request.MediaTypes)
             {
@@ -112,7 +148,7 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
             addedWorkspace = await _context.Workspaces
                 .Include(x => x.WorkspaceMedias)
                 .FirstOrDefaultAsync(x => x.Id == entity.Id, cancellationToken);
-        }
+        }*/
 
         await _context.SaveChangesAsync(cancellationToken);
 

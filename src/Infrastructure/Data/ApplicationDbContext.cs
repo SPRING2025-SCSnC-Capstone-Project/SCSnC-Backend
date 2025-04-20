@@ -40,9 +40,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<WorkspaceMedia> WorkspaceMedias => Set<WorkspaceMedia>();
     public DbSet<WorkspaceType> WorkspaceTypes => Set<WorkspaceType>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-    
+    public DbSet<WorkspaceTypeAtBranch> WorkspaceTypeAtBranches => Set<WorkspaceTypeAtBranch>();
+
     #endregion
-    
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

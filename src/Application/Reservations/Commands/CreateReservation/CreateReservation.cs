@@ -29,6 +29,7 @@ public record CreateReservationCommand : IRequest<ResponseReservationDto> {
     public double? EntranceFee { get; init; }
     public string PaymentMethod { get; init; }
     public bool IsEventPrivate { get; init; } = false;
+    public Guid BranchId { get; init; }
 }
 
 public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ResponseReservationDto> {
@@ -73,6 +74,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             //    throw new ConflictException("One or more slots have already been reserved");
             //}
         }
+        Debug.WriteLine(request.BranchId);
         var reservation = new Reservation()
         {
             UserId = request.UserId,
@@ -86,6 +88,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             Note = request.Note,
             //EndDate = request.endDate,
             //StartDate = request.startDate,
+            BranchId = request.BranchId,
         };
         Event reservationEvent = new Event();
         var newReservation = await _context.Reservations.AddAsync(reservation, cancellationToken);
@@ -127,12 +130,18 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
 
             var added_event = await _context.Events
                 .Include(x => x.Reservation)
-                .ThenInclude(y => y.Workspace)
-                .ThenInclude(z => z.WorkspaceType)
+                    .ThenInclude(y => y.Workspace)
+                    .ThenInclude(z => z.WorkspaceTypeAtBranch)
+                    .ThenInclude(w => w.WorkspaceType)
                 .Include(x => x.Reservation)
-                .ThenInclude(y => y.User)
+                    .ThenInclude(y => y.Workspace)
+                    .ThenInclude(z => z.WorkspaceTypeAtBranch)
+                    .ThenInclude(w => w.Branch)
+                .AsNoTracking()
+                .Include(x => x.Reservation)
+                    .ThenInclude(y => y.User)
                 .Include(x => x.EventSlots)
-                .ThenInclude(y => y.Slot)
+                    .ThenInclude(y => y.Slot)
                 .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken);
             await _context.Events.AddAsync(entity, cancellationToken);
             reservationEvent = added_event;
@@ -157,10 +166,15 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
 
         var createdReservation = await _context.Reservations
             .Include(x => x.Workspace)
-            .ThenInclude(y => y.WorkspaceType)
+                .ThenInclude(y => y.WorkspaceTypeAtBranch)
+                .ThenInclude(z => z.WorkspaceType)
+            .Include(x => x.Workspace)
+                .ThenInclude(y => y.WorkspaceTypeAtBranch)
+                .ThenInclude(z => z.Branch)
+            .AsNoTracking()
             .Include(x => x.User)
             .Include(x => x.ReservedSlots)
-            .ThenInclude(y => y.Slot)
+                .ThenInclude(y => y.Slot)
             .FirstOrDefaultAsync(x => x.Id == newReservation.Entity.Id, cancellationToken);
 
         var returnReservationData = _mapper.Map<ResponseReservationDto>(createdReservation);

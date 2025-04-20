@@ -14,6 +14,7 @@ public record GetWorkspacesByTimeAndTypeQuery : IRequest<List<WorkspaceDto>>
     public Guid[] SlotIds { get; init; } = null!;
     public DateOnly ReservationDate { get; init; }
     public Guid WorkspaceTypeId { get; init; }
+    public Guid BranchId { get; init; }
 
 }
 
@@ -33,7 +34,7 @@ public class GetWorkspacesByTimePaginatedQueryHandler : IRequestHandler<GetWorks
         try
         {
             List<WorkspaceDto> workspaceDtos = new List<WorkspaceDto>();
-            var workspaces = GetRoom(request.WorkspaceTypeId, request.ReservationDate, request.SlotIds).Result.AsQueryable();
+            var workspaces = GetRoom(request.WorkspaceTypeId, request.ReservationDate, request.SlotIds, request.BranchId).Result.AsQueryable();
 
             foreach (var workspace in workspaces)
             {
@@ -51,13 +52,43 @@ public class GetWorkspacesByTimePaginatedQueryHandler : IRequestHandler<GetWorks
 
     }
 
-    async Task<List<Workspace>> GetRoom(Guid workspaceTypeId, DateOnly reserveDate, Guid[] slotsId)
+    async Task<List<Workspace>> GetRoom(Guid workspaceTypeId, DateOnly reserveDate, Guid[] slotsId, Guid branchId)
     {
-        var allReservationByWorkspaceTypeAndReservedDate = _context.Reservations.Include(x => x.ReservedSlots).ThenInclude(y => y.Slot).Include(x => x.Workspace).Where(x => x.Workspace.WorkspaceTypeId.Equals(workspaceTypeId) && x.ReserveDate.Equals(new LocalDate(reserveDate.Year, reserveDate.Month, reserveDate.Day)) && !x.IsFullPaid).AsQueryable();
+        var allReservationByWorkspaceTypeAndReservedDate = _context.Reservations
+            .Include(x => x.ReservedSlots)
+                .ThenInclude(y => y.Slot)
+            .Include(x => x.Workspace)
+                .ThenInclude(y => y.WorkspaceTypeAtBranch)
+                .ThenInclude(w => w.WorkspaceType)
+            .Include(x => x.Workspace)
+                .ThenInclude(y => y.WorkspaceTypeAtBranch)
+                .ThenInclude(z => z.Branch)
+            .AsNoTracking()
+            .Include(x => x.Transactions)
+            .Where(x => x.Workspace.WorkspaceTypeAtBranch.WorkspaceType.Id.Equals(workspaceTypeId)
+            && x.ReserveDate.Equals(new LocalDate(reserveDate.Year, reserveDate.Month, reserveDate.Day)) 
+            && x.Workspace.WorkspaceTypeAtBranch.Branch.Id.Equals(branchId))
+            .AsQueryable();
+
+        allReservationByWorkspaceTypeAndReservedDate = allReservationByWorkspaceTypeAndReservedDate.Where(x => x.Transactions.ToList()[0].TransactionStatus != "Failed");
+
+        Debug.WriteLine(allReservationByWorkspaceTypeAndReservedDate.ToList().Count);
+
         var requestedTimeSlot = _context.Slots.Where(x => slotsId.Contains(x.Id)).AsQueryable();
         int[] requestedTimeRange = requestedTimeSlot.Select(x => x.SlotNumber).ToArray();
         List<Workspace> reservedWorkspaces = new List<Workspace>();
-        List<Workspace> availableWorkspaces = _context.Workspaces.Include(x => x.WorkspaceMedias).Include(x => x.WorkspaceType).Where(x => x.IsActive && x.WorkspaceType.Id.Equals(workspaceTypeId)).ToList();
+        List<Workspace> availableWorkspaces = _context.Workspaces
+            .Include(x => x.WorkspaceMedias)
+            .Include(x => x.WorkspaceTypeAtBranch)
+                .ThenInclude(y => y.WorkspaceType)
+            .Include(x => x.WorkspaceTypeAtBranch)
+                .ThenInclude(y => y.Branch)
+            .AsNoTracking()
+            .Where(x => x.IsActive && x.WorkspaceTypeAtBranch.WorkspaceType.Id.Equals(workspaceTypeId) && x.WorkspaceTypeAtBranch.Branch.Id.Equals(branchId))
+            .ToList();
+
+        Debug.WriteLine(availableWorkspaces.Count);
+
         if (!allReservationByWorkspaceTypeAndReservedDate.Any())
         {
             return availableWorkspaces;

@@ -17,7 +17,7 @@ public class RemoveWorkspaceCommandHandler: IRequestHandler<RemoveWorkspaceComma
     }
 
     public async Task<WorkspaceDto> Handle(RemoveWorkspaceCommand request, CancellationToken cancellationToken) {
-        var workspace = await _context.Workspaces.Include(x => x.WorkspaceType).FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
+        var workspace = await _context.Workspaces.Include(x => x.WorkspaceTypeAtBranch.WorkspaceType).FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
 
         if (workspace is null) {
             throw new KeyNotFoundException($"Workspace with Id {request.Id} does not exist");

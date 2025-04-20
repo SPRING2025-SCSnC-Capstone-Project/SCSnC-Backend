@@ -21,7 +21,7 @@ public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceComma
     }
 
     public async Task<WorkspaceDto> Handle(UpdateWorkspaceCommand request, CancellationToken cancellationToken) {
-        var workspace = await _context.Workspaces.Include(x => x.WorkspaceType).FirstOrDefaultAsync(x => x.Id == request.Id  && x.IsActive, cancellationToken);
+        var workspace = await _context.Workspaces.Include(x => x.WorkspaceTypeAtBranch.WorkspaceType).FirstOrDefaultAsync(x => x.Id == request.Id  && x.IsActive, cancellationToken);
 
         if (workspace is null) {
             throw new KeyNotFoundException($"Workspace with Id {request.Id} does not exist.");
@@ -40,8 +40,8 @@ public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceComma
         }
 
         workspace.WorkspaceNumber = request.WorkspaceNumber;
-        workspace.WorkspaceType = workspaceType;
-        workspace.WorkspaceTypeId = request.WorkspaceTypeId;
+        workspace.WorkspaceTypeAtBranch.WorkspaceType = workspaceType;
+        workspace.WorkspaceTypeAtBranch.WorkspaceTypeId = request.WorkspaceTypeId;
 
         _context.Workspaces.Update(workspace);
         await _context.SaveChangesAsync(cancellationToken);

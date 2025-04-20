@@ -30,7 +30,12 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
     {
         var query = _context.Reservations
             .Include (x => x.Workspace)
-            .ThenInclude (y => y.WorkspaceType)
+                .ThenInclude (y => y.WorkspaceTypeAtBranch)
+                .ThenInclude(z => z.WorkspaceType)
+            .Include(x => x.Workspace)
+                .ThenInclude(y => y.WorkspaceTypeAtBranch)
+                .ThenInclude(z => z.Branch)
+            .AsNoTracking()
             .Include(x => x.User)
             .Include(x => x.ReservedSlots)
             .ThenInclude(y => y.Slot)

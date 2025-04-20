@@ -30,6 +30,7 @@ public class ReservationsController : ApiControllerBase {
             SlotIds = request.SlotIds,
             PaymentMethod = request.PaymentMethod,
             IsEventPrivate = request.IsEventPrivate,
+            BranchId = request.BranchId
         } :
         new CreateReservationCommand()
         {
@@ -50,7 +51,8 @@ public class ReservationsController : ApiControllerBase {
             EventTitle = request.EventTitle,
             SlotIds = request.SlotIds,
             PaymentMethod = request.PaymentMethod,
-            IsEventPrivate = request.IsEventPrivate
+            IsEventPrivate = request.IsEventPrivate,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(command);
@@ -76,6 +78,7 @@ public class ReservationsController : ApiControllerBase {
             Filter = request.Filter,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
+            InFuture = request.InFuture
         };
 
         var result = await Mediator.Send(command);

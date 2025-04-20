@@ -259,7 +259,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
 
         var order = new Order
         {
-            TableId = request.TableId,
+            //TableId = request.TableId,
             WorkspaceId = request.WorkspaceId,
             UserId = request.UserId,
             VoucherId = request.VoucherId,

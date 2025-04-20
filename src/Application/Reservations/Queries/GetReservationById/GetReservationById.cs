@@ -23,10 +23,10 @@ public class GetReservationByIdQueryHandler: IRequestHandler<GetReservationByIdQ
     {
         var entity = _context.Reservations
             .Include (x => x.Workspace)
-            .ThenInclude (y => y.WorkspaceType)
+            .ThenInclude (y => y.WorkspaceTypeAtBranch.WorkspaceType)
             .Include(x => x.User)
-            //.Include(x => x.ReservedSlots)
-            //.ThenInclude(y => y.Slot)
+            .Include(x => x.ReservedSlots)
+            .ThenInclude(y => y.Slot)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         
         if (entity is null)

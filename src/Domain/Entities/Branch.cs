@@ -22,4 +22,6 @@ public class Branch: BaseEntity
     public virtual ICollection<ItemPriceAtBranch> ItemPricesAtBranches { get; set; }
     public virtual ICollection<ToppingPriceAtBranch> ToppingPricesAtBranches { get; set; }
     public virtual ICollection<Order> Orders { get; set; }
+    public virtual ICollection<Reservation> Reservations { get; set; }
+    public virtual ICollection<WorkspaceTypeAtBranch> WorkspaceTypesAtBranches { get; set; }
 }

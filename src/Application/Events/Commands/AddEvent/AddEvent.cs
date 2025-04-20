@@ -114,7 +114,7 @@ public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
         var added_event = await _context.Events
             .Include(x => x.Reservation)
             .ThenInclude(y => y.Workspace)
-            .ThenInclude(z => z.WorkspaceType)
+            .ThenInclude(z => z.WorkspaceTypeAtBranch.WorkspaceType)
             .Include(x => x.Reservation)
             .ThenInclude(y => y.User)
             .Include(x => x.EventSlots)
