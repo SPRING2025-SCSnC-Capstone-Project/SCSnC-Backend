@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="UtilityServices\Commands\DeleteUtilityService\" />
       <Folder Include="Users\" />
     </ItemGroup>
 
