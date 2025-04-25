@@ -30,6 +30,9 @@ public record CreateReservationCommand : IRequest<ResponseReservationDto> {
     public string PaymentMethod { get; init; }
     public bool IsEventPrivate { get; init; } = false;
     public Guid BranchId { get; init; }
+    public TimeOnly TimeStart { get; init; }
+    public TimeOnly TimeEnd { get; init; }
+    public bool BookingWithTime { get; init; }
 }
 
 public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ResponseReservationDto> {
@@ -89,6 +92,10 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             //EndDate = request.endDate,
             //StartDate = request.startDate,
             BranchId = request.BranchId,
+            CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+            LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+            TimeStart = LocalTime.FromTimeOnly(request.TimeStart),
+            TimeEnd = LocalTime.FromTimeOnly(request.TimeEnd)
         };
         Event reservationEvent = new Event();
         var newReservation = await _context.Reservations.AddAsync(reservation, cancellationToken);
@@ -113,20 +120,23 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
 
             var result = await _context.Events.AddAsync(entity, cancellationToken);
 
-            var eventSlotsToAdd = new List<EventSlot>();
-
-            foreach (var slotId in request.SlotIds)
+            if (!request.BookingWithTime)
             {
-                var eventSlot = new EventSlot()
+                var eventSlotsToAdd = new List<EventSlot>();
+
+                foreach (var slotId in request.SlotIds)
                 {
-                    SlotId = slotId,
-                    EventId = result.Entity.Id,
-                };
+                    var eventSlot = new EventSlot()
+                    {
+                        SlotId = slotId,
+                        EventId = result.Entity.Id,
+                    };
 
-                eventSlotsToAdd.Add(eventSlot);
+                    eventSlotsToAdd.Add(eventSlot);
+                }
+
+                await _context.EventSlots.AddRangeAsync(eventSlotsToAdd, cancellationToken);
             }
-
-            await _context.EventSlots.AddRangeAsync(eventSlotsToAdd, cancellationToken);
 
             var added_event = await _context.Events
                 .Include(x => x.Reservation)
@@ -147,20 +157,20 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             reservationEvent = added_event;
         }
 
-        Debug.WriteLine(request.SlotIds[1]);
-
-        foreach (var slotId in request.SlotIds)
+        if (!request.BookingWithTime)
         {
-            var reservedSlot = new ReservedSlot()
+            foreach (var slotId in request.SlotIds)
             {
-                SlotId = slotId,
-                ReservationId = newReservation.Entity.Id,
+                var reservedSlot = new ReservedSlot()
+                {
+                    SlotId = slotId,
+                    ReservationId = newReservation.Entity.Id,
+                };
+
+                reservedSlotsToAdd.Add(reservedSlot);
             };
-
-            reservedSlotsToAdd.Add(reservedSlot);
-        };
-
-        await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
+            await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

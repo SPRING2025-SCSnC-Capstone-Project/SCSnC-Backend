@@ -1,3 +1,5 @@
+using NodaTime;
+
 namespace Api.Controllers.Payload.Requests;
 
 public class CreateReservationRequest {
@@ -10,8 +12,6 @@ public class CreateReservationRequest {
     public string? Note { get; set; }
     public string Email { get; set; }
     public string? Phone { get; set; }
-    //public DateTimeOffset startDate { get; set; }
-    //public DateTimeOffset endDate { get; set; }
     public bool includeEvent { get; set; }
     public string? EventTitle { get; set; }
     public string? EventDescription { get; set; }
@@ -21,4 +21,7 @@ public class CreateReservationRequest {
     public string PaymentMethod { get; set; }
     public bool IsEventPrivate { get; set; }
     public Guid BranchId { get; set; }
+    public TimeOnly TimeStart { get; set; }
+    public TimeOnly TimeEnd { get; set; }
+    public bool BookingWithTime {  get; set; }
 } 

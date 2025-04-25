@@ -30,4 +30,5 @@ public class User : BaseEntity
     public virtual ICollection<JoinEvent> JoinEvents { get; set; }
     public virtual ICollection<Reservation> Reservations { get; set; }
     public virtual ICollection<Blog> Blogs { get; set; }
+    public virtual Branch? Branch { get; set; }
 }

@@ -6,4 +6,7 @@ public class GetWorkspacesByTimeAndTypePaginatedRequest : PaginatedQueryParamete
     public DateOnly ReserveDate { get; set; }
     public Guid[] SlotIds { get; set; }
     public Guid BranchId { get; set; }
+    public bool BookingWithTime { get; set; }
+    public TimeOnly TimeStart { get; set; }
+    public TimeOnly TimeEnd { get; set; }
 }

@@ -25,12 +25,14 @@ public class ReservationsController : ApiControllerBase {
             Note = request.Note,
             Email = request.Email,
             Phone = request.Phone,
-            //startDate = request.startDate,
-            //endDate = request.endDate
             SlotIds = request.SlotIds,
             PaymentMethod = request.PaymentMethod,
             IsEventPrivate = request.IsEventPrivate,
-            BranchId = request.BranchId
+            BranchId = request.BranchId,
+            CoverImageLink = request.CoverImageLink,
+            BookingWithTime = request.BookingWithTime,
+            TimeStart = request.TimeStart,
+            TimeEnd = request.TimeEnd
         } :
         new CreateReservationCommand()
         {
@@ -43,8 +45,6 @@ public class ReservationsController : ApiControllerBase {
             Note = request.Note,
             Email = request.Email,
             Phone = request.Phone,
-            //startDate = request.startDate,
-            //endDate = request.endDate,
             includeEvent = request.includeEvent,
             EntranceFee = request.EntranceFee,
             EventDescription = request.EventDescription,
@@ -52,7 +52,11 @@ public class ReservationsController : ApiControllerBase {
             SlotIds = request.SlotIds,
             PaymentMethod = request.PaymentMethod,
             IsEventPrivate = request.IsEventPrivate,
-            BranchId = request.BranchId
+            BranchId = request.BranchId,
+            CoverImageLink = request.CoverImageLink,
+            BookingWithTime = request.BookingWithTime,
+            TimeStart = request.TimeStart,
+            TimeEnd = request.TimeEnd
         };
 
         var result = await Mediator.Send(command);
@@ -78,7 +82,6 @@ public class ReservationsController : ApiControllerBase {
             Filter = request.Filter,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
-            InFuture = request.InFuture
         };
 
         var result = await Mediator.Send(command);
@@ -93,6 +96,7 @@ public class ReservationsController : ApiControllerBase {
             Filter = request.Filter,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
+            InFuture = request.InFuture
         };
 
         var result = await Mediator.Send(command);

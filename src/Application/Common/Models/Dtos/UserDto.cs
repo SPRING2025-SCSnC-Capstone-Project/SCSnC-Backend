@@ -14,6 +14,7 @@ public class UserDto : BaseDto, IMapFrom<User> {
     public string? AvatarLink { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
+    public BranchDto? Branch { get; set; }
 
     public void Mapping(Profile profile) {
         profile.CreateMap<User, UserDto>()

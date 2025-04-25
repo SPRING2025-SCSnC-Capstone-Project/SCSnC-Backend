@@ -9,7 +9,6 @@ public class Reservation : BaseEntity
         
         ReservedSlots = new HashSet<ReservedSlot>();
         Transactions = new HashSet<Transaction>();
-        
     }
 
     public LocalDate ReserveDate { get; set; }
@@ -25,10 +24,10 @@ public class Reservation : BaseEntity
     public string? Phone { get; set; }
     [ForeignKey("BranchId")]
     public Guid BranchId { get; set; }
-    //public DateTimeOffset StartDate { get; set; }
-    //public DateTimeOffset EndDate { get; set; }
-    // public LocalDateTime CreatedAt { get; set; }
-    // public LocalDateTime LastUpdatedAt { get; set; }
+    public LocalTime? TimeStart { get; set; }
+    public LocalTime? TimeEnd { get; set; }
+    public LocalDateTime CreatedAt { get; set; }
+    public LocalDateTime LastUpdatedAt { get; set; }
     // may need reviews to add these fields
 
     public virtual Workspace Workspace { get; set; }

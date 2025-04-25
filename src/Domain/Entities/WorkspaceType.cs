@@ -13,7 +13,9 @@ public class WorkspaceType : BaseEntity
     public int MaxCapacity { get; set; }
     public double PricePerHour { get; set; }
     public bool IsActive { get; set; }
-    
+    public string MediaUrl { get; set; } = null!;
+    public bool HaveEquipmentForRent { get; set; }
+
     public virtual ICollection<Workspace> Workspaces { get; set; }
     public virtual ICollection<WorkspaceTypeAtBranch> WorkspacesAtBranches { get; set; }
 

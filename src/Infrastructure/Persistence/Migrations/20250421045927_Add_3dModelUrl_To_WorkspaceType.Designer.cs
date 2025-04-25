@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250421045927_Add_3dModelUrl_To_WorkspaceType")]
+    partial class Add_3dModelUrl_To_WorkspaceType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -528,9 +531,6 @@ namespace Infrastructure.Persistence
                     b.Property<Guid>("BranchId")
                         .HasColumnType("uuid");
 
-                    b.Property<LocalDateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<double>("Deposit")
                         .HasColumnType("double precision");
 
@@ -541,9 +541,6 @@ namespace Infrastructure.Persistence
                     b.Property<bool>("IsFullPaid")
                         .HasColumnType("boolean");
 
-                    b.Property<LocalDateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
@@ -552,12 +549,6 @@ namespace Infrastructure.Persistence
 
                     b.Property<LocalDate>("ReserveDate")
                         .HasColumnType("date");
-
-                    b.Property<LocalTime?>("TimeEnd")
-                        .HasColumnType("time");
-
-                    b.Property<LocalTime?>("TimeStart")
-                        .HasColumnType("time");
 
                     b.Property<double>("TotalPrice")
                         .HasColumnType("double precision");
@@ -788,9 +779,6 @@ namespace Infrastructure.Persistence
                     b.Property<string>("AvatarLink")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("BranchId")
-                        .HasColumnType("uuid");
-
                     b.Property<LocalDateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -822,8 +810,6 @@ namespace Infrastructure.Persistence
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BranchId");
 
                     b.ToTable("Users");
                 });
@@ -951,9 +937,6 @@ namespace Infrastructure.Persistence
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<bool>("HaveEquipmentForRent")
-                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -1312,15 +1295,6 @@ namespace Infrastructure.Persistence
                     b.Navigation("Reservation");
                 });
 
-            modelBuilder.Entity("Domain.Entities.User", b =>
-                {
-                    b.HasOne("Domain.Entities.Branch", "Branch")
-                        .WithMany("Users")
-                        .HasForeignKey("BranchId");
-
-                    b.Navigation("Branch");
-                });
-
             modelBuilder.Entity("Domain.Entities.UserVoucher", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
@@ -1399,8 +1373,6 @@ namespace Infrastructure.Persistence
                     b.Navigation("Reservations");
 
                     b.Navigation("ToppingPricesAtBranches");
-
-                    b.Navigation("Users");
 
                     b.Navigation("WorkspaceTypesAtBranches");
                 });

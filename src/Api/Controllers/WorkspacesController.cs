@@ -107,7 +107,10 @@ public class WorkspacesController : ApiControllerBase
             WorkspaceTypeId = request.WorkspaceTypes,
             ReservationDate = request.ReserveDate,
             SlotIds = request.SlotIds,
-            BranchId = request.BranchId
+            BranchId = request.BranchId,
+            BookingWithTime = request.BookingWithTime,
+            TimeEnd = request.TimeEnd,
+            TimeStart = request.TimeStart,
         };
 
         var result = await Mediator.Send(query);

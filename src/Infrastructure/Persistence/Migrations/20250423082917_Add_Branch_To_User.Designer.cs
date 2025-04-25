@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250423082917_Add_Branch_To_User")]
+    partial class Add_Branch_To_User
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -528,9 +531,6 @@ namespace Infrastructure.Persistence
                     b.Property<Guid>("BranchId")
                         .HasColumnType("uuid");
 
-                    b.Property<LocalDateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<double>("Deposit")
                         .HasColumnType("double precision");
 
@@ -541,9 +541,6 @@ namespace Infrastructure.Persistence
                     b.Property<bool>("IsFullPaid")
                         .HasColumnType("boolean");
 
-                    b.Property<LocalDateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
@@ -552,12 +549,6 @@ namespace Infrastructure.Persistence
 
                     b.Property<LocalDate>("ReserveDate")
                         .HasColumnType("date");
-
-                    b.Property<LocalTime?>("TimeEnd")
-                        .HasColumnType("time");
-
-                    b.Property<LocalTime?>("TimeStart")
-                        .HasColumnType("time");
 
                     b.Property<double>("TotalPrice")
                         .HasColumnType("double precision");

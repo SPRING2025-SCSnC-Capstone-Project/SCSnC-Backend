@@ -31,6 +31,7 @@ public class OrderDto: BaseDto, IMapFrom<Order>
 public class ResponseOrderDto: BaseDto, IMapFrom<Order>
 {
     public Guid UserId { get; set; }
+    public WorkspaceDto Workspace { get; set; }
     public string BranchName { get; set; }
     public double TotalPrice { get; set; }
     public int TableNumber { get; set; }

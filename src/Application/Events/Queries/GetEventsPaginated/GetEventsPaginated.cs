@@ -3,6 +3,8 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
+using NodaTime;
+using System.Diagnostics;
 
 namespace Application.Events.Queries.GetEventsPaginated;
 
@@ -28,16 +30,31 @@ public class GetEventsPaginatedQueryHandler : IRequestHandler<GetEventsPaginated
     
     public async Task<PaginatedList<EventDto>> Handle(GetEventsPaginatedQuery request, CancellationToken cancellationToken)
     {
+        IClock clock = SystemClock.Instance;
+        DateTimeZone timeZone = DateTimeZoneProviders.Tzdb["Asia/Ho_Chi_Minh"];
+        ZonedDateTime currentZonedDateTime = clock.GetCurrentInstant().InZone(timeZone);
+        LocalDate currentDate = currentZonedDateTime.Date;
+        LocalTime currentTime = currentZonedDateTime.TimeOfDay;
+        Debug.WriteLine(currentDate);
+        Debug.WriteLine(currentTime);
         IQueryable<Event> query = query = _context.Events
                     .Include(x => x.Reservation)
-                    .ThenInclude(y => y.Workspace)
-                    .ThenInclude(z => z.WorkspaceTypeAtBranch.WorkspaceType)
+                        .ThenInclude(y => y.Workspace)
+                        .ThenInclude(z => z.WorkspaceTypeAtBranch.WorkspaceType)
                     .Include(x => x.Reservation)
-                    .ThenInclude(y => y.User)
+                        .ThenInclude(y => y.User)
+                    .Include(x => x.Reservation)
+                        .ThenInclude(y => y.Transactions)
+                    .AsNoTracking()
                     .Include(x => x.EventSlots)
-                    .ThenInclude(y => y.Slot)
-                    .Where(x => !x.IsPrivate)
+                        .ThenInclude(y => y.Slot)
+                    .Where(x => !x.IsPrivate 
+                        && x.Reservation.Transactions.ToList()[0].TransactionStatus.ToLower() == "success"
+                        && x.EventDate > currentDate ? true : x.EventDate >= currentDate && x.EventSlots.ToList()[0].Slot.TimeStart >= currentTime)
                     .AsQueryable();
+
+        Debug.WriteLine(query.ToList()[0].EventDate);
+        Debug.WriteLine(query.ToList()[0].EventSlots.ToList()[0].Slot.TimeStart);
         
         return await query.ListPaginateWithSortAsync<Event, EventDto>(
             request.Page, 

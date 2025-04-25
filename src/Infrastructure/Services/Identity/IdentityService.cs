@@ -43,4 +43,28 @@ public class IdentityService : IIdentityService {
 
         return _mapper.Map<UserDto>(user);
     }
+
+    public async Task<OneOf<UserDto, string>> StaffAuthenticateAsync(string email, string password, Guid branch, CancellationToken cancellationToken)
+    {
+        var user = await _context.Users.Include(x => x.Branch).FirstOrDefaultAsync(x => x.Email.Equals(email)
+                && x.IsActive && x.Branch.Id.Equals(branch), cancellationToken: cancellationToken);
+
+        if (user is null || string.IsNullOrEmpty(password))
+        {
+            throw new AuthenticationFailureException("Invalid email or password");
+        }
+
+        var base64Salt = user.PasswordHash![..20];
+        var hashedInputPassword = _securityService.Hash(password, base64Salt, user.Email);
+
+        var base64HashedPassword = user.PasswordHash[20..];
+        var hashedPassword = Convert.FromBase64String(base64HashedPassword);
+
+        if (!hashedInputPassword.SequenceEqual(hashedPassword))
+        {
+            throw new AuthenticationFailureException("Invalid email or password");
+        }
+
+        return _mapper.Map<UserDto>(user);
+    }
 }

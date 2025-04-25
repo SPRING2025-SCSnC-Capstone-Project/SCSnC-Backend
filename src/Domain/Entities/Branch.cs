@@ -24,4 +24,5 @@ public class Branch: BaseEntity
     public virtual ICollection<Order> Orders { get; set; }
     public virtual ICollection<Reservation> Reservations { get; set; }
     public virtual ICollection<WorkspaceTypeAtBranch> WorkspaceTypesAtBranches { get; set; }
+    public virtual ICollection<User> Users { get; set; }
 }

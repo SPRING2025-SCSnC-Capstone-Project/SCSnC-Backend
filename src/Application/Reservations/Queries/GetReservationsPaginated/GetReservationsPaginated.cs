@@ -3,6 +3,8 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
+using NodaTime;
+using System.Diagnostics;
 
 namespace Application.Reservations.Queries.GetReservationsPaginated;
 
@@ -13,6 +15,7 @@ public record GetReservationsPaginatedQuery : IRequest<PaginatedList<Reservation
     public string? SortBy { get; init; }
     public string? SortOrder { get; init; }
     public string? Filter { get; init; }
+    public bool? InFuture { get; init; } = false;
 }
 
 public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservationsPaginatedQuery, PaginatedList<ReservationDto>>
@@ -39,8 +42,21 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
             .Include(x => x.User)
             .Include(x => x.ReservedSlots)
             .ThenInclude(y => y.Slot)
-            .AsQueryable(); 
-        
+            .AsQueryable();
+
+        if (request.InFuture.HasValue && request.InFuture.Value)
+        {
+            var date = DateTime.Now;
+            var today = new DateTime(date.Year, date.Month, date.Day, date.Hour, date.Minute, 0);
+            LocalDate localDate = new LocalDate(today.Year, today.Month, today.Day);
+            LocalTime localTime = new LocalTime(today.Hour, today.Minute, 0);
+            Debug.WriteLine(localDate);
+            Debug.WriteLine(localTime);
+            query = query.Include(x => x.Transactions).Where(x => x.Transactions.ToList()[0].TransactionStatus != "Failed"
+            && x.ReserveDate > localDate ? true : x.ReserveDate >= localDate && x.ReservedSlots.ToList()[0].Slot.TimeStart >= localTime)
+            .AsQueryable();
+        }
+
         return await query.ListPaginateWithSortAsync<Reservation, ReservationDto>(
             request.Page, 
             request.Size, 
