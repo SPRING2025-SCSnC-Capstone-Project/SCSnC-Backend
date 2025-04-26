@@ -1,8 +1,10 @@
+using Application.Common.Exceptions;
 using Application.Common.Extensions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
+using NodaTime;
 
 namespace Application.Workspaces.Queries;
 
@@ -12,7 +14,9 @@ public record GetWorkspacesPaginatedQuery: IRequest<PaginatedList<WorkspaceDto>>
     public int? Size { get; init; }
     public string? SortBy { get; init; }
     public string? SortOrder { get; init; }
-
+    public Guid? BranchId { get; set; }
+    public int? SlotNumber { get; set; }
+    public DateOnly? ReserveDate { get; set; }
 }
 
 public class GetWorkspacesPaginatedQueryHandler: IRequestHandler<GetWorkspacesPaginatedQuery, PaginatedList<WorkspaceDto>> {
@@ -25,7 +29,39 @@ public class GetWorkspacesPaginatedQueryHandler: IRequestHandler<GetWorkspacesPa
     }
 
     public async Task<PaginatedList<WorkspaceDto>> Handle(GetWorkspacesPaginatedQuery request, CancellationToken cancellationToken) {
-        var workspaces = _context.Workspaces.Include(x => x.WorkspaceType).AsQueryable().Where(x => x.IsActive);
+        var workspaces = _context.Workspaces
+            .Include(x => x.WorkspaceType)
+            .Include(x => x.Branch)
+            .Include(x => x.Reservations)
+            .ThenInclude(y => y.ReservedSlots)
+            .ThenInclude(z => z.Slot)
+            .AsQueryable()
+            .Where(x => x.IsActive);
+
+        if (request.BranchId != Guid.Empty && request.BranchId != null) {
+            var branch = await _context.Branches.FirstOrDefaultAsync(x => x.IsActive && x.Id == request.BranchId, cancellationToken);
+
+            if (branch is null) {
+                throw new KeyNotFoundException($"Branch with Id {request.BranchId} does not exist");
+            }
+
+            workspaces = workspaces.Where(x => x.Branch.Id == branch.Id);
+        }
+
+        if ((request.ReserveDate != null && request.SlotNumber == null) || (request.ReserveDate == null && request.SlotNumber != null)) {
+            throw new RequestValidationException("Reserve date and Slot number must be both filled in or both empty");
+        }
+
+        if (request.SlotNumber != null && request.ReserveDate != null) {
+            var slot = await _context.Slots.FirstOrDefaultAsync(x => x.IsActive && x.SlotNumber == request.SlotNumber, cancellationToken);
+
+            if (slot is null) {
+                throw new KeyNotFoundException($"Slot with Number {request.SlotNumber} does not exist");
+            }
+
+            workspaces = workspaces.Where(x => !(x.Reservations.Any(y => y.ReservedSlots.Any(z => z.Slot!.SlotNumber == request.SlotNumber)) 
+                && x.Reservations.Any(y => y.ReserveDate == LocalDate.FromDateOnly(request.ReserveDate.Value))));
+        }
 
         if (request.Filter != null && !request.Filter.Equals(string.Empty)) {
             workspaces = workspaces.Where(x => x.WorkspaceType.WorkspaceTypeName == request.Filter);

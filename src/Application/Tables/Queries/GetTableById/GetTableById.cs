@@ -17,7 +17,9 @@ public class GetTableByIdQueryHandler : IRequestHandler<GetTableByIdQuery, Table
     }
 
     public async Task<TableDto> Handle(GetTableByIdQuery request, CancellationToken cancellationToken) {
-        var table = await _context.Tables.FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
+        var table = await _context.Tables
+            .Include(x => x.Branch)
+            .FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
 
         if (table is null) {
             throw new KeyNotFoundException($"Table with Id {request.Id} does not exist");

@@ -27,6 +27,7 @@ public class GetActiveItemByIdQueryHandler : IRequestHandler<GetActiveItemByIdQu
             .Include(x => x.ItemWithSizes)
             .ThenInclude(x => x.Size)
             .Include(x => x.ItemPricesAtBranches.FirstOrDefault(y => y.BranchId == request.BranchId && y.ItemId == request.Id))
+            .ThenInclude(y => y.Branch)
             .FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive == true, cancellationToken);
         
         if (item is null)
