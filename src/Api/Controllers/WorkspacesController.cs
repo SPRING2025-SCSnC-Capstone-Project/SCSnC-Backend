@@ -81,7 +81,8 @@ public class WorkspacesController: ApiControllerBase {
             Filter = request.Filter,
             BranchId = request.BranchId,
             SlotNumber = request.SlotNumber,
-            ReserveDate = request.ReserveDate
+            ReserveDate = request.ReserveDate,
+            WorkspaceTypeId = request.WorkspaceTypeId
         };
 
         var result = await Mediator.Send(query);

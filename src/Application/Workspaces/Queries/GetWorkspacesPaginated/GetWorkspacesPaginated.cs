@@ -14,6 +14,7 @@ public record GetWorkspacesPaginatedQuery: IRequest<PaginatedList<WorkspaceDto>>
     public int? Size { get; init; }
     public string? SortBy { get; init; }
     public string? SortOrder { get; init; }
+    public Guid? WorkspaceTypeId { get; set; }
     public Guid? BranchId { get; set; }
     public int? SlotNumber { get; set; }
     public DateOnly? ReserveDate { get; set; }
@@ -46,6 +47,16 @@ public class GetWorkspacesPaginatedQueryHandler: IRequestHandler<GetWorkspacesPa
             }
 
             workspaces = workspaces.Where(x => x.Branch.Id == branch.Id);
+        }
+
+        if (request.WorkspaceTypeId != Guid.Empty && request.WorkspaceTypeId != null) {
+            var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.IsActive && x.Id == request.WorkspaceTypeId, cancellationToken);
+
+            if (workspaceType is null) {
+                throw new KeyNotFoundException($"Workspace Type with Id {request.WorkspaceTypeId} does not exist");
+            }
+
+            workspaces = workspaces.Where(x => x.WorkspaceType.Id == workspaceType.Id);
         }
 
         if ((request.ReserveDate != null && request.SlotNumber == null) || (request.ReserveDate == null && request.SlotNumber != null)) {
