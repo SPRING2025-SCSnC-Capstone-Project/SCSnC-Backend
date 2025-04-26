@@ -33,9 +33,5 @@ public class AddUserCommandValidator: AbstractValidator<AddUserCommand>
         
         RuleFor(x => x.AvatarLink)
             .MaximumLength(200).WithMessage("Avatar link must not exceed 200 characters");
-        
-        RuleFor(x => x.Type)
-            .NotEmpty().WithMessage("Type is required")
-            .MaximumLength(50).WithMessage("Type must not exceed 50 characters");
     }
 }

@@ -79,6 +79,10 @@ public class WorkspacesController: ApiControllerBase {
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
             Filter = request.Filter,
+            BranchId = request.BranchId,
+            SlotNumber = request.SlotNumber,
+            ReserveDate = request.ReserveDate,
+            WorkspaceTypeId = request.WorkspaceTypeId
         };
 
         var result = await Mediator.Send(query);

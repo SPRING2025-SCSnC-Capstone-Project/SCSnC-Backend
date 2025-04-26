@@ -30,6 +30,7 @@ public class GetToppingsPaginatedQueryHandler : IRequestHandler<GetToppingsPagin
     {
         var query = _context.Toppings
             .Include(x => x.ToppingPricesAtBranches.Where(y => y.BranchId == request.BranchId))
+            .ThenInclude(y => y.Branch)
             .AsQueryable();
         
         return await query.ListPaginateWithSortAsync<Topping, ToppingDto>(
