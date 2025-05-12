@@ -3,18 +3,21 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250427144705_Add_Event_To_Reservation")]
+    partial class Add_Event_To_Reservation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,6 +179,10 @@ namespace Infrastructure.Persistence
 
                     b.Property<Guid>("ReservationId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -933,12 +940,12 @@ namespace Infrastructure.Persistence
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("WorkspaceTypeId")
+                    b.Property<Guid>("WorkspaceId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("WorkspaceTypeId");
+                    b.HasIndex("WorkspaceId");
 
                     b.ToTable("WorkspaceMedias");
                 });
@@ -1354,13 +1361,13 @@ namespace Infrastructure.Persistence
 
             modelBuilder.Entity("Domain.Entities.WorkspaceMedia", b =>
                 {
-                    b.HasOne("Domain.Entities.WorkspaceType", "WorkspaceType")
+                    b.HasOne("Domain.Entities.Workspace", "Workspace")
                         .WithMany("WorkspaceMedias")
-                        .HasForeignKey("WorkspaceTypeId")
+                        .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("WorkspaceType");
+                    b.Navigation("Workspace");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkspaceTypeAtBranch", b =>
@@ -1502,12 +1509,12 @@ namespace Infrastructure.Persistence
                     b.Navigation("Orders");
 
                     b.Navigation("Reservations");
+
+                    b.Navigation("WorkspaceMedias");
                 });
 
             modelBuilder.Entity("Domain.Entities.WorkspaceType", b =>
                 {
-                    b.Navigation("WorkspaceMedias");
-
                     b.Navigation("Workspaces");
 
                     b.Navigation("WorkspacesAtBranches");
