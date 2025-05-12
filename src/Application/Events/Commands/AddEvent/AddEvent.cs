@@ -86,7 +86,6 @@ public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             ReservationId = request.ReservationId,
             IsActive = true,
-            Status = "Accepted",
             IsPrivate = request.IsEventPrivate
         };
 

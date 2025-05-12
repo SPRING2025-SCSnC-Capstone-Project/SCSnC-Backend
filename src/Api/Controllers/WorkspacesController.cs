@@ -21,20 +21,11 @@ public class WorkspacesController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request) {
-        var mediaTypes = new List<string>();
-        var mediaUrls = new List<string>();
-
-        for (var i = 0; i < request.WorkspaceMedias.Length; i++) {
-            mediaTypes.Add(request.WorkspaceMedias[i].MediaType);
-            mediaUrls.Add(request.WorkspaceMedias[i].MediaUrl);
-        }
-        
+    public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request) { 
         var command = new AddWorkspaceCommand() {
             WorkspaceNumber = request.WorkspaceNumber,
             WorkspaceTypeId = request.WorkspaceTypeId,
-            MediaTypes = mediaTypes,
-            MediaUrls = mediaUrls
+            WorkspaceTypeAtBranchId = request.WorkspaceTypeAtBranchId,
         };
 
         var result = await Mediator.Send(command);

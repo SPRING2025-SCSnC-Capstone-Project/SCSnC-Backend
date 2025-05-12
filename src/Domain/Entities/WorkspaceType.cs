@@ -8,6 +8,7 @@ public class WorkspaceType : BaseEntity
     public WorkspaceType()
     {
         Workspaces = new HashSet<Workspace>();
+        WorkspaceMedias = new HashSet<WorkspaceMedia>();
     }
     public string WorkspaceTypeName { get; set; }
     public int MaxCapacity { get; set; }
@@ -18,5 +19,7 @@ public class WorkspaceType : BaseEntity
 
     public virtual ICollection<Workspace> Workspaces { get; set; }
     public virtual ICollection<WorkspaceTypeAtBranch> WorkspacesAtBranches { get; set; }
+    public virtual ICollection<WorkspaceMedia> WorkspaceMedias { get; set; }
+
 
 }

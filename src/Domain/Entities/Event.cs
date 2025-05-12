@@ -19,7 +19,6 @@ public class Event : BaseEntity
     public LocalDateTime LastUpdatedAt { get; set; }
     public bool IsPrivate { get; set; }
 
-    public string Status { get; set; }
     public bool IsActive { get; set; }
 
     public virtual Reservation Reservation { get; set; }

@@ -50,12 +50,18 @@ public static class PaymentHelper
 
                 if(transactionStatus == "Failed")
                 {
-                    reservation.IsFullPaid = true;
+                    reservation.IsFullPaid = false;
                     _context.Reservations.Update(reservation);
 
                     var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
+                    var reservationEvent = await _context.Events.Include(x => x.Reservation).FirstOrDefaultAsync(x => x.Reservation.Id.Equals(entityId));
                     reservationTransaction.TransactionStatus = transactionStatus;
                     reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
+                    if(reservationEvent != null)
+                    {
+                        reservationEvent.IsActive = false;
+                        _context.Events.Update(reservationEvent);
+                    }
                     _context.Transactions.Update(reservationTransaction);
                     await _context.SaveChangesAsync(cancellationToken);
                 }

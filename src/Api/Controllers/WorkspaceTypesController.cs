@@ -7,13 +7,27 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
-public class WorkspaceTypesController: ApiControllerBase {
+public class WorkspaceTypesController : ApiControllerBase
+{
     [HttpPost]
-    public async Task<ActionResult<Result<WorkspaceTypeDto>>> AddWorkspaceType([FromBody] AddWorkspaceTypeRequest request) {
-        var command = new AddWorkspaceTypeCommand() {
+    public async Task<ActionResult<Result<WorkspaceTypeDto>>> AddWorkspaceType([FromBody] AddWorkspaceTypeRequest request)
+    {
+        var mediaTypes = new List<string>();
+        var mediaUrls = new List<string>();
+
+        for (var i = 0; i < request.WorkspaceMedias.Length; i++)
+        {
+            mediaTypes.Add(request.WorkspaceMedias[i].MediaType);
+            mediaUrls.Add(request.WorkspaceMedias[i].MediaUrl);
+        }
+
+        var command = new AddWorkspaceTypeCommand()
+        {
             WorkspaceTypeName = request.WorkspaceTypeName,
             MaxCapacity = request.MaxCapacity,
-            PricePerHour =request.PricePerHour
+            PricePerHour = request.PricePerHour,
+            MediaTypes = mediaTypes,
+            MediaUrls = mediaUrls
         };
 
         var result = await Mediator.Send(command);
@@ -22,8 +36,10 @@ public class WorkspaceTypesController: ApiControllerBase {
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult<Result<WorkspaceTypeDto>>> RemoveWorkspaceType([FromRoute] Guid id) {
-        var command = new RemoveWorkspaceTypeCommand() {
+    public async Task<ActionResult<Result<WorkspaceTypeDto>>> RemoveWorkspaceType([FromRoute] Guid id)
+    {
+        var command = new RemoveWorkspaceTypeCommand()
+        {
             Id = id
         };
 
@@ -33,8 +49,10 @@ public class WorkspaceTypesController: ApiControllerBase {
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<Result<WorkspaceTypeDto>>> UpdateWorkspaceType([FromRoute] Guid id, [FromBody] UpdateWorkspaceTypeRequest request) {
-        var command = new UpdateWorkspaceTypeCommand() {
+    public async Task<ActionResult<Result<WorkspaceTypeDto>>> UpdateWorkspaceType([FromRoute] Guid id, [FromBody] UpdateWorkspaceTypeRequest request)
+    {
+        var command = new UpdateWorkspaceTypeCommand()
+        {
             Id = id,
             MaxCapacity = request.MaxCapacity,
             WorkspaceTypeName = request.WorkspaceTypeName,
@@ -42,13 +60,15 @@ public class WorkspaceTypesController: ApiControllerBase {
         };
 
         var result = await Mediator.Send(command);
-        
+
         return Ok(Result<WorkspaceTypeDto>.Succeed(result));
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<Result<WorkspaceTypeDto>>> GetWorkspaceTypeById([FromRoute] Guid id) {
-        var query = new GetWorkspaceTypeByIdQuery() {
+    public async Task<ActionResult<Result<WorkspaceTypeDto>>> GetWorkspaceTypeById([FromRoute] Guid id)
+    {
+        var query = new GetWorkspaceTypeByIdQuery()
+        {
             Id = id
         };
 
@@ -58,8 +78,10 @@ public class WorkspaceTypesController: ApiControllerBase {
     }
 
     [HttpGet]
-    public async Task<ActionResult<Result<PaginatedList<WorkspaceTypeDto>>>> GetWorkspaceTypesPaginated([FromQuery] PaginatedQueryParameters request) {
-        var query = new GetWorkspaceTypesPaginatedQuery() {
+    public async Task<ActionResult<Result<PaginatedList<WorkspaceTypeDto>>>> GetWorkspaceTypesPaginated([FromQuery] PaginatedQueryParameters request)
+    {
+        var query = new GetWorkspaceTypesPaginatedQuery()
+        {
             Page = request.Page,
             Size = request.Size,
             SortBy = request.SortBy,

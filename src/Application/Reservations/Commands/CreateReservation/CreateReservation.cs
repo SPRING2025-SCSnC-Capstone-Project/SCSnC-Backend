@@ -111,8 +111,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                 LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                 ReservationId = newReservation.Entity.Id,
-                IsActive = true,
-                Status = "Accepted",
+                IsActive = false,
                 IsPrivate = request.IsEventPrivate
             };
 

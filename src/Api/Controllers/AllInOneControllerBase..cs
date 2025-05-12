@@ -5,6 +5,7 @@ using Application.ItemCategories.Commands.CreateItemCategory;
 using Application.Items.Commands.AddItem;
 using Application.Sizes.Commands.AddSize;
 using Application.Toppings.Commands.AddTopping;
+using Application.WorkspaceTypes.Commands;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
@@ -42,20 +43,23 @@ namespace Api.Controllers
 
             //var resultToppings = await Mediator.Send(toppingsCommand);
 
-            var itemsCommand = new AddItemCommand()
-            {
-                Name = request.Name,
-                Price = request.Price,
-                CategoryId = request.CategoryId,
-                Description = request.Description,
-                Img = request.Img,
-                SizeIds = request.SizeIds,
-                AutoCreate = true
-            };
+            //var itemsCommand = new AddItemCommand()
+            //{
+            //    Name = request.Name,
+            //    Price = request.Price,
+            //    CategoryId = request.CategoryId,
+            //    Description = request.Description,
+            //    Img = request.Img,
+            //    SizeIds = request.SizeIds,
+            //    AutoCreate = true
+            //};
 
-            var resultItems = await Mediator.Send(itemsCommand);
+            //var resultItems = await Mediator.Send(itemsCommand);
 
-            return Ok(new {item = itemsCommand});
+            var workspaceMediaCommand = new AddWorkspaceTypeMediaCommand();
+            var resultWorkspaceMedia = await Mediator.Send(workspaceMediaCommand);
+
+            return Ok();
         }
 
     }

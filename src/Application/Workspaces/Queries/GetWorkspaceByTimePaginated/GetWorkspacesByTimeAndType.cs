@@ -86,7 +86,6 @@ public class GetWorkspacesByTimePaginatedQueryHandler : IRequestHandler<GetWorks
             int[] requestedTimeRange = requestedTimeSlot.Select(x => x.SlotNumber).ToArray();
             List<Workspace> reservedWorkspaces = new List<Workspace>();
             List<Workspace> availableWorkspaces = _context.Workspaces
-                .Include(x => x.WorkspaceMedias)
                 .Include(x => x.WorkspaceTypeAtBranch)
                     .ThenInclude(y => y.WorkspaceType)
                 .Include(x => x.WorkspaceTypeAtBranch)

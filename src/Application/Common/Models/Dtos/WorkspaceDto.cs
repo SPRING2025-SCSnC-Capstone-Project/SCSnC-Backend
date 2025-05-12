@@ -10,7 +10,6 @@ public class WorkspaceDto : BaseDto, IMapFrom<Workspace>
     public bool IsAvailable { get; set; }
     public WorkspaceTypeDto WorkspaceType { get; set; } = null!;
     public BranchDto Branch { get; set; } = null!;
-    public WorkspaceMediaDto[] WorkspaceMedias { get; set; } = null!;
 
     public void Mapping(Profile profile)
     {

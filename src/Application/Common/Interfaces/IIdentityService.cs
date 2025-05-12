@@ -6,5 +6,4 @@ namespace Application.Common.Interfaces;
 
 public interface IIdentityService {
    public Task<OneOf<UserDto, string>> AuthenticateAsync(string email, string password, CancellationToken cancellationToken);
-   public Task<OneOf<UserDto, string>> StaffAuthenticateAsync(string email, string password, Guid branch, CancellationToken cancellationToken);
 }

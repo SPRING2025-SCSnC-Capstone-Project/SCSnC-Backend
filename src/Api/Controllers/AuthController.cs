@@ -148,37 +148,6 @@ public class AuthController : ControllerBase
             throw new NotImplementedException();
         });
     }
-    
-    [HttpPost]
-    public async Task<IActionResult> StaffLogin([FromBody] LoginRequest request, CancellationToken cancellationToken)
-    {
-        var result = await _identityService.StaffAuthenticateAsync(request.Email, request.Password, request.Branch.Value, cancellationToken);
-
-        return result.Match<IActionResult>((loginSuccess) =>
-        {
-            var user = loginSuccess;
-            var (jwtToken, refreshToken) = _jwtService.SignInAsync(user, cancellationToken).Result;
-
-            var handler = new JwtSecurityTokenHandler();
-            var accessToken = handler.WriteToken(jwtToken);
-
-            SetJwtAccessToken(accessToken, jwtToken);
-            SetRefreshToken(refreshToken);
-
-            var loginResult = new LoginSuccessResponse()
-            {
-                User = _mapper.Map<UserDto>(user),
-                AccessToken = accessToken,
-                RefreshToken = refreshToken.Token,
-            };
-
-            return Ok(Result<LoginSuccessResponse>.Succeed(loginResult));
-        },
-        token =>
-        {
-            throw new NotImplementedException();
-        });
-    }
 
     [AllowAnonymous]
     [HttpPost]

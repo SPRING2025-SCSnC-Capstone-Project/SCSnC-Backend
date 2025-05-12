@@ -17,7 +17,7 @@ public class GetWorkspaceTypeByIdQueryHandler : IRequestHandler<GetWorkspaceType
     }
 
     public async Task<WorkspaceTypeDto> Handle(GetWorkspaceTypeByIdQuery request, CancellationToken cancellationToken) {
-        var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
+        var workspaceType = await _context.WorkspaceTypes.Include(x => x.WorkspaceMedias).FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
 
         if (workspaceType is null) {
             throw new KeyNotFoundException($"WorkspaceType with Id {request.Id} does not exist");

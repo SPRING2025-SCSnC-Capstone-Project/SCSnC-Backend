@@ -6,6 +6,7 @@ using Application.Events.Commands;
 using Application.Events.Queries.GetEventById;
 using Application.Events.Queries.GetEventsByUserPaginated;
 using Application.Events.Queries.GetEventsPaginated;
+using Application.Reservations.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -69,9 +70,23 @@ public class EventsController : ApiControllerBase {
             Filter = request.Filter,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
+            GetAllEventByBranch = request.GetAllEvent,
+            BranchId = request.BranchId,
         };
 
         var result = await Mediator.Send(command);
         return Ok(Result<PaginatedList<EventDto>>.Succeed(result));
+    }
+
+    [HttpPut("approve/{id:guid}")]
+    public async Task<ActionResult<Result<EventDto>>> ApproveEvent([FromRoute] Guid id)
+    {
+        var command = new ApproveEventCommand()
+        {
+            EventId = id,
+        };
+
+        var result = await Mediator.Send(command);
+        return Ok(Result<EventDto>.Succeed(result));
     }
 }

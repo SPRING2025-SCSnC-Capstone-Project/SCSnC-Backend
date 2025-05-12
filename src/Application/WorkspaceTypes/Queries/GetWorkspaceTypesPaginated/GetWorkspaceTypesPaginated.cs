@@ -23,7 +23,7 @@ public class GetWorkspaceTypesPaginatedQueryHandler: IRequestHandler<GetWorkspac
     }
 
     public async Task<PaginatedList<WorkspaceTypeDto>> Handle(GetWorkspaceTypesPaginatedQuery request, CancellationToken cancellationToken) {
-        var workspaceTypes = _context.WorkspaceTypes.AsQueryable().Where(x => x.IsActive);
+        var workspaceTypes = _context.WorkspaceTypes.Include(x => x.WorkspaceMedias).AsQueryable().Where(x => x.IsActive);
 
         return await workspaceTypes.ListPaginateWithSortAsync<WorkspaceType, WorkspaceTypeDto>(
             request.Page,

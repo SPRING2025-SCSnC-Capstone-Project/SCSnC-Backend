@@ -1,9 +1,11 @@
 using Application.Common.Mappings;
 using Domain.Entities;
+using NodaTime;
 
 namespace Application.Common.Models.Dtos;
 
-public class ReservationDto : BaseDto, IMapFrom<Reservation> {
+public class ReservationDto : BaseDto, IMapFrom<Reservation>
+{
     public DateOnly ReserveDate { get; set; }
     public WorkspaceDto Workspace { get; set; } = null!;
     public double Deposit { get; set; }
@@ -18,15 +20,24 @@ public class ReservationDto : BaseDto, IMapFrom<Reservation> {
     //public DateTimeOffset EndDate { get; set; }
     public string PaymentLink { get; set; }
     public Event? Event { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime LastUpdatedAt { get; set; }
+    public TimeOnly TimeStart { get; set; }
+    public TimeOnly TimeEnd { get; set; }
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Reservation, ReservationDto>()
-            .ForMember(dest => dest.ReserveDate, opt => opt.MapFrom(src => src.ReserveDate.ToDateOnly()));
+            .ForMember(dest => dest.ReserveDate, opt => opt.MapFrom(src => src.ReserveDate.ToDateOnly()))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt.ToDateTimeUnspecified()))
+            .ForMember(dest => dest.LastUpdatedAt, opt => opt.MapFrom(src => src.LastUpdatedAt.ToDateTimeUnspecified()))
+            .ForMember(dest => dest.TimeStart, opt => opt.MapFrom(src => src.TimeStart.Value.ToTimeOnly()))
+            .ForMember(dest => dest.TimeEnd, opt => opt.MapFrom(src => src.TimeEnd.Value.ToTimeOnly()));
     }
 }
 
-public class ResponseReservationDto : BaseDto, IMapFrom<Reservation> {
+public class ResponseReservationDto : BaseDto, IMapFrom<Reservation>
+{
     public DateOnly ReserveDate { get; set; }
     public WorkspaceDto Workspace { get; set; } = null!;
     public double Deposit { get; set; }
@@ -42,9 +53,14 @@ public class ResponseReservationDto : BaseDto, IMapFrom<Reservation> {
     //public DateTimeOffset EndDate { get; set; }
     public Event? Event { get; set; }
     public BranchDto Branch { get; set; }
+    public TimeOnly TimeStart { get; set; }
+    public TimeOnly TimeEnd { get; set; }
 
-    public void Mapping(Profile profile) {
+    public void Mapping(Profile profile)
+    {
         profile.CreateMap<Reservation, ResponseReservationDto>()
-            .ForMember(dest => dest.ReserveDate, opt => opt.MapFrom(src => src.ReserveDate.ToDateOnly()));
+            .ForMember(dest => dest.ReserveDate, opt => opt.MapFrom(src => src.ReserveDate.ToDateOnly()))
+            .ForMember(dest => dest.TimeStart, opt => opt.MapFrom(src => src.TimeStart.Value.ToTimeOnly()))
+            .ForMember(dest => dest.TimeEnd, opt => opt.MapFrom(src => src.TimeEnd.Value.ToTimeOnly()));
     }
 }

@@ -30,6 +30,7 @@ public class Reservation : BaseEntity
     public LocalDateTime LastUpdatedAt { get; set; }
     // may need reviews to add these fields
 
+    public virtual Event Event {  get; set; }
     public virtual Workspace Workspace { get; set; }
     public virtual User User { get; set; }
     public virtual Branch Branch { get; set; }

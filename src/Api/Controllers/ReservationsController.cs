@@ -11,11 +11,14 @@ using System.Diagnostics;
 
 namespace Api.Controllers;
 
-public class ReservationsController : ApiControllerBase {
+public class ReservationsController : ApiControllerBase
+{
     [HttpPost]
-    public async Task<ActionResult<Result<ResponseReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request) {
+    public async Task<ActionResult<Result<ResponseReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request)
+    {
         Debug.WriteLine(request.ReservationDate);
-        var command = !request.includeEvent ? new CreateReservationCommand() {
+        var command = !request.includeEvent ? new CreateReservationCommand()
+        {
             ReservationDate = request.ReservationDate,
             TotalPrice = request.TotalPrice,
             Deposit = request.Deposit,
@@ -64,8 +67,10 @@ public class ReservationsController : ApiControllerBase {
     }
 
     [HttpGet("{reservationid:guid}")]
-    public async Task<ActionResult<Result<ReservationDto>>> GetReservationById([FromRoute] Guid reservationid) {
-        var query = new GetReservationByIdQuery() {
+    public async Task<ActionResult<Result<ReservationDto>>> GetReservationById([FromRoute] Guid reservationid)
+    {
+        var query = new GetReservationByIdQuery()
+        {
             Id = reservationid
         };
 
@@ -74,8 +79,10 @@ public class ReservationsController : ApiControllerBase {
     }
 
     [HttpGet("user/{userid:guid}")]
-    public async Task<ActionResult<Result<PaginatedList<ReservationDto>>>> GetReservationsByUserPaginated([FromRoute] Guid userid, [FromQuery] GetReservationsPaginatedRequest request) {
-        var command = new GetReservationsByUserPaginatedQuery() {
+    public async Task<ActionResult<Result<PaginatedList<ReservationDto>>>> GetReservationsByUserPaginated([FromRoute] Guid userid, [FromQuery] GetReservationsPaginatedRequest request)
+    {
+        var command = new GetReservationsByUserPaginatedQuery()
+        {
             UserId = userid,
             Page = request.Page,
             Size = request.Size,
@@ -89,18 +96,33 @@ public class ReservationsController : ApiControllerBase {
     }
 
     [HttpGet()]
-    public async Task<ActionResult<Result<PaginatedList<ReservationDto>>>> GetReservationsPaginated([FromQuery] GetReservationsPaginatedRequest request) {
-        var command = new GetReservationsPaginatedQuery() {
+    public async Task<ActionResult<Result<PaginatedList<ReservationDto>>>> GetReservationsPaginated([FromQuery] GetReservationsPaginatedRequest request)
+    {
+        var command = new GetReservationsPaginatedQuery()
+        {
             Page = request.Page,
             Size = request.Size,
             Filter = request.Filter,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
-            InFuture = request.InFuture
+            GetAllReservationByBranch = request.GetAllReservationByBranch,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(command);
         return Ok(Result<PaginatedList<ReservationDto>>.Succeed(result));
+    }
+
+    [HttpPut("cancel/{id:guid}")]
+    public async Task<ActionResult<Result<ResponseReservationDto>>> CancelReservation([FromRoute] Guid id)
+    {
+        var command = new CancelReservationCommand()
+        {
+            ReservationId = id,
+        };
+
+        var result = await Mediator.Send(command);
+        return Ok(Result<ResponseReservationDto>.Succeed(result));
     }
 
 }
