@@ -7,7 +7,9 @@ public class CreateReservationRequest {
     public Guid WorkspaceTypeId { get; set; }
     public Guid WorkspaceId { get; set; }
     public double Deposit { get; set; }
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
+    public string PhoneNumber { get; set; } = null!;
+    public string Email { get; set; } = null!;
     public double TotalPrice { get; set; }
     public string? Note { get; set; }
     public string Email { get; set; }
@@ -18,6 +20,7 @@ public class CreateReservationRequest {
     public string? CoverImageLink { get; set; }
     public double? EntranceFee { get; set; }
     public Guid[] SlotIds { get; set; }
+    public Guid[]? WorkspaceUtilityServiceIds { get; set; }
     public string PaymentMethod { get; set; }
     public bool IsEventPrivate { get; set; }
     public Guid BranchId { get; set; }

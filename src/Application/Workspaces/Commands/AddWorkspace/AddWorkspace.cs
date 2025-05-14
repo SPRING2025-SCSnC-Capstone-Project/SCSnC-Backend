@@ -12,7 +12,6 @@ namespace Application.Workspaces.Commands;
 public record AddWorkspaceCommand : IRequest<WorkspaceDto>
 {
     public int WorkspaceNumber { get; init; }
-    public Guid WorkspaceTypeId { get; init; }
     public Guid WorkspaceTypeAtBranchId {  get; init; }
 }
 
@@ -34,6 +33,12 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
         if (workspace is not null)
         {
             throw new ConflictException($"Workspace with number {request.WorkspaceNumber} already exists");
+        }
+
+        var exisistingWorkspaceName = await _context.Workspaces.FirstOrDefaultAsync(x => x.WorkspaceName.Equals(request.WorkspaceName.Trim()) && x.IsActive, cancellationToken);
+
+        if (exisistingWorkspaceName is not null) {
+            throw new ConflictException($"Workspace with name {request.WorkspaceName} already exists");
         }
 
         var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.Id == request.WorkspaceTypeId && x.IsActive, cancellationToken);

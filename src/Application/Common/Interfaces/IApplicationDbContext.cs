@@ -34,5 +34,8 @@ public interface IApplicationDbContext
     public DbSet<WorkspaceType> WorkspaceTypes { get; }
     public DbSet<WorkspaceTypeAtBranch> WorkspaceTypeAtBranches { get; }
     public DbSet<RefreshToken> RefreshTokens { get; }
+    public DbSet<UtilityService> UtilityServices { get; }
+    public DbSet<WorkspaceUtilityService> WorkspaceUtilityServices { get; }
+    public DbSet<ReservationUtilityService> ReservationUtilityServices { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

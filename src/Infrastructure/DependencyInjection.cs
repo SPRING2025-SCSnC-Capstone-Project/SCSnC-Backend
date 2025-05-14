@@ -2,7 +2,9 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using Application.Common.Interfaces;
 using Ardalis.GuardClauses;
+using Azure.Storage.Blobs;
 using Infrastructure.Data;
+using Infrastructure.Services.Azure;
 using Infrastructure.Services.Deepseek;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Jwt;
@@ -23,6 +25,7 @@ public static class DependencyInjection
             .AddApplicationDbContext(configuration)
             .AddJwtAuthentication(configuration)
             .AddVNPayService(configuration)
+            .AddAzureService(configuration)
             .AddDeepseekService(configuration)
             .AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!)
             .AddTransient<ISecurityService, SecurityService>()
@@ -97,6 +100,13 @@ public static class DependencyInjection
         services.Configure<VNPayConfig>(configuration.GetSection(VNPayConfig.Section));
         services.AddTransient<IPaymentService, VNPayService>();
 
+        return services;
+    }
+    private static IServiceCollection AddAzureService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton(x =>
+            new BlobServiceClient(configuration.GetConnectionString("Azure")));
+        services.AddTransient<IAzureService, AzureService>();
         return services;
     }
 

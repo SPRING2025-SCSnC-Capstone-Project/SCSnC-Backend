@@ -54,6 +54,9 @@ public class WorkspacesController : ApiControllerBase
             Id = id,
             WorkspaceNumber = request.WorkspaceNumber,
             WorkspaceTypeId = request.WorkspaceTypeId,
+            WorkspaceName = request.WorkspaceName,
+            Description = request.Description,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(command);
@@ -84,6 +87,10 @@ public class WorkspacesController : ApiControllerBase
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
             Filter = request.Filter,
+            BranchId = request.BranchId,
+            SlotNumber = request.SlotNumber,
+            ReserveDate = request.ReserveDate,
+            WorkspaceTypeId = request.WorkspaceTypeId
         };
 
         var result = await Mediator.Send(query);

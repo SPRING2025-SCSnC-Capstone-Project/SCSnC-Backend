@@ -25,7 +25,6 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Respo
             .Include(o => o.Table)
             .Include(o => o.User)
             .Include(o => o.Voucher)
-            .Include(o => o.Branch)
             // .ThenInclude(o => o.ItemWithSizes)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 

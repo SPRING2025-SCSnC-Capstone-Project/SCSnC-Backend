@@ -9,9 +9,12 @@ public class ReservationDto : BaseDto, IMapFrom<Reservation>
     public DateOnly ReserveDate { get; set; }
     public WorkspaceDto Workspace { get; set; } = null!;
     public double Deposit { get; set; }
-    public UserDto User { get; set; } = null!;
+    public UserDto? User { get; set; } = null!;
     public bool IsFullPaid { get; set; }
     public double TotalPrice { get; set; }
+    public string PhoneNumber { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string Status { get; set; } = null!;
     public HashSet<ReservedSlotDto> ReservedSlots { get; set; } = null!;
     public string? Note { get; set; }
     public string Email { get; set; }
@@ -41,9 +44,12 @@ public class ResponseReservationDto : BaseDto, IMapFrom<Reservation>
     public DateOnly ReserveDate { get; set; }
     public WorkspaceDto Workspace { get; set; } = null!;
     public double Deposit { get; set; }
-    public UserDto User { get; set; } = null!;
+    public UserDto? User { get; set; } = null!;
     public bool IsFullPaid { get; set; }
     public double TotalPrice { get; set; }
+    public string PhoneNumber { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string Status { get; set; } = null!;
     public string PaymentLink { get; set; }
     public HashSet<ReservedSlotDto> ReservedSlots { get; set; } = null!;
     public string? Note { get; set; }

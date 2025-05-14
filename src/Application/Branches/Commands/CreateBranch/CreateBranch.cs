@@ -44,6 +44,23 @@ public class CreateBranchCommandHandler : IRequestHandler<CreateBranchCommand, B
         await _context.Branches.AddAsync(branch, cancellationToken);
         
         await _context.SaveChangesAsync(cancellationToken);
+        
+        // Add default prices for all items at the new branch based on the earliest branch
+        var getBranchForDefaultPrice = await _context.Branches.OrderBy(x => x.CreatedAt).FirstOrDefaultAsync(cancellationToken);
+        foreach (var item in await _context.Items.ToListAsync(cancellationToken))
+        {
+            var itemPriceAtBranch = new ItemPriceAtBranch
+            {
+                ItemId = item.Id,
+                BranchId = getBranchForDefaultPrice.Id,
+                Price = _context.ItemPricesAtBranches.FirstOrDefault(x => x.ItemId == item.Id && x.BranchId == getBranchForDefaultPrice.Id)?.Price ?? 0,
+                CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
+            };
+            
+            await _context.ItemPricesAtBranches.AddAsync(itemPriceAtBranch, cancellationToken);
+        }
+        await _context.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<BranchDto>(branch);
     }

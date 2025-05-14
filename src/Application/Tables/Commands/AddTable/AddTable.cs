@@ -9,6 +9,7 @@ namespace Application.Tables.Commands;
 public record AddTableCommand: IRequest<TableDto> {
     public int TableNumber { get; init; }
     public int SeatAmount { get; init; }
+    public Guid BranchId { get; init; }
 }
 
 public class AddTableCommandHandler: IRequestHandler<AddTableCommand, TableDto> {
@@ -27,7 +28,15 @@ public class AddTableCommandHandler: IRequestHandler<AddTableCommand, TableDto> 
             throw new ConflictException($"Table with number {request.TableNumber} already exists");
         }
 
+        var branch = await _context.Branches.FirstOrDefaultAsync(x => x.Id == request.BranchId
+                && x.IsActive, cancellationToken);
+
+        if (branch is null) {
+            throw new KeyNotFoundException($"Branch with Id {request.BranchId} does not exist");
+        }
+
         var entity = new Table() {
+            BranchId = request.BranchId,
             TableNumber = request.TableNumber,
             SeatAmount = request.SeatAmount,
             IsAvailable = true,

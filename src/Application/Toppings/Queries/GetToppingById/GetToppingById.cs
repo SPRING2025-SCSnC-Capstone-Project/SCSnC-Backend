@@ -24,6 +24,7 @@ public class GetToppingByIdQueryHandler : IRequestHandler<GetToppingByIdQuery, T
     {
         var topping = await _context.Toppings
             .Include(x => x.ToppingPricesAtBranches.Where(y => y.BranchId == request.BranchId))
+            .ThenInclude(y => y.Branch)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         
         if (topping is null)

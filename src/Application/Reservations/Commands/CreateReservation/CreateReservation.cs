@@ -14,7 +14,9 @@ public record CreateReservationCommand : IRequest<ResponseReservationDto> {
     public Guid WorkspaceTypeId { get; set; }
     public Guid WorkspaceId { get; init; }
     public double Deposit { get; init; }
-    public Guid UserId { get; init; }
+    public Guid? UserId { get; init; }
+    public string PhoneNumber { get; init; } = null!;
+    public string Email { get; init; } = null!;
     public double TotalPrice { get; init; }
     public Guid[] SlotIds { get; init; } = null!;
     public string? Note { get; set; }
@@ -33,6 +35,7 @@ public record CreateReservationCommand : IRequest<ResponseReservationDto> {
     public TimeOnly TimeStart { get; init; }
     public TimeOnly TimeEnd { get; init; }
     public bool BookingWithTime { get; init; }
+    public Guid[]? WorkspaceUtilityServiceIds { get; set; }
 }
 
 public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ResponseReservationDto> {
@@ -62,6 +65,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
         }
 
         var reservedSlotsToAdd = new List<ReservedSlot>();
+        var reservationUtilityServicesToAdd = new List<ReservationUtilityService>();
 
         foreach (var slotId in request.SlotIds)
         {
@@ -80,6 +84,24 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
         Debug.WriteLine(request.BranchId);
         var reservation = new Reservation()
         {
+            if (await CheckConflict(request.ReservationDate, slotId, cancellationToken)) {
+                throw new ConflictException("One or more slots have already been reserved");
+            }
+        }
+
+        if (request.WorkspaceUtilityServiceIds != null) {
+            foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds) {
+                var workspaceUtilityService = await _context.WorkspaceUtilityServices.FirstOrDefaultAsync(
+                    x => x.Id == workspaceUtilityServiceId, cancellationToken
+                );
+
+                if (workspaceUtilityService is null) {
+                    throw new KeyNotFoundException($"Workspace utility service with Id {workspaceUtilityServiceId} does not exist");
+                }
+            }
+        }
+
+        var reservation = new Reservation() {
             UserId = request.UserId,
             WorkspaceId = request.WorkspaceId,
             Deposit = request.TotalPrice,
@@ -171,6 +193,18 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
         }
 
+        foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds) {
+            var reservationUtilityService = new ReservationUtilityService() {
+                ReservationId = result.Entity.Id,
+                WorkspaceUtilityServiceId = workspaceUtilityServiceId,
+            };
+
+
+            reservationUtilityServicesToAdd.Add(reservationUtilityService);
+        }
+
+        await _context.ReservationUtilityServices.AddRangeAsync(reservationUtilityServicesToAdd, cancellationToken);
+
         await _context.SaveChangesAsync(cancellationToken);
 
         var createdReservation = await _context.Reservations
@@ -184,6 +218,9 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             .Include(x => x.User)
             .Include(x => x.ReservedSlots)
                 .ThenInclude(y => y.Slot)
+            .Include(x => x.ReservationUtilityServices)
+            .ThenInclude(y => y.WorkspaceUtilityService)
+            .ThenInclude(z => z.UtilityService)
             .FirstOrDefaultAsync(x => x.Id == newReservation.Entity.Id, cancellationToken);
 
         var returnReservationData = _mapper.Map<ResponseReservationDto>(createdReservation);
@@ -196,7 +233,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 {
                     vnp_CreateDate = DateTime.Now.ToString("yyyyMMddHHmmss"),
                     vnp_IpAddr = IPAddressHelper.GetLocalIPAddress(),
-                    vnp_Amount = (decimal)createdReservation.Deposit * 100,
+                    vnp_Amount = (decimal)createdReservation!.Deposit * 100,
                     vnp_OrderType = "other",
                     vnp_OrderInfo = $"Date: {DateTime.Now.ToString("yyyyMMddHHmmss")}; Total Price: {createdReservation.Deposit}",
                     vnp_TxnRef = createdReservation.Id.ToString(),
@@ -231,11 +268,11 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
         return returnReservationData;
     }
 
-    private async Task<bool> CheckConflict(DateOnly reservationDate, Guid slotId, CancellationToken cancellationToken)
-    {
-        var conflict = await _context.ReservedSlots.Include(x => x.Reservation).FirstOrDefaultAsync(x =>
-                x.Reservation!.ReserveDate == LocalDate.FromDateOnly(reservationDate) &&
-                x.SlotId == slotId, cancellationToken);
+    private async Task<bool> CheckConflict(DateOnly reservationDate, Guid slotId, CancellationToken cancellationToken) {
+        var conflict = await _context.ReservedSlots.Include(x => x.Reservation).FirstOrDefaultAsync(x => 
+                x.Reservation!.ReserveDate == LocalDate.FromDateOnly(reservationDate) 
+                && (x.Reservation.Status.Equals("Pending") || x.Reservation.Status.Equals("Booked"))
+                && x.SlotId == slotId, cancellationToken);
 
         return conflict is not null;
     }
