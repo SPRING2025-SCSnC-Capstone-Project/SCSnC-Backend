@@ -7,19 +7,22 @@ public class WorkspaceType : BaseEntity
 {
     public WorkspaceType()
     {
-        Workspaces = new HashSet<Workspace>();
+        //Workspaces = new HashSet<Workspace>();
         WorkspaceMedias = new HashSet<WorkspaceMedia>();
+        WorkspaceUtilityServices = new HashSet<WorkspaceUtilityService>();
     }
     public string WorkspaceTypeName { get; set; }
     public int MaxCapacity { get; set; }
     public double PricePerHour { get; set; }
     public bool IsActive { get; set; }
-    public string MediaUrl { get; set; } = null!;
     public bool HaveEquipmentForRent { get; set; }
+    public string Description { get; set; }
 
-    public virtual ICollection<Workspace> Workspaces { get; set; }
+    //public virtual ICollection<Workspace> Workspaces { get; set; }
     public virtual ICollection<WorkspaceTypeAtBranch> WorkspacesAtBranches { get; set; }
     public virtual ICollection<WorkspaceMedia> WorkspaceMedias { get; set; }
+    public virtual ICollection<WorkspaceUtilityService> WorkspaceUtilityServices { get; set; }
+
 
 
 }

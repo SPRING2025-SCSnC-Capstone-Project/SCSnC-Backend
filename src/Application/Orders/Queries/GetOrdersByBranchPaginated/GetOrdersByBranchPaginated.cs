@@ -4,29 +4,29 @@ using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
 
-namespace Application.Orders.Queries.GetOrdersByUserPaginated;
+namespace Application.Orders.Queries.GetOrdersByBranchPaginated;
 
-public record GetOrdersByUserPaginatedQuery : IRequest<PaginatedList<ResponseOrderDto>>
+public record GetOrdersByBranchPaginatedQuery : IRequest<PaginatedList<ResponseOrderDto>>
 {
     public int? Page { get; init; }
     public int? Size { get; init; }
     public string? SortBy { get; init; }
     public string? SortOrder { get; init; }
-    public Guid UserId { get; init; }
+    public Guid BranchId { get; init; }
 }
 
-public class GetOrdersByUserPaginatedQueryHandler : IRequestHandler<GetOrdersByUserPaginatedQuery, PaginatedList<ResponseOrderDto>>
+public class GetOrdersByBranchPaginatedQueryHandler : IRequestHandler<GetOrdersByBranchPaginatedQuery, PaginatedList<ResponseOrderDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     
-    public GetOrdersByUserPaginatedQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetOrdersByBranchPaginatedQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
     
-    public async Task<PaginatedList<ResponseOrderDto>> Handle(GetOrdersByUserPaginatedQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedList<ResponseOrderDto>> Handle(GetOrdersByBranchPaginatedQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Orders
             .Include(x => x.Workspace)
@@ -39,7 +39,7 @@ public class GetOrdersByUserPaginatedQueryHandler : IRequestHandler<GetOrdersByU
             .Include(x => x.Table)
             .Include(x => x.Voucher)
             .Include(x => x.User)
-            .Where(x => x.User.Id.Equals(request.UserId))
+            .Where(x => x.BranchId.Equals(request.BranchId))
             .AsQueryable();
 
         return await query.ListPaginateWithSortAsync<Order, ResponseOrderDto>

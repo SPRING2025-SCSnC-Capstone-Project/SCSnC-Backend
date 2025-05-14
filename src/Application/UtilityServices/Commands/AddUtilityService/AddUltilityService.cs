@@ -34,11 +34,11 @@ public class AddUtilityServiceCommandHandler : IRequestHandler<AddUtilityService
         await _context.UtilityServices.AddAsync(utilityService, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        foreach (var workspace in await _context.Workspaces.ToListAsync(cancellationToken))
+        foreach (var workspaceType in await _context.WorkspaceTypes.ToListAsync(cancellationToken))
         {
             var workspaceUtility = new WorkspaceUtilityService
             {
-                WorkspaceId = workspace.Id,
+                WorkspaceTypeId = workspaceType.Id,
                 UtilityServiceId = utilityService.Id,
                 ServiceFee = request.ServiceFee
             };

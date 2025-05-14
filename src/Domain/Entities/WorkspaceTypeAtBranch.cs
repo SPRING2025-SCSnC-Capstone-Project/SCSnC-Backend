@@ -12,7 +12,6 @@ namespace Domain.Entities
         public Guid WorkspaceTypeId { get; set; }
         [ForeignKey("BranchId")]
         public Guid BranchId { get; set; }
-        public double PriceAdjust { get; set; }
         public LocalDateTime CreatedAt { get; set; }
         public LocalDateTime LastUpdatedAt { get; set; }
 

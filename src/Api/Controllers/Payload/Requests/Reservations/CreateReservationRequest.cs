@@ -8,8 +8,6 @@ public class CreateReservationRequest {
     public Guid WorkspaceId { get; set; }
     public double Deposit { get; set; }
     public Guid? UserId { get; set; }
-    public string PhoneNumber { get; set; } = null!;
-    public string Email { get; set; } = null!;
     public double TotalPrice { get; set; }
     public string? Note { get; set; }
     public string Email { get; set; }
@@ -27,4 +25,6 @@ public class CreateReservationRequest {
     public TimeOnly TimeStart { get; set; }
     public TimeOnly TimeEnd { get; set; }
     public bool BookingWithTime {  get; set; }
-} 
+    public IFormFile? File { get; set; }
+
+}

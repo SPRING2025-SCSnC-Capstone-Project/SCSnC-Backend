@@ -1,6 +1,7 @@
-namespace Domain.Entities;
+﻿namespace Domain.Entities;
 
-public class ReservationUtilityService : BaseEntity {
+public class ReservationUtilityService : BaseEntity
+{
     [ForeignKey("ReservationId")]
     public Guid ReservationId { get; set; }
     [ForeignKey("WorkspaceUtilityServiceId")]

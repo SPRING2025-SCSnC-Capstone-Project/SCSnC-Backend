@@ -31,20 +31,12 @@ public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceComma
             throw new KeyNotFoundException($"Workspace with Id {request.Id} does not exist.");
         }
 
-        var existingWorkspaceNumber = await _context.Workspaces.FirstOrDefaultAsync(x => x.WorkspaceNumber == request.WorkspaceNumber 
-                && x.BranchId == request.BranchId
+        var existingWorkspaceNumber = await _context.Workspaces.Include(x => x.WorkspaceTypeAtBranch).FirstOrDefaultAsync(x => x.WorkspaceNumber == request.WorkspaceNumber 
+                && x.WorkspaceTypeAtBranch.Branch.Id == request.BranchId
                 && x.IsActive, cancellationToken);
 
         if (existingWorkspaceNumber is not null && workspace.WorkspaceNumber != existingWorkspaceNumber.WorkspaceNumber) {
             throw new ConflictException($"Workspace with number {request.WorkspaceNumber} already exists");
-        }
-
-        var exisistingWorkspaceName = await _context.Workspaces.FirstOrDefaultAsync(x => x.WorkspaceName.Equals(request.WorkspaceName.Trim()) 
-                && x.BranchId == request.BranchId
-                && x.IsActive, cancellationToken);
-
-        if (exisistingWorkspaceName is not null && !workspace.WorkspaceName.Equals(exisistingWorkspaceName.WorkspaceName)) {
-            throw new ConflictException($"Workspace with name {request.WorkspaceName} already exists");
         }
 
         var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.Id == request.WorkspaceTypeId && x.IsActive, cancellationToken);

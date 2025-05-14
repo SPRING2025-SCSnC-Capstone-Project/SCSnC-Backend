@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
+using System.Diagnostics;
 
 namespace Application.WorkspaceTypes.Queries;
 
@@ -17,7 +18,12 @@ public class GetWorkspaceTypeByIdQueryHandler : IRequestHandler<GetWorkspaceType
     }
 
     public async Task<WorkspaceTypeDto> Handle(GetWorkspaceTypeByIdQuery request, CancellationToken cancellationToken) {
-        var workspaceType = await _context.WorkspaceTypes.Include(x => x.WorkspaceMedias).FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
+        var workspaceType = await _context.WorkspaceTypes.Include(x => x.WorkspaceMedias)
+            .Include(x => x.WorkspaceUtilityServices)
+            .ThenInclude(y => y.UtilityService)
+            .FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
+
+        Debug.WriteLine(workspaceType.WorkspaceUtilityServices.ToList()[0].UtilityService.ServiceName);
 
         if (workspaceType is null) {
             throw new KeyNotFoundException($"WorkspaceType with Id {request.Id} does not exist");

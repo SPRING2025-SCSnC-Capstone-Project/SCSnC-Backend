@@ -1,5 +1,6 @@
 using Application.Common.Mappings;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using NodaTime;
 
 namespace Application.Common.Models.Dtos;
@@ -12,8 +13,6 @@ public class ReservationDto : BaseDto, IMapFrom<Reservation>
     public UserDto? User { get; set; } = null!;
     public bool IsFullPaid { get; set; }
     public double TotalPrice { get; set; }
-    public string PhoneNumber { get; set; } = null!;
-    public string Email { get; set; } = null!;
     public string Status { get; set; } = null!;
     public HashSet<ReservedSlotDto> ReservedSlots { get; set; } = null!;
     public string? Note { get; set; }
@@ -27,6 +26,8 @@ public class ReservationDto : BaseDto, IMapFrom<Reservation>
     public DateTime LastUpdatedAt { get; set; }
     public TimeOnly TimeStart { get; set; }
     public TimeOnly TimeEnd { get; set; }
+    public bool IsCanceled { get; set; }
+
 
     public void Mapping(Profile profile)
     {
@@ -47,8 +48,6 @@ public class ResponseReservationDto : BaseDto, IMapFrom<Reservation>
     public UserDto? User { get; set; } = null!;
     public bool IsFullPaid { get; set; }
     public double TotalPrice { get; set; }
-    public string PhoneNumber { get; set; } = null!;
-    public string Email { get; set; } = null!;
     public string Status { get; set; } = null!;
     public string PaymentLink { get; set; }
     public HashSet<ReservedSlotDto> ReservedSlots { get; set; } = null!;

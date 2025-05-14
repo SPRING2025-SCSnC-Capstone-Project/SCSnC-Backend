@@ -30,9 +30,12 @@ public class CancelReservationCommandHandler : IRequestHandler<CancelReservation
         {
             var reservationTransaction = await _context.Transactions.Include(x => x.Reservation).ThenInclude(y => y.Event).Include(x => x.Order).FirstOrDefaultAsync(x => x.Reservation.Id.Equals(request.ReservationId));
             reservationTransaction.Reservation.IsFullPaid = false;
+            reservationTransaction.Reservation.Status = "Canceled";
+            reservationTransaction.Reservation.IsCanceled = true;
             if (reservationTransaction.Reservation.Event != null)
             {
                 reservationTransaction.Reservation.Event.IsActive = false;
+                reservationTransaction.Reservation.Event.IsCanceled = true;
             }
             if (reservationTransaction.Order != null)
             {

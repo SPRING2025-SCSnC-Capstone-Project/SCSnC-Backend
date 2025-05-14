@@ -35,19 +35,6 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
             throw new ConflictException($"Workspace with number {request.WorkspaceNumber} already exists");
         }
 
-        var exisistingWorkspaceName = await _context.Workspaces.FirstOrDefaultAsync(x => x.WorkspaceName.Equals(request.WorkspaceName.Trim()) && x.IsActive, cancellationToken);
-
-        if (exisistingWorkspaceName is not null) {
-            throw new ConflictException($"Workspace with name {request.WorkspaceName} already exists");
-        }
-
-        var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.Id == request.WorkspaceTypeId && x.IsActive, cancellationToken);
-
-        if (workspaceType is null)
-        {
-            throw new KeyNotFoundException($"Workspace type with Id {request.WorkspaceTypeId} does not exists");
-        }
-
         string[] workspaces = "phòng họp:l:200000,phòng cặp đôi:s:50000,phòng trà:m:100000,phòng đơn:xs:30000".Split(',');
         List<WorkspaceType> workspaceTypes = _context.WorkspaceTypes.ToList();
         List<Branch> branches = _context.Branches.ToList();
@@ -88,7 +75,6 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
                     {
                         BranchId = branch.Id,
                         WorkspaceTypeId = wt.Id,
-                        PriceAdjust = wt.PricePerHour - 0,
                         CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                         LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
                     };
@@ -105,7 +91,6 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
                         WorkspaceNumber = i + 1,
                         IsAvailable = true,
                         IsActive = true,
-                        PricePerHour = 0,
                         //WorkspaceImageUrl = request.WorkspaceImageUrl,
                         WorkspaceTypeAtBranchId = workspaceTypeAtBranch.Id,
                     };

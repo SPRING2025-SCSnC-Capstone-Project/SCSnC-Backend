@@ -6,7 +6,6 @@ public class Branch: BaseEntity
     {
         ItemPricesAtBranches = new HashSet<ItemPriceAtBranch>();
         ToppingPricesAtBranches = new HashSet<ToppingPriceAtBranch>();
-        Workspaces = new HashSet<Workspace>();
         Tables = new HashSet<Table>();
     }
     

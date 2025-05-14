@@ -24,7 +24,6 @@ public class WorkspacesController : ApiControllerBase
     public async Task<ActionResult<Result<WorkspaceDto>>> AddWorkspace([FromBody] AddWorkspaceRequest request) { 
         var command = new AddWorkspaceCommand() {
             WorkspaceNumber = request.WorkspaceNumber,
-            WorkspaceTypeId = request.WorkspaceTypeId,
             WorkspaceTypeAtBranchId = request.WorkspaceTypeAtBranchId,
         };
 
@@ -87,10 +86,8 @@ public class WorkspacesController : ApiControllerBase
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
             Filter = request.Filter,
-            BranchId = request.BranchId,
             SlotNumber = request.SlotNumber,
             ReserveDate = request.ReserveDate,
-            WorkspaceTypeId = request.WorkspaceTypeId
         };
 
         var result = await Mediator.Send(query);

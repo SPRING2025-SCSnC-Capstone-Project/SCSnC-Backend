@@ -39,29 +39,29 @@ public class GetWorkspacesPaginatedQueryHandler : IRequestHandler<GetWorkspacesP
                 .Where(x => x.IsActive)
                 .AsQueryable();
 
-            if (request.BranchId != Guid.Empty && request.BranchId != null)
-            {
-                var branch = await _context.Branches.FirstOrDefaultAsync(x => x.IsActive && x.Id == request.BranchId, cancellationToken);
+            //if (request.BranchId != Guid.Empty && request.BranchId != null)
+            //{
+            //    var branch = await _context.Branches.FirstOrDefaultAsync(x => x.IsActive && x.Id == request.BranchId, cancellationToken);
 
-                if (branch is null)
-                {
-                    throw new KeyNotFoundException($"Branch with Id {request.BranchId} does not exist");
-                }
+            //    if (branch is null)
+            //    {
+            //        throw new KeyNotFoundException($"Branch with Id {request.BranchId} does not exist");
+            //    }
 
-                workspaces = workspaces.Where(x => x.Branch.Id == branch.Id);
-            }
+            //    workspaces = workspaces.Where(x => x.Branch.Id == branch.Id);
+            //}
 
-            if (request.WorkspaceTypeId != Guid.Empty && request.WorkspaceTypeId != null)
-            {
-                var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.IsActive && x.Id == request.WorkspaceTypeId, cancellationToken);
+            //if (request.WorkspaceTypeId != Guid.Empty && request.WorkspaceTypeId != null)
+            //{
+            //    var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.IsActive && x.Id == request.WorkspaceTypeId, cancellationToken);
 
-                if (workspaceType is null)
-                {
-                    throw new KeyNotFoundException($"Workspace Type with Id {request.WorkspaceTypeId} does not exist");
-                }
+            //    if (workspaceType is null)
+            //    {
+            //        throw new KeyNotFoundException($"Workspace Type with Id {request.WorkspaceTypeId} does not exist");
+            //    }
 
-                workspaces = workspaces.Where(x => x.WorkspaceType.Id == workspaceType.Id);
-            }
+            //    workspaces = workspaces.Where(x => x.WorkspaceType.Id == workspaceType.Id);
+            //}
 
             if ((request.ReserveDate != null && request.SlotNumber == null) || (request.ReserveDate == null && request.SlotNumber != null))
             {

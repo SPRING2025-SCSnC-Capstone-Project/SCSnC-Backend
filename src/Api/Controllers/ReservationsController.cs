@@ -15,7 +15,7 @@ namespace Api.Controllers;
 public class ReservationsController : ApiControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<Result<ResponseReservationDto>>> CreateReservation([FromBody] CreateReservationRequest request)
+    public async Task<ActionResult<Result<ResponseReservationDto>>> CreateReservation([FromForm] CreateReservationRequest request)
     {
         Debug.WriteLine(request.ReservationDate);
         var command = !request.includeEvent ? new CreateReservationCommand()
@@ -25,8 +25,6 @@ public class ReservationsController : ApiControllerBase
             Deposit = request.Deposit,
             WorkspaceTypeId = request.WorkspaceTypeId,
             WorkspaceId = request.WorkspaceId,
-            Email = request.Email,
-            PhoneNumber = request.PhoneNumber,
             UserId = request.UserId,
             Note = request.Note,
             Email = request.Email,
@@ -38,7 +36,9 @@ public class ReservationsController : ApiControllerBase
             CoverImageLink = request.CoverImageLink,
             BookingWithTime = request.BookingWithTime,
             TimeStart = request.TimeStart,
-            TimeEnd = request.TimeEnd
+            TimeEnd = request.TimeEnd,
+            WorkspaceUtilityServiceIds = request.WorkspaceUtilityServiceIds,
+            File = request.File,
         } :
         new CreateReservationCommand()
         {
@@ -62,7 +62,9 @@ public class ReservationsController : ApiControllerBase
             CoverImageLink = request.CoverImageLink,
             BookingWithTime = request.BookingWithTime,
             TimeStart = request.TimeStart,
-            TimeEnd = request.TimeEnd
+            TimeEnd = request.TimeEnd,
+            WorkspaceUtilityServiceIds = request.WorkspaceUtilityServiceIds,
+            File = request.File,
         };
 
         var result = await Mediator.Send(command);

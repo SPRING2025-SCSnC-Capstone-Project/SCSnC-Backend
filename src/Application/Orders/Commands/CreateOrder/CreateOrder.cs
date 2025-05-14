@@ -203,6 +203,7 @@ public record CreateOrderCommand : IRequest<OrderDto>
     public Guid? WorkspaceId { get; init; }
     public Guid UserId { get; init; }
     public Guid? VoucherId { get; init; }
+    public Guid BranchId { get; init; }
     public double TotalPrice { get; init; }
     public List<CreateOrderDetailDto> OrderDetails { get; init; }
     public string PaymentMethod { get; init; }
@@ -263,6 +264,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             UserId = request.UserId,
             VoucherId = request.VoucherId,
             TotalPrice = request.TotalPrice,
+            BranchId = request.BranchId,
 
             IsActive = true,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),

@@ -4,6 +4,7 @@ using Application.Common.Models.Dtos;
 using Application.Orders.Commands.CreateOrder;
 using Application.Orders.Commands.UpdateOrder;
 using Application.Orders.Queries.GetOrderById;
+using Application.Orders.Queries.GetOrdersByBranchPaginated;
 using Application.Orders.Queries.GetOrdersByUserPaginated;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,6 +31,19 @@ public class OrdersController : ApiControllerBase
         var query = new GetOrdersByUserPaginatedQuery()
         {
             UserId = userId
+        };
+
+        var result = await Mediator.Send(query);
+
+        return Ok(Result<PaginatedList<ResponseOrderDto>>.Succeed(result));
+    }
+
+    [HttpGet("branch/{branchId:guid}")]
+    public async Task<ActionResult<Result<PaginatedList<ResponseOrderDto>>>> GetOrderByBranchId([FromRoute] Guid branchId)
+    {
+        var query = new GetOrdersByBranchPaginatedQuery()
+        {
+            BranchId = branchId
         };
 
         var result = await Mediator.Send(query);

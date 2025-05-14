@@ -3,20 +3,21 @@ using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using NodaTime;
 using System.Diagnostics;
 
 namespace Application.Reservations.Commands;
 
-public record CreateReservationCommand : IRequest<ResponseReservationDto> {
+public record CreateReservationCommand : IRequest<ResponseReservationDto>
+{
     public DateOnly ReservationDate { get; init; }
     public Guid WorkspaceTypeId { get; set; }
     public Guid WorkspaceId { get; init; }
     public double Deposit { get; init; }
     public Guid? UserId { get; init; }
     public string PhoneNumber { get; init; } = null!;
-    public string Email { get; init; } = null!;
     public double TotalPrice { get; init; }
     public Guid[] SlotIds { get; init; } = null!;
     public string? Note { get; set; }
@@ -36,26 +37,33 @@ public record CreateReservationCommand : IRequest<ResponseReservationDto> {
     public TimeOnly TimeEnd { get; init; }
     public bool BookingWithTime { get; init; }
     public Guid[]? WorkspaceUtilityServiceIds { get; set; }
+    public IFormFile? File { get; set; }
+
 }
 
-public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ResponseReservationDto> {
+public class CreateReservationCommandHandler : IRequestHandler<CreateReservationCommand, ResponseReservationDto>
+{
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IPaymentService _vnpayService;
+    private readonly IAzureService _azureService;
 
-    public CreateReservationCommandHandler(IMapper mapper, IApplicationDbContext context, IPaymentService vnpayService)
+    public CreateReservationCommandHandler(IMapper mapper, IApplicationDbContext context, IPaymentService vnpayService, IAzureService azureService)
     {
         _mapper = mapper;
         _context = context;
         _vnpayService = vnpayService;
+        _azureService = azureService;
     }
 
-    public async Task<ResponseReservationDto> Handle(CreateReservationCommand request, CancellationToken cancellationToken) {
+    public async Task<ResponseReservationDto> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
+    {
         var workspace = await _context.Workspaces.FirstOrDefaultAsync(x => x.Id == request.WorkspaceId && x.IsActive, cancellationToken);
-        
+
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.UserId && x.IsActive, cancellationToken);
 
-        if (workspace is null) {
+        if (workspace is null)
+        {
             throw new KeyNotFoundException($"Workspace with Id {request.WorkspaceId} does not exist");
         }
 
@@ -81,30 +89,27 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             //    throw new ConflictException("One or more slots have already been reserved");
             //}
         }
-        Debug.WriteLine(request.BranchId);
-        var reservation = new Reservation()
-        {
-            if (await CheckConflict(request.ReservationDate, slotId, cancellationToken)) {
-                throw new ConflictException("One or more slots have already been reserved");
-            }
-        }
 
-        if (request.WorkspaceUtilityServiceIds != null) {
-            foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds) {
+        if (request.WorkspaceUtilityServiceIds != null)
+        {
+            foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds)
+            {
                 var workspaceUtilityService = await _context.WorkspaceUtilityServices.FirstOrDefaultAsync(
                     x => x.Id == workspaceUtilityServiceId, cancellationToken
                 );
 
-                if (workspaceUtilityService is null) {
+                if (workspaceUtilityService is null)
+                {
                     throw new KeyNotFoundException($"Workspace utility service with Id {workspaceUtilityServiceId} does not exist");
                 }
             }
         }
-
-        var reservation = new Reservation() {
+        Debug.WriteLine(request.BranchId);
+        var reservation = new Reservation()
+        {
             UserId = request.UserId,
             WorkspaceId = request.WorkspaceId,
-            Deposit = request.TotalPrice,
+            Deposit = request.Deposit,
             IsFullPaid = false,
             TotalPrice = request.TotalPrice,
             ReserveDate = LocalDate.FromDateOnly(request.ReservationDate),
@@ -117,27 +122,34 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             TimeStart = LocalTime.FromTimeOnly(request.TimeStart),
-            TimeEnd = LocalTime.FromTimeOnly(request.TimeEnd)
+            TimeEnd = LocalTime.FromTimeOnly(request.TimeEnd),
+            Status = "Pending"
         };
         Event reservationEvent = new Event();
         var newReservation = await _context.Reservations.AddAsync(reservation, cancellationToken);
+        var imageUrl = "";
 
         if (request.includeEvent)
         {
             var entity = new Event()
             {
                 EventTitle = request.EventTitle,
-                EventDescription = request.EventDescription,
+                EventDescription = request.EventDescription ?? "",
                 EventDate = reservation.ReserveDate,
-                EntranceFee = request.EntranceFee?? 0,
+                EntranceFee = request.EntranceFee ?? 0,
                 CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                 LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                 ReservationId = newReservation.Entity.Id,
                 IsActive = false,
-                IsPrivate = request.IsEventPrivate
+                IsPrivate = request.IsEventPrivate,
+                IsCanceled = false
             };
 
-            entity.CoverImageLink = request.CoverImageLink ?? "";
+            if (request.File != null || request.File.Length == 0)
+            {
+                imageUrl = await _azureService.UploadFile(request.File);
+            }
+            entity.CoverImageLink = imageUrl;
 
             var result = await _context.Events.AddAsync(entity, cancellationToken);
 
@@ -193,13 +205,13 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
         }
 
-        foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds) {
-            var reservationUtilityService = new ReservationUtilityService() {
-                ReservationId = result.Entity.Id,
+        foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds)
+        {
+            var reservationUtilityService = new ReservationUtilityService()
+            {
+                ReservationId = newReservation.Entity.Id,
                 WorkspaceUtilityServiceId = workspaceUtilityServiceId,
             };
-
-
             reservationUtilityServicesToAdd.Add(reservationUtilityService);
         }
 
@@ -242,7 +254,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 };
                 var paymentUrl = await _vnpayService.GetPaymentLink(vnPayRequest);
                 returnReservationData.PaymentLink = paymentUrl;
-                
+
                 var statusVNPay = await PaymentHelper.CreateTransaction(null, returnReservationData.Id, createdReservation.Deposit,
                     request.PaymentMethod, _context, cancellationToken);
 
@@ -251,10 +263,10 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                     break;
                 }
                 throw new Exception(statusVNPay.Message);
-            
+
             case "Cash":
                 returnReservationData.PaymentLink = "Please pay at the cashier in the next 15 minutes. If no confirmation is received, the reservation will be canceled.";
-                
+
                 var statusCash = await PaymentHelper.CreateTransaction(null, returnReservationData.Id, createdReservation.Deposit,
                     request.PaymentMethod, _context, cancellationToken);
 
@@ -264,13 +276,14 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 }
                 throw new Exception(statusCash.Message);
         }
-        
+
         return returnReservationData;
     }
 
-    private async Task<bool> CheckConflict(DateOnly reservationDate, Guid slotId, CancellationToken cancellationToken) {
-        var conflict = await _context.ReservedSlots.Include(x => x.Reservation).FirstOrDefaultAsync(x => 
-                x.Reservation!.ReserveDate == LocalDate.FromDateOnly(reservationDate) 
+    private async Task<bool> CheckConflict(DateOnly reservationDate, Guid slotId, CancellationToken cancellationToken)
+    {
+        var conflict = await _context.ReservedSlots.Include(x => x.Reservation).FirstOrDefaultAsync(x =>
+                x.Reservation!.ReserveDate == LocalDate.FromDateOnly(reservationDate)
                 && (x.Reservation.Status.Equals("Pending") || x.Reservation.Status.Equals("Booked"))
                 && x.SlotId == slotId, cancellationToken);
 
