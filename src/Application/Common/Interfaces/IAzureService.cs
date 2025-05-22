@@ -11,5 +11,6 @@ namespace Application.Common.Interfaces
     public interface IAzureService
     {
         public Task<String> UploadFile(IFormFile file);
+        public Task<String> UploadModel(IFormFile file);
     }
 }

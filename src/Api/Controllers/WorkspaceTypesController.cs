@@ -4,6 +4,7 @@ using Application.Common.Models.Dtos;
 using Application.WorkspaceTypes.Commands;
 using Application.WorkspaceTypes.Queries;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Api.Controllers;
 
@@ -49,14 +50,18 @@ public class WorkspaceTypesController : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<Result<WorkspaceTypeDto>>> UpdateWorkspaceType([FromRoute] Guid id, [FromBody] UpdateWorkspaceTypeRequest request)
+    [RequestSizeLimit(524288000)]
+    public async Task<ActionResult<Result<WorkspaceTypeDto>>> UpdateWorkspaceType([FromRoute] Guid id, [FromForm] UpdateWorkspaceTypeRequest request)
     {
+        Debug.WriteLine(request.WorkspaceUtilityServices);
         var command = new UpdateWorkspaceTypeCommand()
         {
             Id = id,
-            MaxCapacity = request.MaxCapacity,
-            WorkspaceTypeName = request.WorkspaceTypeName,
-            PricePerHour = request.PricePerHour
+            MaxCapacity = request.MaxCapacity ?? null,
+            WorkspaceTypeName = request.WorkspaceTypeName ?? null,
+            PricePerHour = request.PricePerHour ?? null,
+            WorkspaceUtilityServices = request.WorkspaceUtilityServices,
+            ModelFile = request.ModelFile ?? null,
         };
 
         var result = await Mediator.Send(command);

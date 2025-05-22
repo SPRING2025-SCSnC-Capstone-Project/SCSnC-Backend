@@ -145,7 +145,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 IsCanceled = false
             };
 
-            if (request.File != null || request.File.Length == 0)
+            if (request.File != null || request.File.Length > 0)
             {
                 imageUrl = await _azureService.UploadFile(request.File);
             }

@@ -64,7 +64,8 @@ public class UtilityServicesController: ApiControllerBase
             Id = id,
             Name = request.ServiceName,
             ImgUrl = request.ServiceImage,
-            ServiceFee = request.ServiceFee
+            ServiceFee = request.ServiceFee,
+            IsAllowToRent = request.IsAllowToRent
         };
 
         var result = await Mediator.Send(command);

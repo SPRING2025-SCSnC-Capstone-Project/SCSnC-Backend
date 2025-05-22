@@ -11,7 +11,9 @@ using Infrastructure.Services.Jwt;
 using Infrastructure.Services.Security;
 using Infrastructure.Services.VNPay;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -104,8 +106,18 @@ public static class DependencyInjection
     }
     private static IServiceCollection AddAzureService(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton(x =>
-            new BlobServiceClient(configuration.GetConnectionString("Azure")));
+        services.AddAzureClients(azureBuilder =>
+        {
+            azureBuilder.AddBlobServiceClient(configuration.GetConnectionString("Azure_Image"))
+                        .WithName("ImageStorageClient");
+
+            azureBuilder.AddBlobServiceClient(configuration.GetConnectionString("Azure_Model"))
+                        .WithName("ModelStorageClient");
+        });
+        services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = 500 * 1024 * 1024;
+        });
         services.AddTransient<IAzureService, AzureService>();
         return services;
     }

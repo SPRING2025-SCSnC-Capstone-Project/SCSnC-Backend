@@ -9,6 +9,7 @@ public record UpdateUtilityServiceCommand : IRequest<UtilityServiceDto>
     public string Name { get; init; }
     public string ImgUrl { get; init; }
     public double ServiceFee { get; init; }
+    public bool IsAllowToRent {  get; init; }
 }
 
 public class UpdateUtilityServiceCommandHandler : IRequestHandler<UpdateUtilityServiceCommand, UtilityServiceDto>
@@ -42,6 +43,7 @@ public class UpdateUtilityServiceCommandHandler : IRequestHandler<UpdateUtilityS
                      .ToListAsync(cancellationToken))
         {
             workspaceUtility.ServiceFee = request.ServiceFee;
+            workspaceUtility.IsAllowToRent = request.IsAllowToRent;
             _context.WorkspaceUtilityServices.Update(workspaceUtility);
             await _context.SaveChangesAsync(cancellationToken);
         }
