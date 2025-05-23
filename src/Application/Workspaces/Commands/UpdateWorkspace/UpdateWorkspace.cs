@@ -25,26 +25,18 @@ public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceComma
     }
 
     public async Task<WorkspaceDto> Handle(UpdateWorkspaceCommand request, CancellationToken cancellationToken) {
-        var workspace = await _context.Workspaces.Include(x => x.WorkspaceType).FirstOrDefaultAsync(x => x.Id == request.Id  && x.IsActive, cancellationToken);
+        var workspace = await _context.Workspaces.Include(x => x.WorkspaceTypeAtBranch.WorkspaceType).FirstOrDefaultAsync(x => x.Id == request.Id  && x.IsActive, cancellationToken);
 
         if (workspace is null) {
             throw new KeyNotFoundException($"Workspace with Id {request.Id} does not exist.");
         }
 
-        var existingWorkspaceNumber = await _context.Workspaces.FirstOrDefaultAsync(x => x.WorkspaceNumber == request.WorkspaceNumber 
-                && x.BranchId == request.BranchId
+        var existingWorkspaceNumber = await _context.Workspaces.Include(x => x.WorkspaceTypeAtBranch).FirstOrDefaultAsync(x => x.WorkspaceNumber == request.WorkspaceNumber 
+                && x.WorkspaceTypeAtBranch.Branch.Id == request.BranchId
                 && x.IsActive, cancellationToken);
 
         if (existingWorkspaceNumber is not null && workspace.WorkspaceNumber != existingWorkspaceNumber.WorkspaceNumber) {
             throw new ConflictException($"Workspace with number {request.WorkspaceNumber} already exists");
-        }
-
-        var exisistingWorkspaceName = await _context.Workspaces.FirstOrDefaultAsync(x => x.WorkspaceName.Equals(request.WorkspaceName.Trim()) 
-                && x.BranchId == request.BranchId
-                && x.IsActive, cancellationToken);
-
-        if (exisistingWorkspaceName is not null && !workspace.WorkspaceName.Equals(exisistingWorkspaceName.WorkspaceName)) {
-            throw new ConflictException($"Workspace with name {request.WorkspaceName} already exists");
         }
 
         var workspaceType = await _context.WorkspaceTypes.FirstOrDefaultAsync(x => x.Id == request.WorkspaceTypeId && x.IsActive, cancellationToken);
@@ -61,9 +53,8 @@ public class UpdateWorkspaceCommandHandler: IRequestHandler<UpdateWorkspaceComma
         }
 
         workspace.WorkspaceNumber = request.WorkspaceNumber;
-        workspace.WorkspaceType = workspaceType;
-        workspace.WorkspaceTypeId = request.WorkspaceTypeId;
-        workspace.BranchId = request.BranchId;
+        workspace.WorkspaceTypeAtBranch.WorkspaceType = workspaceType;
+        workspace.WorkspaceTypeAtBranch.WorkspaceTypeId = request.WorkspaceTypeId;
 
         _context.Workspaces.Update(workspace);
         await _context.SaveChangesAsync(cancellationToken);

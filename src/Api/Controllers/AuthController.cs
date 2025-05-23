@@ -20,7 +20,8 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("/api/v1/[controller]/[action]")]
-public class AuthController : ControllerBase {
+public class AuthController : ControllerBase
+{
     private ISender? _mediator;
     protected ISender Mediator => _mediator ??= HttpContext.RequestServices.GetRequiredService<ISender>();
     private readonly IIdentityService _identityService;
@@ -36,11 +37,14 @@ public class AuthController : ControllerBase {
 
     [HttpPost]
     public async Task<ActionResult<Result<LoginSuccessResponse>>> VerifyGoogleToken(
-            [FromBody] string Token, CancellationToken cancellationToken) {
-        try {
+            [FromBody] string Token, CancellationToken cancellationToken)
+    {
+        try
+        {
             var res = await GoogleJsonWebSignature.ValidateAsync(Token);
 
-            var googleUserQuery = new GetGoogleUserByEmailQuery() {
+            var googleUserQuery = new GetGoogleUserByEmailQuery()
+            {
                 Email = res.Email,
             };
 
@@ -48,16 +52,18 @@ public class AuthController : ControllerBase {
 
             var handler = new JwtSecurityTokenHandler();
 
-            if (existingGoogleUser != null) {
+            if (existingGoogleUser != null)
+            {
                 var (gJwtToken, gRefreshToken) = _jwtService
                     .SignInAsync(existingGoogleUser, cancellationToken).Result;
-                
+
                 var gAccessToken = handler.WriteToken(gJwtToken);
 
                 SetJwtAccessToken(gAccessToken, gJwtToken);
                 SetRefreshToken(gRefreshToken);
 
-                var gLoginResponse = new LoginSuccessResponse() {
+                var gLoginResponse = new LoginSuccessResponse()
+                {
                     User = existingGoogleUser,
                     AccessToken = gAccessToken,
                     RefreshToken = gRefreshToken.Token,
@@ -66,17 +72,20 @@ public class AuthController : ControllerBase {
                 return Ok(Result<LoginSuccessResponse>.Succeed(gLoginResponse));
             }
 
-            var manualUserQuery = new GetManualUserByEmailQuery() {
+            var manualUserQuery = new GetManualUserByEmailQuery()
+            {
                 Email = res.Email,
             };
 
             var existingManualUser = await Mediator.Send(manualUserQuery, cancellationToken);
 
-            if (existingManualUser != null) {
+            if (existingManualUser != null)
+            {
                 throw new ConflictException($"User with email {res.Email} has already been created manually. Please login manually to continue");
             }
 
-            var command = new AddUserCommand() {
+            var command = new AddUserCommand()
+            {
                 Email = res.Email,
                 Username = res.Email.Split('@')[0],
                 Role = "user",
@@ -95,22 +104,27 @@ public class AuthController : ControllerBase {
             SetJwtAccessToken(accessToken, jwtToken);
             SetRefreshToken(refreshToken);
 
-            var loginResponse = new LoginSuccessResponse() {
+            var loginResponse = new LoginSuccessResponse()
+            {
                 User = newUser,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
             };
 
             return Ok(Result<LoginSuccessResponse>.Succeed(loginResponse));
-        } catch (InvalidJwtException) {
+        }
+        catch (InvalidJwtException)
+        {
             throw new AuthenticationFailureException("Invalid Token");
         }
     }
     [HttpPost]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken) {
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+    {
         var result = await _identityService.AuthenticateAsync(request.Email, request.Password, cancellationToken);
 
-        return result.Match<IActionResult>((loginSuccess) => {
+        return result.Match<IActionResult>((loginSuccess) =>
+        {
             var user = loginSuccess;
             var (jwtToken, refreshToken) = _jwtService.SignInAsync(user, cancellationToken).Result;
 
@@ -120,7 +134,8 @@ public class AuthController : ControllerBase {
             SetJwtAccessToken(accessToken, jwtToken);
             SetRefreshToken(refreshToken);
 
-            var loginResult = new LoginSuccessResponse() {
+            var loginResult = new LoginSuccessResponse()
+            {
                 User = _mapper.Map<UserDto>(user),
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
@@ -128,8 +143,9 @@ public class AuthController : ControllerBase {
 
             return Ok(Result<LoginSuccessResponse>.Succeed(loginResult));
         },
-        token => {
-            throw new NotImplementedException(); 
+        token =>
+        {
+            throw new NotImplementedException();
         });
     }
 
@@ -142,7 +158,7 @@ public class AuthController : ControllerBase {
             return BadRequest("Missing refresh token.");
 
         var (jwtToken, newRefreshToken) = await _jwtService.RefreshTokenAsync(refreshToken, cancellationToken);
-       
+
         var accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken);
 
         SetJwtAccessToken(accessToken, jwtToken);
@@ -158,7 +174,8 @@ public class AuthController : ControllerBase {
 
     [Authorize]
     [HttpPost]
-    public ActionResult Validate() {
+    public ActionResult Validate()
+    {
         return Ok();
     }
 
@@ -172,7 +189,7 @@ public class AuthController : ControllerBase {
 
         Response.Cookies.Append("SCSnCJwtToken", accessToken, cookieOptions);
     }
-    
+
     private void SetRefreshToken(RefreshToken newRefreshToken)
     {
         var cookieOptions = new CookieOptions

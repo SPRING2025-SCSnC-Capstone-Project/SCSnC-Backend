@@ -14,8 +14,8 @@ public static class DependencyInjection
         services.AddControllers(opt =>
         {
             opt.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
-        });
-
+        }).AddNewtonsoftJson(options =>
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         services.AddHttpContextAccessor();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>

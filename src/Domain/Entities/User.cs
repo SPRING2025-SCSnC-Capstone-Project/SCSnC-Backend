@@ -12,6 +12,7 @@ public class User : BaseEntity
         JoinEvents = new HashSet<JoinEvent>();
         Reservations = new HashSet<Reservation>();
         Blogs = new HashSet<Blog>();
+        ShiftSelections = new HashSet<ShiftSelection>();
     }
     public string AccountType { get; set; }
     public string Username { get; set; }
@@ -30,4 +31,7 @@ public class User : BaseEntity
     public virtual ICollection<JoinEvent> JoinEvents { get; set; }
     public virtual ICollection<Reservation> Reservations { get; set; }
     public virtual ICollection<Blog> Blogs { get; set; }
+    public virtual ICollection<ShiftSelection> ShiftSelections { get; set; }
+    public virtual Branch? Branch { get; set; }
+    public virtual ICollection<AttendanceRecord>? AttendanceRecords { get; set; }
 }

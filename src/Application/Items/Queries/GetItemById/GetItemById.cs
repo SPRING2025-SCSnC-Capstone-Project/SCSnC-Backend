@@ -28,7 +28,7 @@ public class GetItemByIdQueryHandler : IRequestHandler<GetItemByIdQuery, ItemInf
             .Include(x => x.ItemPricesAtBranches.Where(y => y.ItemId == request.Id))
             .ThenInclude(br => br.Branch)
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-        
+
         if (item is null)
         {
             throw new KeyNotFoundException($"Item with id {request.Id} not found");

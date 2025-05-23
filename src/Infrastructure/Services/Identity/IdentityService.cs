@@ -24,7 +24,7 @@ public class IdentityService : IIdentityService {
     }
 
     public async Task<OneOf<UserDto, string>> AuthenticateAsync(string email, string password, CancellationToken cancellationToken) {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(email) 
+        var user = await _context.Users.Include(x => x.Branch).FirstOrDefaultAsync(x => x.Email.Equals(email) 
                 && x.IsActive && x.AccountType.Equals("manual"), cancellationToken: cancellationToken);
 
         if (user is null || string.IsNullOrEmpty(password)) {

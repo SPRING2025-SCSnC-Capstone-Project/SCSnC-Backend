@@ -8,4 +8,5 @@ public class CreateEventRequest {
     public Guid ReservationId { get; set; }
     public Guid CurrentUserId { get; set; }
     public Guid[] SlotIds { get; set; }
+    public bool IsEventPrivate { get; set; }
 }

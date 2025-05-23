@@ -17,11 +17,7 @@ public class GetWorkspaceByIdQueryHandler : IRequestHandler<GetWorkspaceByIdQuer
     }
 
     public async Task<WorkspaceDto> Handle(GetWorkspaceByIdQuery request, CancellationToken cancellationToken) {
-        var workspace = await _context
-            .Workspaces
-            .Include(x => x.WorkspaceType)
-            .Include(x => x.Branch)
-            .FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
+        var workspace = await _context.Workspaces.Include(x => x.WorkspaceTypeAtBranch.WorkspaceType).FirstOrDefaultAsync(x => x.Id == request.Id && x.IsActive, cancellationToken);
 
         if (workspace is null) {
             throw new KeyNotFoundException($"Workspace with Id {request.Id} does not exist");

@@ -18,7 +18,7 @@ public class ToppingsController: ApiControllerBase
     #region Basic CRUD Operations
     
     [HttpGet]
-    public async Task<ActionResult<Result<PaginatedList<ToppingDto>>>> GetToppings([FromBody] PaginatedToppingQueryParameters request)
+    public async Task<ActionResult<Result<PaginatedList<ToppingDto>>>> GetToppings([FromQuery] PaginatedToppingQueryParameters request)
     {
         var query = new GetToppingsPaginatedQuery()
         {

@@ -1,16 +1,26 @@
 using Api.Controllers.Payload.Requests;
+using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Application.Events.Commands;
 using Application.Events.Queries.GetEventById;
 using Application.Events.Queries.GetEventsByUserPaginated;
 using Application.Events.Queries.GetEventsPaginated;
+using Application.Reservations.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 public class EventsController : ApiControllerBase {
+
+    private readonly IApplicationDbContext _context;
+
+    public EventsController(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
     [HttpPost]
     public async Task<ActionResult<Result<EventDto>>> CreateEvent([FromBody] CreateEventRequest request) {
         var command = new AddEventCommand() {
@@ -19,7 +29,8 @@ public class EventsController : ApiControllerBase {
             EventDescription = request.EventDescription,
             ReservationId = request.ReservationId,
             UserId = request.CurrentUserId,
-            SlotIds = request.SlotIds
+            SlotIds = request.SlotIds,
+            IsEventPrivate = request.IsEventPrivate
         };
 
         var result = await Mediator.Send(command);
@@ -59,9 +70,23 @@ public class EventsController : ApiControllerBase {
             Filter = request.Filter,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
+            GetAllEventByBranch = request.GetAllEvent,
+            BranchId = request.BranchId,
         };
 
         var result = await Mediator.Send(command);
         return Ok(Result<PaginatedList<EventDto>>.Succeed(result));
+    }
+
+    [HttpPut("approve/{id:guid}")]
+    public async Task<ActionResult<Result<EventDto>>> ApproveEvent([FromRoute] Guid id)
+    {
+        var command = new ApproveEventCommand()
+        {
+            EventId = id,
+        };
+
+        var result = await Mediator.Send(command);
+        return Ok(Result<EventDto>.Succeed(result));
     }
 }

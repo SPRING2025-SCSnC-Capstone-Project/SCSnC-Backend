@@ -56,7 +56,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                 {
                     case "00":
                         paymentResponse.PaymentMessage = "Successful transaction.";
-                        await PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken);
+                        await PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken, paymentResponse.PaymentStatus);
                         break;
                     case "07":
                         paymentResponse.PaymentMessage =
@@ -81,6 +81,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                         break;
                     case "24":
                         paymentResponse.PaymentMessage = "Transaction Canceled.";
+                        await PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken, paymentResponse.PaymentStatus);
                         break;
                     case "51":
                         paymentResponse.PaymentMessage =

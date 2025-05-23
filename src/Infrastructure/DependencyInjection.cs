@@ -1,7 +1,10 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 using Application.Common.Interfaces;
 using Ardalis.GuardClauses;
+using Azure.Storage.Blobs;
 using Infrastructure.Data;
+using Infrastructure.Services.Azure;
 using Infrastructure.Services.Deepseek;
 using Infrastructure.Services.Identity;
 using Infrastructure.Services.Jwt;
@@ -22,6 +25,7 @@ public static class DependencyInjection
             .AddApplicationDbContext(configuration)
             .AddJwtAuthentication(configuration)
             .AddVNPayService(configuration)
+            .AddAzureService(configuration)
             .AddDeepseekService(configuration)
             .AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!)
             .AddTransient<ISecurityService, SecurityService>()
@@ -34,7 +38,7 @@ public static class DependencyInjection
 
     private static IServiceCollection AddApplicationDbContext(this IServiceCollection services, IConfiguration configuration)
     {
-        
+
         var connectionString = configuration.GetConnectionString("SCSnC_DB");
         Guard.Against.Null(connectionString, message: "Connection string \"SCSnC_DB\" not found");
 
@@ -46,27 +50,51 @@ public static class DependencyInjection
                 option.UseNodaTime();
             });
             builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            ;
         });
 
         return services;
     }
 
-    private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configurations) {
-       services.Configure<JwtSettings>(configurations.GetSection(JwtSettings.Section));
-       services.AddScoped<IJwtSService, JwtService>();
+    private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configurations)
+    {
+        services.Configure<JwtSettings>(configurations.GetSection(JwtSettings.Section));
+        services.AddScoped<IJwtSService, JwtService>();
 
-       var signingKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var signingKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
-       services.AddSingleton(signingKey);
+        services.AddSingleton(signingKey);
 
-       services
-           .ConfigureOptions<JwtBearerTokenValidationConfiguration>()
-           .AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
-           .AddJwtBearer();
+        services
+            .ConfigureOptions<JwtBearerTokenValidationConfiguration>()
+            .AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.IncludeErrorDetails = true;
 
-       return services;
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (context?.Request?.Cookies != null &&
+                            context.Request.Cookies.ContainsKey("SCSnCJwtToken"))
+                        {
+                            context.Token = context.Request.Cookies["SCSnCJwtToken"];
+                            Debug.WriteLine(context.Token ?? "No token found in cookie.");
+                        }
+                        else
+                        {
+                            Debug.WriteLine("No cookies or token found.");
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+        return services;
     }
-    
+
     private static IServiceCollection AddVNPayService(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<VNPayConfig>(configuration.GetSection(VNPayConfig.Section));
@@ -74,7 +102,14 @@ public static class DependencyInjection
 
         return services;
     }
-    
+    private static IServiceCollection AddAzureService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton(x =>
+            new BlobServiceClient(configuration.GetConnectionString("Azure")));
+        services.AddTransient<IAzureService, AzureService>();
+        return services;
+    }
+
     private static IServiceCollection AddDeepseekService(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DeepSeekConfig>(configuration.GetSection(DeepSeekConfig.Section));
@@ -84,7 +119,7 @@ public static class DependencyInjection
             .Bind(configuration.GetSection(DeepSeekConfig.Section))
             .Validate(config => !string.IsNullOrEmpty(config.ApiKey))
             .ValidateOnStart();
-        
+
         return services;
     }
 }

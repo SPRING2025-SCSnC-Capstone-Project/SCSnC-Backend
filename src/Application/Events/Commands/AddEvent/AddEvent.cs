@@ -6,17 +6,20 @@ using NodaTime;
 
 namespace Application.Events.Commands;
 
-public record AddEventCommand : IRequest<EventDto> {
+public record AddEventCommand : IRequest<EventDto>
+{
     public string EventTitle { get; init; } = null!;
     public string EventDescription { get; init; } = null!;
     public string? CoverImageLink { get; init; }
     public double EntranceFee { get; init; }
     public Guid UserId { get; init; }
     public Guid ReservationId { get; init; }
-    public Guid[] SlotIds { get; init; } = null!; 
+    public Guid[] SlotIds { get; init; } = null!;
+    public bool IsEventPrivate { get; init; } = false;
 }
 
-public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto> {
+public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
+{
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
@@ -25,67 +28,77 @@ public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
         _mapper = mapper;
         _context = context;
     }
-    
-    public async Task<EventDto> Handle(AddEventCommand request, CancellationToken cancellationToken) {
+
+    public async Task<EventDto> Handle(AddEventCommand request, CancellationToken cancellationToken)
+    {
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.UserId && x.IsActive, cancellationToken);
 
         var reservation = await _context.Reservations
             .FirstOrDefaultAsync(x => x.Id == request.ReservationId &&
                     x.UserId == request.UserId, cancellationToken);
 
-        if (reservation is null) {
+        if (reservation is null)
+        {
             throw new KeyNotFoundException($"Reservation with Id {request.ReservationId} does not exist");
         }
 
-        if (user is null) {
+        if (user is null)
+        {
             throw new KeyNotFoundException($"User with Id {request.UserId} does not exist");
         }
 
-        foreach (var slotId in request.SlotIds) {
+        foreach (var slotId in request.SlotIds)
+        {
             var slot = await _context.Slots.FirstOrDefaultAsync(x => x.Id == slotId && x.IsActive, cancellationToken);
-            
-            if (slot is null) {
+
+            if (slot is null)
+            {
                 throw new KeyNotFoundException($"Slot with Id {slotId} does not exist");
             }
 
-            var reservedSlot = await _context.ReservedSlots.FirstOrDefaultAsync(x => 
-                x.ReservationId == request.ReservationId && 
+            var reservedSlot = await _context.ReservedSlots.FirstOrDefaultAsync(x =>
+                x.ReservationId == request.ReservationId &&
                 x.SlotId == slotId, cancellationToken);
 
-            if (reservedSlot is null) {
+            if (reservedSlot is null)
+            {
                 throw new KeyNotFoundException("Event slots must be within the reserved slots");
             }
 
             var conflict = await _context.EventSlots
                 .Include(x => x.Event)
-                .FirstOrDefaultAsync(x => 
+                .FirstOrDefaultAsync(x =>
                 x.Event!.ReservationId == request.ReservationId && x.SlotId == slotId, cancellationToken);
 
-            if (conflict is not null) {
+            if (conflict is not null)
+            {
                 throw new ConflictException("Slot(s) has been taken for another event");
             }
-        } 
+        }
 
-        var entity = new Event() {
+        var entity = new Event()
+        {
             EventTitle = request.EventTitle,
             EventDescription = request.EventDescription,
             EventDate = reservation.ReserveDate,
             EntranceFee = request.EntranceFee,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-            ReservationId = request.ReservationId, 
+            ReservationId = request.ReservationId,
             IsActive = true,
-            Status = "Accepted",
+            IsPrivate = request.IsEventPrivate
         };
 
         entity.CoverImageLink = request.CoverImageLink ?? "";
 
         var result = await _context.Events.AddAsync(entity, cancellationToken);
-        
+
         var eventSlotsToAdd = new List<EventSlot>();
 
-        foreach (var slotId in request.SlotIds) {
-            var eventSlot = new EventSlot() {
+        foreach (var slotId in request.SlotIds)
+        {
+            var eventSlot = new EventSlot()
+            {
                 SlotId = slotId,
                 EventId = result.Entity.Id,
             };
@@ -100,12 +113,12 @@ public class AddEventCommandHandler : IRequestHandler<AddEventCommand, EventDto>
         var added_event = await _context.Events
             .Include(x => x.Reservation)
             .ThenInclude(y => y.Workspace)
-            .ThenInclude(z => z.WorkspaceType)
+            .ThenInclude(z => z.WorkspaceTypeAtBranch.WorkspaceType)
             .Include(x => x.Reservation)
             .ThenInclude(y => y.User)
             .Include(x => x.EventSlots)
             .ThenInclude(y => y.Slot)
-            .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken); 
+            .FirstOrDefaultAsync(x => x.Id == result.Entity.Id, cancellationToken);
 
         return _mapper.Map<EventDto>(added_event);
     }

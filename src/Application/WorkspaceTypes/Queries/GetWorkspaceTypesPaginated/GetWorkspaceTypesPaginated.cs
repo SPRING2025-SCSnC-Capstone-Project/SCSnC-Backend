@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
+using System.Diagnostics;
 
 namespace Application.WorkspaceTypes.Queries;
 
@@ -23,7 +24,11 @@ public class GetWorkspaceTypesPaginatedQueryHandler: IRequestHandler<GetWorkspac
     }
 
     public async Task<PaginatedList<WorkspaceTypeDto>> Handle(GetWorkspaceTypesPaginatedQuery request, CancellationToken cancellationToken) {
-        var workspaceTypes = _context.WorkspaceTypes.AsQueryable().Where(x => x.IsActive);
+        var workspaceTypes = _context.WorkspaceTypes.Include(x => x.WorkspaceMedias)
+            .Include(x => x.WorkspaceUtilityServices)
+            .ThenInclude(y => y.UtilityService).AsQueryable().Where(x => x.IsActive);
+
+        Debug.WriteLine(workspaceTypes.ToList()[0].WorkspaceUtilityServices.ToList()[0].UtilityService.ServiceName);
 
         return await workspaceTypes.ListPaginateWithSortAsync<WorkspaceType, WorkspaceTypeDto>(
             request.Page,

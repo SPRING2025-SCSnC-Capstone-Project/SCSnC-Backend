@@ -22,7 +22,6 @@ try
             .SetIsOriginAllowed(_ => true));
     
     app.UseInfrastructure(builder.Configuration);
-
     app.Run();
 }
 catch (Exception ex)

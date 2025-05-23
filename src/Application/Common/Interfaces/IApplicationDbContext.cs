@@ -32,9 +32,14 @@ public interface IApplicationDbContext
     public DbSet<Workspace> Workspaces { get; }
     public DbSet<WorkspaceMedia> WorkspaceMedias { get; }
     public DbSet<WorkspaceType> WorkspaceTypes { get; }
+    public DbSet<WorkspaceTypeAtBranch> WorkspaceTypeAtBranches { get; }
     public DbSet<RefreshToken> RefreshTokens { get; }
     public DbSet<UtilityService> UtilityServices { get; }
     public DbSet<WorkspaceUtilityService> WorkspaceUtilityServices { get; }
     public DbSet<ReservationUtilityService> ReservationUtilityServices { get; }
+    public DbSet<ShiftType> ShiftTypes { get; }
+    public DbSet<RegistrationWindow> RegistrationWindows { get; }
+    public DbSet<ShiftSelection> ShiftSelections { get; }
+    public DbSet<AttendanceRecord> AttendanceRecords { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

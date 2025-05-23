@@ -7,7 +7,7 @@ namespace Application.Common.Helpers;
 
 public static class PaymentHelper
 {
-    public static async Task UpdateStatus(string entityId, string switcher, IApplicationDbContext _context, CancellationToken cancellationToken)
+    public static async Task UpdateStatus(string entityId, string switcher, IApplicationDbContext _context, CancellationToken cancellationToken, string? transactionStatus = "")
     {
         switch (switcher)
         {
@@ -36,14 +36,38 @@ public static class PaymentHelper
                     throw new KeyNotFoundException($"Reservation with reservation id {entityId} not found");
                 }
                 
-                reservation.IsFullPaid = true;
-                _context.Reservations.Update(reservation);
-                
-                var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
-                reservationTransaction.TransactionStatus = "Success";
-                reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
-                _context.Transactions.Update(reservationTransaction);
-                await _context.SaveChangesAsync(cancellationToken);
+                if(transactionStatus == "Success")
+                {
+                    reservation.IsFullPaid = false;
+                    _context.Reservations.Update(reservation);
+
+                    var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
+                    reservationTransaction.TransactionStatus = "Success";
+                    reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
+                    _context.Transactions.Update(reservationTransaction);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
+                if(transactionStatus == "Failed")
+                {
+                    reservation.IsFullPaid = false;
+                    reservation.IsCanceled = false;
+                    _context.Reservations.Update(reservation);
+
+                    var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
+                    var reservationEvent = await _context.Events.Include(x => x.Reservation).FirstOrDefaultAsync(x => x.Reservation.Id.Equals(entityId));
+                    reservationTransaction.TransactionStatus = transactionStatus;
+                    reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
+                    if(reservationEvent != null)
+                    {
+                        reservationEvent.IsActive = false;
+                        reservationEvent.IsCanceled = true;
+                        _context.Events.Update(reservationEvent);
+                    }
+                    _context.Transactions.Update(reservationTransaction);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
                 break;
         }
     }

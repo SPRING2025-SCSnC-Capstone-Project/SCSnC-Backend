@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
 using NodaTime;
+using System.Diagnostics;
 
 namespace Application.Toppings.Commands.AddTopping;
 
@@ -33,6 +34,11 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
             dynamic result = "";
             if (request.Toppings?.Length > 0 && _context.Toppings.ToList().Count <= 0)
             {
+                double basePrice = 5.000;
+                double[] priceArr = [10.000, 0.000, -2.000];
+                List<Branch> branches = _context.Branches.ToList();
+                List<Topping> toppings = new List<Topping>();
+
                 for (int i = 0; i < request.Toppings.Length; i++)
                 {
                     var topping = new Topping
@@ -45,6 +51,23 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
                         LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                     };
                     result = await _context.Toppings.AddAsync(topping, cancellationToken);
+                    toppings.Add(result.Entity);
+                }
+                for (int i = 0; i < branches.Count; i++)
+                {
+                    for (int j = 0; j < toppings.Count; j++)
+                    {
+                        var toppingPriceAtBranch = new ToppingPriceAtBranch
+                        {
+                            BranchId = branches[i].Id,
+                            ToppingId = toppings[j].Id,
+                            ToppingPrice = toppings[j].ToppingName.ToLower().Equals("không có") ? 0 : basePrice + priceArr[i],
+                            CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                            LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                        };
+
+                        await _context.ToppingPricesAtBranches.AddAsync(toppingPriceAtBranch, cancellationToken);
+                    }
                 }
             }
             else
@@ -57,27 +80,25 @@ public class AddToppingCommandHandler : IRequestHandler<AddToppingCommand, Toppi
                     CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                     LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                 };
-        
+
                 result = await _context.Toppings.AddAsync(topping, cancellationToken);
-            }
-            
-            await _context.SaveChangesAsync(cancellationToken);
-            
-            foreach (var branch in _context.Branches.Select(x => x.Id).ToList())
-            {
-                var toppingPriceAtBranch = new ToppingPriceAtBranch
+                foreach (var branch in _context.Branches.Select(x => x.Id).ToList())
                 {
-                    BranchId = branch,
-                    ToppingId = result.Entity.Id,
-                    ToppingPrice = request.Price,
-                    CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-                    LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-                };
-                
-                await _context.ToppingPricesAtBranches.AddAsync(toppingPriceAtBranch, cancellationToken);
+                    var toppingPriceAtBranch = new ToppingPriceAtBranch
+                    {
+                        BranchId = branch,
+                        ToppingId = result.Entity.Id,
+                        ToppingPrice = request.Price,
+                        CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                        LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                    };
+
+                    await _context.ToppingPricesAtBranches.AddAsync(toppingPriceAtBranch, cancellationToken);
+                }
             }
-            await _context.SaveChangesAsync(cancellationToken);
             
+            await _context.SaveChangesAsync(cancellationToken);
+
             return _mapper.Map<ToppingDto>(result.Entity);
         }
         catch (Exception ex)

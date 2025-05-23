@@ -17,10 +17,10 @@ public class Event : BaseEntity
     public Guid ReservationId { get; set; }
     public LocalDateTime CreatedAt { get; set; }
     public LocalDateTime LastUpdatedAt { get; set; }
-
-    public string Status { get; set; }
+    public bool IsPrivate { get; set; }
     public bool IsActive { get; set; }
-    
+    public bool IsCanceled { get; set; }
+
     public virtual Reservation Reservation { get; set; }
     public virtual ICollection<JoinEvent> JoinEvents { get; set; }
     public virtual ICollection<Blog> Blogs { get; set; }

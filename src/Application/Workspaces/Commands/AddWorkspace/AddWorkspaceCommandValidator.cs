@@ -7,9 +7,5 @@ public class AddWorkspaceCommandValidator : AbstractValidator<AddWorkspaceComman
         RuleFor(x => x.WorkspaceNumber)
             .GreaterThan(0)
             .WithMessage("Workspace number must be greater than 0");
-
-        RuleFor(x => x.WorkspaceTypeId)
-            .NotEmpty()
-            .WithMessage("Workspace type Id must not be empty");
     }
 }
