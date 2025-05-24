@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250523141127_Remove_HaveEquipment_In_WorkspaceType")]
+    partial class Remove_HaveEquipment_In_WorkspaceType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -894,9 +897,6 @@ namespace Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<double>("Fee")
-                        .HasColumnType("double precision");
-
                     b.Property<string>("ServiceImage")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1056,6 +1056,9 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsAllowToRent")
                         .HasColumnType("boolean");
+
+                    b.Property<double>("ServiceFee")
+                        .HasColumnType("double precision");
 
                     b.Property<Guid>("UtilityServiceId")
                         .HasColumnType("uuid");

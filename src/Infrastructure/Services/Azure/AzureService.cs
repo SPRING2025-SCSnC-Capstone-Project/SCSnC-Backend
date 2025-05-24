@@ -56,5 +56,30 @@ namespace Infrastructure.Services.Azure
 
             return blobClient.Uri.ToString();
         }
+
+        public async Task<List<string>> UploadMultipleImage(IFormFile[] files, string? name)
+        {
+            List<string> url = new List<string>();
+            if (files == null || files!.ToList().Count == 0)
+            {
+                return url;
+            }
+
+            var containerClient = _imageBlobServiceClient.GetBlobContainerClient("images");
+            await containerClient.CreateIfNotExistsAsync();
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                var blobClient = containerClient.GetBlobClient(name + $"_{i}.png" ?? files[i].FileName);
+
+                using (var stream = files[i].OpenReadStream())
+                {
+                    await blobClient.UploadAsync(stream, overwrite: true);
+                }
+                url.Add(blobClient.Uri.ToString());
+            }
+
+            return url;
+        }
     }
 }
