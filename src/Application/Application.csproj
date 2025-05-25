@@ -21,6 +21,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="ShiftSelections\Commands\CreateShiftSelection\" />
+      <Folder Include="ShiftTypes\Queries\" />
       <Folder Include="UtilityServices\Commands\DeleteUtilityService\" />
       <Folder Include="Users\" />
     </ItemGroup>
