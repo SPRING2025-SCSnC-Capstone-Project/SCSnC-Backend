@@ -28,7 +28,8 @@ public class AddUtilityServiceCommandHandler : IRequestHandler<AddUtilityService
         var utilityService = new UtilityService
         {
             ServiceName = request.Name,
-            ServiceImage = request.ImgUrl
+            ServiceImage = request.ImgUrl,
+            Fee = request.ServiceFee,
         };
         
         await _context.UtilityServices.AddAsync(utilityService, cancellationToken);
@@ -40,7 +41,6 @@ public class AddUtilityServiceCommandHandler : IRequestHandler<AddUtilityService
             {
                 WorkspaceTypeId = workspaceType.Id,
                 UtilityServiceId = utilityService.Id,
-                ServiceFee = request.ServiceFee
             };
             await _context.WorkspaceUtilityServices.AddAsync(workspaceUtility, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);

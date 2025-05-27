@@ -11,7 +11,6 @@ public class WorkspaceUtilityService : BaseEntity
     public Guid WorkspaceTypeId { get; set; }
     [ForeignKey("UtilityServiceId")]
     public Guid UtilityServiceId { get; set; }
-    public double ServiceFee { get; set; }
     public bool IsAllowToRent {  get; set; }
     public virtual WorkspaceType WorkspaceType { get; set; } = null!;
     public virtual UtilityService UtilityService { get; set; } = null!;

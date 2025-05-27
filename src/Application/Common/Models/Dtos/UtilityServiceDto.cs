@@ -6,4 +6,5 @@ namespace Application.Common.Models.Dtos;
 public class UtilityServiceDto : BaseDto, IMapFrom<UtilityService> {
     public string ServiceName { get; set; } = null!;
     public string ServiceImage { get; set; } = null!; 
+    public double Fee { get; set; }
 }

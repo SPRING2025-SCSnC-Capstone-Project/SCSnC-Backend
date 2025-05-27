@@ -89,7 +89,6 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
                     var entity = new Workspace()
                     {
                         WorkspaceNumber = i + 1,
-                        IsAvailable = true,
                         IsActive = true,
                         //WorkspaceImageUrl = request.WorkspaceImageUrl,
                         WorkspaceTypeAtBranchId = workspaceTypeAtBranch.Id,
@@ -104,7 +103,6 @@ public class AddWorkspaceCommandHandler : IRequestHandler<AddWorkspaceCommand, W
             var entity = new Workspace()
             {
                 WorkspaceNumber = request.WorkspaceNumber,
-                IsAvailable = true,
                 IsActive = true,
                 //WorkspaceImageUrl = request.WorkspaceImageUrl,
                 //WorkspaceTypeId = request.WorkspaceTypeId,

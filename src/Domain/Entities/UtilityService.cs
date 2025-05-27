@@ -7,6 +7,6 @@ public class UtilityService : BaseEntity {
 
     public string ServiceName { get; set; } = null!;
     public string ServiceImage { get; set; } = null!;
-
+    public double Fee { get; set; }
     public virtual ICollection<WorkspaceUtilityService> WorkspaceUtilityServices { get; set; }
 }

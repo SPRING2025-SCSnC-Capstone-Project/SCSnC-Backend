@@ -13,7 +13,6 @@ public class Workspace : BaseEntity
     public int WorkspaceNumber { get; set; }
     [ForeignKey("WorkspaceTypeAtBranchId")]
     public Guid WorkspaceTypeAtBranchId { get; set; }
-    public bool IsAvailable { get; set; }
     public bool IsActive { get; set; }
     
     public virtual WorkspaceTypeAtBranch WorkspaceTypeAtBranch { get; set; }

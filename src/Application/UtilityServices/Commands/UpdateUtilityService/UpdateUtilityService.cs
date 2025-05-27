@@ -34,6 +34,7 @@ public class UpdateUtilityServiceCommandHandler : IRequestHandler<UpdateUtilityS
         
         entity.ServiceName = request.Name;
         entity.ServiceImage = request.ImgUrl;
+        entity.Fee = request.ServiceFee;
         _context.UtilityServices.Update(entity);
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -42,7 +43,6 @@ public class UpdateUtilityServiceCommandHandler : IRequestHandler<UpdateUtilityS
                      .Where(X => X.Id == entity.Id)
                      .ToListAsync(cancellationToken))
         {
-            workspaceUtility.ServiceFee = request.ServiceFee;
             workspaceUtility.IsAllowToRent = request.IsAllowToRent;
             _context.WorkspaceUtilityServices.Update(workspaceUtility);
             await _context.SaveChangesAsync(cancellationToken);

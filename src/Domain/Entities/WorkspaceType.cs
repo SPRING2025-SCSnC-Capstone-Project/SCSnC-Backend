@@ -10,12 +10,12 @@ public class WorkspaceType : BaseEntity
         //Workspaces = new HashSet<Workspace>();
         WorkspaceMedias = new HashSet<WorkspaceMedia>();
         WorkspaceUtilityServices = new HashSet<WorkspaceUtilityService>();
+        WorkspacesAtBranches = new HashSet<WorkspaceTypeAtBranch>();
     }
     public string WorkspaceTypeName { get; set; }
     public int MaxCapacity { get; set; }
     public double PricePerHour { get; set; }
     public bool IsActive { get; set; }
-    public bool HaveEquipmentForRent { get; set; }
     public string Description { get; set; }
 
     //public virtual ICollection<Workspace> Workspaces { get; set; }

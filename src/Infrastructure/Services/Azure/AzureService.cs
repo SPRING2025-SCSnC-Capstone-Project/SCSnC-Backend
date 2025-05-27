@@ -20,14 +20,14 @@ namespace Infrastructure.Services.Azure
             _imageBlobServiceClient = clientFactory.CreateClient("ImageStorageClient");
             _modelBlobServiceClient = clientFactory.CreateClient("ModelStorageClient");
         }
-        public async Task<string> UploadFile(IFormFile file)
+        public async Task<string> UploadFile(IFormFile file, string name)
         {
             if (file == null || file.Length == 0)
                 return "";
 
             var containerClient = _imageBlobServiceClient.GetBlobContainerClient("images");
             await containerClient.CreateIfNotExistsAsync();
-            var blobName = $"{file.FileName.Split(".")[0] + Guid.NewGuid()}.png";
+            var blobName = name.Equals("") ? $"{file.FileName.Split(".")[0] + Guid.NewGuid()}.png" : name;
 
             var blobClient = containerClient.GetBlobClient(blobName);
 
@@ -57,7 +57,7 @@ namespace Infrastructure.Services.Azure
             return blobClient.Uri.ToString();
         }
 
-        public async Task<List<string>> UploadMultipleImage(IFormFile[] files, string? name)
+        public async Task<List<string>> UploadMultipleImage(IFormFile[] files, string name)
         {
             List<string> url = new List<string>();
             if (files == null || files!.ToList().Count == 0)
@@ -70,7 +70,7 @@ namespace Infrastructure.Services.Azure
 
             for (int i = 0; i < files.Length; i++)
             {
-                var blobClient = containerClient.GetBlobClient(name + $"_{i}.png" ?? files[i].FileName);
+                var blobClient = containerClient.GetBlobClient(name + $"_{i}.png");
 
                 using (var stream = files[i].OpenReadStream())
                 {

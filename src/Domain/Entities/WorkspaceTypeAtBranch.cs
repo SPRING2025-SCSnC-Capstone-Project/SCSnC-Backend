@@ -8,10 +8,15 @@ namespace Domain.Entities
 {
     public class WorkspaceTypeAtBranch: BaseEntity
     {
+        public WorkspaceTypeAtBranch()
+        {
+            Workspaces = new HashSet<Workspace>();
+        }
         [ForeignKey("WorkspaceTypeId")]
         public Guid WorkspaceTypeId { get; set; }
         [ForeignKey("BranchId")]
         public Guid BranchId { get; set; }
+        public bool IsAvailable { get; set; }
         public LocalDateTime CreatedAt { get; set; }
         public LocalDateTime LastUpdatedAt { get; set; }
 

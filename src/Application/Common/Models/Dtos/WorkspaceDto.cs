@@ -6,8 +6,7 @@ namespace Application.Common.Models.Dtos;
 public class WorkspaceDto : BaseDto, IMapFrom<Workspace>
 {
     public int WorkspaceNumber { get; set; }
-    public Guid WorkspaceTypeId { get; set; }
-    public bool IsAvailable { get; set; }
+    public bool IsActive { get; set; }
     public WorkspaceTypeDto WorkspaceType { get; set; } = null!;
     public BranchDto Branch { get; set; } = null!;
 

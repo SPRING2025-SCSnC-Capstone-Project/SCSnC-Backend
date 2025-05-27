@@ -145,9 +145,9 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
                 IsCanceled = false
             };
 
-            if (request.File != null || request.File.Length > 0)
+            if (request.File != null)
             {
-                imageUrl = await _azureService.UploadFile(request.File);
+                imageUrl = await _azureService.UploadFile(request.File, "");
             }
             entity.CoverImageLink = imageUrl;
 
@@ -205,17 +205,20 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             await _context.ReservedSlots.AddRangeAsync(reservedSlotsToAdd, cancellationToken);
         }
 
-        foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds)
+        if(request.WorkspaceUtilityServiceIds != null)
         {
-            var reservationUtilityService = new ReservationUtilityService()
+            foreach (var workspaceUtilityServiceId in request.WorkspaceUtilityServiceIds)
             {
-                ReservationId = newReservation.Entity.Id,
-                WorkspaceUtilityServiceId = workspaceUtilityServiceId,
-            };
-            reservationUtilityServicesToAdd.Add(reservationUtilityService);
+                var reservationUtilityService = new ReservationUtilityService()
+                {
+                    ReservationId = newReservation.Entity.Id,
+                    WorkspaceUtilityServiceId = workspaceUtilityServiceId,
+                };
+                reservationUtilityServicesToAdd.Add(reservationUtilityService);
+            }
+            await _context.ReservationUtilityServices.AddRangeAsync(reservationUtilityServicesToAdd, cancellationToken);
         }
 
-        await _context.ReservationUtilityServices.AddRangeAsync(reservationUtilityServicesToAdd, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
 
