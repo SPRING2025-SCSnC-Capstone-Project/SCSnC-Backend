@@ -51,6 +51,7 @@ public class UpdateWorkspaceTypeComamndHandler : IRequestHandler<UpdateWorkspace
                 .ThenInclude(y => y.Branch)
             .Include(x => x.WorkspacesAtBranches)
                 .ThenInclude(y => y.Workspaces)
+            .Include(x => x.WorkspaceMedias)
             .FirstOrDefaultAsync(x => x.IsActive && x.Id == request.Id, cancellationToken);
 
         if (workspaceType is null)
@@ -129,6 +130,12 @@ public class UpdateWorkspaceTypeComamndHandler : IRequestHandler<UpdateWorkspace
         {
             modelUrl = await _azureService.UploadModel(request.ModelFile);
         }
+        workspaceType.WorkspaceMedias.Add(new WorkspaceMedia()
+        {
+            MediaType = "3d model",
+            MediaUrl = modelUrl,
+            WorkspaceTypeId = workspaceType.Id
+        });
 
         _context.WorkspaceTypes.Update(workspaceType);
         await _context.SaveChangesAsync(cancellationToken);

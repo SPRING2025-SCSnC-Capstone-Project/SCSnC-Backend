@@ -12,11 +12,11 @@ public record AddItemCommand : IRequest<ItemDto>
 {
     public string Name { get; init; }
     public string Description { get; init; }
-    public double Price { get; init; }
     public string Img { get; init; }
     public Guid CategoryId { get; init; }
     public List<Guid> SizeIds { get; init; }
     public bool? AutoCreate { get; init; } = false;
+    public Dictionary<Guid, int> BranchPrices { get; set; }
 }
 
 public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
@@ -116,13 +116,13 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                 await _context.SaveChangesAsync(cancellationToken); 
                 
 //              Note: add to ItemWithSize table when adding new item
-                foreach (var size in request.SizeIds)
+                foreach (var size in sizes)
                 {
                     var itemWithSize = new ItemWithSize
                     {
                         ItemId = result.Entity.Id,
-                        SizeId = size,
-                        IsActive = true
+                        SizeId = size.Id,
+                        IsActive = false
                     };
             
                     await _context.ItemWithSizes.AddAsync(itemWithSize, cancellationToken);
@@ -131,13 +131,13 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                 await _context.SaveChangesAsync(cancellationToken);
                 
 //              Note: add default price to ItemPriceAtBranch table when adding new item
-                foreach (var branch in _context.Branches.Select(x => x.Id).ToList())
+                foreach (var branch in request.BranchPrices)
                 {
                     var itemPriceAtBranch = new ItemPriceAtBranch
                     {
                         ItemId = result.Entity.Id,
-                        BranchId = branch,
-                        Price = request.Price,
+                        BranchId = branch.Key,
+                        Price = branch.Value,
                         CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                         LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
                     };

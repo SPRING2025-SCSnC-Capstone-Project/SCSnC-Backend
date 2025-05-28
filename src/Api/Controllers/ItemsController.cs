@@ -57,11 +57,11 @@ public class ItemsController : ApiControllerBase
         var command = new AddItemCommand()
         {
             Name = request.Name,
-            Price = request.Price,
             CategoryId = request.CategoryId,
             Description = request.Description,
             Img = request.Img,
-            SizeIds = request.SizeIds
+            SizeIds = request.SizeIds ?? [],
+            BranchPrices = request.BranchPrices
         };
 
         var result = await Mediator.Send(command);

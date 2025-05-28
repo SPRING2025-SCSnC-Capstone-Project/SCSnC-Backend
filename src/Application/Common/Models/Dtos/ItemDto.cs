@@ -8,6 +8,7 @@ public class ItemDto : BaseDto, IMapFrom<Item>
 {
     public string ItemName { get; set; }
     public string ItemDescription { get; set; }
+    public List<ItemWithSizeDto> ItemWithSizes { get; set; }
     public double ItemPrice { get; set; }
     public string ItemImg { get; set; }
     public string CategoryName { get; set; }
