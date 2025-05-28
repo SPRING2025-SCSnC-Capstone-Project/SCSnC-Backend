@@ -7,6 +7,7 @@ public class ShiftType : BaseEntity
     public string Name { get; set; } = null!;
     public LocalTime StartTime { get; set; }
     public LocalTime EndTime { get; set; }
+    public bool IsActive { get; set; }
 
     public virtual Branch Branch { get; set; } = null!;
 }

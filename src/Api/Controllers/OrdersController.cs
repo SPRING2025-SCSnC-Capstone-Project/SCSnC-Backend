@@ -1,3 +1,4 @@
+using Api.Controllers.Payload.Requests;
 using Api.Controllers.Payload.Requests.Orders;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
@@ -26,10 +27,14 @@ public class OrdersController : ApiControllerBase
     }
 
     [HttpGet("user/{userId:guid}")]
-    public async Task<ActionResult<Result<PaginatedList<ResponseOrderDto>>>> GetOrderByUserId([FromRoute] Guid userId)
+    public async Task<ActionResult<Result<PaginatedList<ResponseOrderDto>>>> GetOrderByUserId([FromRoute] Guid userId, [FromQuery] PaginatedQueryParameters request)
     {
         var query = new GetOrdersByUserPaginatedQuery()
         {
+            Page = request.Page,
+            Size = request.Size,
+            SortBy = request.SortBy,
+            SortOrder = request.SortOrder,
             UserId = userId
         };
 
