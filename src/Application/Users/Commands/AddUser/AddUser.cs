@@ -4,6 +4,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
 using NodaTime;
+using System.Diagnostics;
 
 namespace Application.Users.Commands;
 
@@ -38,6 +39,12 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserDto> {
         if (string.IsNullOrEmpty(request.Type) && 
                 string.IsNullOrEmpty(request.Password)) {
             throw new RequestValidationException("Password is required");
+        }
+
+        if (string.IsNullOrEmpty(request.Type) &&
+                string.IsNullOrEmpty(request.Phone))
+        {
+            throw new RequestValidationException("Phone number is required");
         }
 
         if (username_used is not null) {

@@ -47,6 +47,7 @@ public class ResponseReservationDto : BaseDto, IMapFrom<Reservation>
     public double Deposit { get; set; }
     public UserDto? User { get; set; } = null!;
     public bool IsFullPaid { get; set; }
+    public bool IsCanceled { get; set; }
     public double TotalPrice { get; set; }
     public string Status { get; set; } = null!;
     public string PaymentLink { get; set; }

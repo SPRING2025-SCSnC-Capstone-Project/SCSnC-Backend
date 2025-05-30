@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using NodaTime;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 
 namespace Application.Reservations.Commands;
 
@@ -152,7 +153,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
 
             if (request.File != null)
             {
-                imageUrl = await _azureService.UploadFile(request.File, "");
+                imageUrl = await _azureService.UploadFile(request.File, $"{request.EventTitle + Guid.NewGuid()}.png");
             }
             entity.CoverImageLink = imageUrl;
 

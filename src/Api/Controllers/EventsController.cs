@@ -1,4 +1,5 @@
 using Api.Controllers.Payload.Requests;
+using Api.Controllers.Payload.Requests.Events;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
@@ -84,6 +85,20 @@ public class EventsController : ApiControllerBase {
         var command = new ApproveEventCommand()
         {
             EventId = id,
+        };
+
+        var result = await Mediator.Send(command);
+        return Ok(Result<EventDto>.Succeed(result));
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<Result<EventDto>>> UpdateEvent([FromRoute] Guid id, [FromForm] UpdateEventRequest request)
+    {
+        var command = new UpdateEventCommand()
+        {
+            EventId = id,
+            EventTitle = request.EventTitle ?? null,
+            Image = request.Image
         };
 
         var result = await Mediator.Send(command);
