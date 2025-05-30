@@ -35,6 +35,8 @@ public class UpdateItemCategoryCommandHandler: IRequestHandler<UpdateItemCategor
         itemCategory.IsActive = request.IsActive.HasValue ? request.IsActive.Value : itemCategory.IsActive;
         itemCategory.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
         
+        _context.ItemCategories.Update(itemCategory);
+        
         await _context.SaveChangesAsync(cancellationToken);
         
         return _mapper.Map<ItemCategoryDto>(itemCategory);

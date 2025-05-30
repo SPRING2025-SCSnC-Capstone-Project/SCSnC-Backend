@@ -44,6 +44,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<UtilityService> UtilityServices => Set<UtilityService>();
     public DbSet<WorkspaceUtilityService> WorkspaceUtilityServices => Set<WorkspaceUtilityService>();
     public DbSet<ReservationUtilityService> ReservationUtilityServices => Set<ReservationUtilityService>();
+    public DbSet<ShiftType> ShiftTypes => Set<ShiftType>();
+    public DbSet<RegistrationWindow> RegistrationWindows => Set<RegistrationWindow>();
+    public DbSet<ShiftSelection> ShiftSelections => Set<ShiftSelection>();
+    public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
 
 
     #endregion

@@ -149,6 +149,21 @@ public class AuthController : ControllerBase
         });
     }
 
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        var refreshToken = Request.Cookies[nameof(RefreshToken)];
+        var jwtToken = Request.Cookies["SCSnCJwtToken"];
+        
+        Response.Cookies.Delete("SCSnCJwtToken");
+        Response.Cookies.Delete(nameof(RefreshToken));
+        
+        await _jwtService.LogoutAsync(jwtToken!, refreshToken!);
+
+        return Ok();
+    }
+
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> Refresh([FromBody] string? token, CancellationToken cancellationToken)

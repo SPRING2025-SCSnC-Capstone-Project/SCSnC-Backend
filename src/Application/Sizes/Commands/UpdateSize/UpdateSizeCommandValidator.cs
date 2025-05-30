@@ -13,6 +13,6 @@ public class UpdateSizeCommandValidator: AbstractValidator<UpdateSizeCommand>
 
         RuleFor(x => x.PriceAdjustment)
             .NotEmpty().WithMessage("Price adjustment is required")
-            .GreaterThan(0).WithMessage("Price adjustment must be greater than 0");
+            .GreaterThanOrEqualTo(0).WithMessage("Price adjustment must be greater than 0");
     }
 }
