@@ -204,6 +204,7 @@ public record CreateOrderCommand : IRequest<OrderDto>
     public Guid UserId { get; init; }
     public Guid? VoucherId { get; init; }
     public Guid BranchId { get; init; }
+    public Guid ReservationId { get; init; }
     public double TotalPrice { get; init; }
     public List<CreateOrderDetailDto> OrderDetails { get; init; }
     public string PaymentMethod { get; init; }

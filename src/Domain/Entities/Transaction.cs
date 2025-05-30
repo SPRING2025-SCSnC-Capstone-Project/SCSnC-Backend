@@ -12,6 +12,7 @@ public class Transaction : BaseEntity
     [ForeignKey("ReservationId")]
     public Guid? ReservationId { get; set; }
     public double Amount { get; set; }
+    public string TypeOfPayment { get; set; }
     public string PaymentMethod { get; set; }
     
     public virtual Order Order { get; set; }

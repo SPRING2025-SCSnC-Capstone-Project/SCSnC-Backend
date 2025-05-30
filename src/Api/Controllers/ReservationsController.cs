@@ -94,6 +94,7 @@ public class ReservationsController : ApiControllerBase
             Filter = request.Filter,
             SortBy = request.SortBy,
             SortOrder = request.SortOrder,
+            GetLatestReservation = request.GetLatestReservation,
         };
 
         var result = await Mediator.Send(command);

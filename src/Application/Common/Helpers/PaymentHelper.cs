@@ -39,6 +39,7 @@ public static class PaymentHelper
                 if(transactionStatus == "Success")
                 {
                     reservation.IsFullPaid = false;
+                    reservation.Status = "Booked";
                     _context.Reservations.Update(reservation);
 
                     var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
@@ -52,6 +53,7 @@ public static class PaymentHelper
                 {
                     reservation.IsFullPaid = false;
                     reservation.IsCanceled = false;
+                    reservation.Status = "Canceled";
                     _context.Reservations.Update(reservation);
 
                     var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
@@ -96,6 +98,7 @@ public static class PaymentHelper
                         Amount = amount,
                         PaymentMethod = paymentMethod,
                         TransactionStatus = "Pending",
+                        TypeOfPayment = "Order",
                         TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
                     };
                     
@@ -115,6 +118,7 @@ public static class PaymentHelper
                         Amount = amount,
                         PaymentMethod = paymentMethod,
                         TransactionStatus = "Pending",
+                        TypeOfPayment = "Reservation",
                         TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
                     };
                     

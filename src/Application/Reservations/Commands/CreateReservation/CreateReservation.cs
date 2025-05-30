@@ -1,4 +1,4 @@
-using Application.Common.Exceptions;
+﻿using Application.Common.Exceptions;
 using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
@@ -59,8 +59,8 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
     public async Task<ResponseReservationDto> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
     {
         var workspace = await _context.Workspaces.FirstOrDefaultAsync(x => x.Id == request.WorkspaceId && x.IsActive, cancellationToken);
-
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.UserId && x.IsActive, cancellationToken);
+        var bookedReservation = _context.Reservations.Where(x => x.UserId.Equals(request.UserId) && x.Status.ToLower().Equals("booked")).ToList();
 
         if (workspace is null)
         {
@@ -70,6 +70,11 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
         if (user is null)
         {
             throw new KeyNotFoundException($"User with Id {request.UserId} does not exist");
+        }
+
+        if (bookedReservation.Count >= 2)
+        {
+            throw new KeyNotFoundException($"Chỉ được đặt phòng trước 2 lần");
         }
 
         var reservedSlotsToAdd = new List<ReservedSlot>();
