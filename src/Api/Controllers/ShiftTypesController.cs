@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Application.ShiftTypes.Commands.CreateShiftType;
 using Application.ShiftTypes.Commands.DeleteShiftType;
+using Application.ShiftTypes.Commands.UpdateShiftType;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -10,7 +11,7 @@ namespace Api.Controllers;
 public class ShiftTypesController: ApiControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<Result<ReturnShiftTypeDto>>> AddShiftType([FromBody] AddShiftTypeRequest request)
+    public async Task<ActionResult<Result<ShiftTypeDto>>> AddShiftType([FromBody] AddShiftTypeRequest request)
     {
         var command = new CreateShiftTypeCommand()
         {
@@ -22,11 +23,11 @@ public class ShiftTypesController: ApiControllerBase
 
         var result = await Mediator.Send(command);
 
-        return Ok(Result<ReturnShiftTypeDto>.Succeed(result));
+        return Ok(Result<ShiftTypeDto>.Succeed(result));
     }
     
     [HttpDelete("{ShiftTypeId:guid}")]
-    public async Task<ActionResult<Result<ReturnShiftTypeDto>>> DeleteShiftType([FromRoute] Guid ShiftTypeId)
+    public async Task<ActionResult<Result<ShiftTypeDto>>> DeleteShiftType([FromRoute] Guid ShiftTypeId)
     {
         var command = new DeleteShiftTypeCommand()
         {
@@ -35,8 +36,23 @@ public class ShiftTypesController: ApiControllerBase
 
         var result = await Mediator.Send(command);
 
-        return Ok(Result<ReturnShiftTypeDto>.Succeed(result));
+        return Ok(Result<ShiftTypeDto>.Succeed(result));
     }
     
-    
+    [HttpPut("{ShiftTypeId:guid}")]
+    public async Task<ActionResult<Result<ShiftTypeDto>>> UpdateShiftType([FromRoute] Guid ShiftTypeId, [FromBody] UpdateShiftTypeRequest request)
+    {
+        var command = new UpdateShiftTypeCommand()
+        {
+            Id = ShiftTypeId,
+            BranchId = request.BranchId,
+            Name = request.Name,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+        };
+
+        var result = await Mediator.Send(command);
+
+        return Ok(Result<ShiftTypeDto>.Succeed(result));
+    }
 }

@@ -4,12 +4,12 @@ using Ardalis.GuardClauses;
 
 namespace Application.ShiftTypes.Commands.DeleteShiftType;
 
-public record DeleteShiftTypeCommand : IRequest<ReturnShiftTypeDto>
+public record DeleteShiftTypeCommand : IRequest<ShiftTypeDto>
 {
     public Guid ShiftTypeId { get; init; }
 }
 
-public class DeleteShiftTypeCommandHandler : IRequestHandler<DeleteShiftTypeCommand, ReturnShiftTypeDto>
+public class DeleteShiftTypeCommandHandler : IRequestHandler<DeleteShiftTypeCommand, ShiftTypeDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -20,7 +20,7 @@ public class DeleteShiftTypeCommandHandler : IRequestHandler<DeleteShiftTypeComm
         _mapper = mapper;
     }
 
-    public async Task<ReturnShiftTypeDto> Handle(DeleteShiftTypeCommand request, CancellationToken cancellationToken)
+    public async Task<ShiftTypeDto> Handle(DeleteShiftTypeCommand request, CancellationToken cancellationToken)
     {
         var shiftType = await _context.ShiftTypes
             .Include(x => x.Branch)
@@ -35,6 +35,6 @@ public class DeleteShiftTypeCommandHandler : IRequestHandler<DeleteShiftTypeComm
         _context.ShiftTypes.Update(shiftType);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return _mapper.Map<ReturnShiftTypeDto>(shiftType);
+        return _mapper.Map<ShiftTypeDto>(shiftType);
     }
 }

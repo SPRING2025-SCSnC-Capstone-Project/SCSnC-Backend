@@ -5,15 +5,15 @@ using NodaTime;
 
 namespace Application.ShiftTypes.Commands.CreateShiftType;
 
-public record CreateShiftTypeCommand : IRequest<ReturnShiftTypeDto>
+public record CreateShiftTypeCommand : IRequest<ShiftTypeDto>
 {
     public Guid BranchId { get; init; }
-    public string Name { get; init; }
+    public string Name { get; init; } = null!;
     public TimeOnly StartTime { get; init; }
     public TimeOnly EndTime { get; init; }
 }
 
-public class CreateShiftTypeCommandHandler : IRequestHandler<CreateShiftTypeCommand, ReturnShiftTypeDto>
+public class CreateShiftTypeCommandHandler : IRequestHandler<CreateShiftTypeCommand, ShiftTypeDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -24,7 +24,7 @@ public class CreateShiftTypeCommandHandler : IRequestHandler<CreateShiftTypeComm
         _mapper = mapper;
     }
     
-    public async Task<ReturnShiftTypeDto> Handle(CreateShiftTypeCommand request, CancellationToken cancellationToken)
+    public async Task<ShiftTypeDto> Handle(CreateShiftTypeCommand request, CancellationToken cancellationToken)
     {
         var entity = new ShiftType
         {
@@ -42,6 +42,6 @@ public class CreateShiftTypeCommandHandler : IRequestHandler<CreateShiftTypeComm
             .Include(x => x.Branch)
             .FirstOrDefault(x => x.Id == entity.Id);
         
-        return _mapper.Map<ReturnShiftTypeDto>(result);
+        return _mapper.Map<ShiftTypeDto>(result);
     }
 }
