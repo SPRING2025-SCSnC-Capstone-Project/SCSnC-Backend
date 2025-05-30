@@ -5,6 +5,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using AutoMapper;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -146,6 +147,51 @@ public class JwtService(
             ?? throw new SecurityTokenValidationException("User associated with token does not exist.");
 
         return (storedRefreshToken, _mapper.Map<UserDto>(user));
+    }
+
+    public async Task LogoutAsync(string token, string refreshToken)
+    {
+        ClaimsPrincipal? validatedToken;
+        var handler = new JwtSecurityTokenHandler();
+        try
+        {
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new ECDsaSecurityKey(_signingKey) { KeyId = _jwtSettings.Secret },
+                ValidIssuer = _jwtSettings.Issuer,
+                ValidAudience = _jwtSettings.Audience,
+                ClockSkew = TimeSpan.Zero,
+            };
+            validatedToken = handler.ValidateToken(token, tokenValidationParameters, out _);
+
+        }
+        catch
+        {
+            validatedToken = null;
+        }
+
+        if (validatedToken is null)
+        {
+            throw new AuthenticationFailureException("Invalid token.");
+        }
+
+        var jti = validatedToken.Claims.Single(x => x.Type.Equals(JwtRegisteredClaimNames.NameId)).Value;
+        var storedRefreshToken =
+            await _context.RefreshTokens.SingleOrDefaultAsync(x => x.Token.Equals(refreshToken));
+
+        if (storedRefreshToken is null) return;
+        
+        if (!storedRefreshToken.UserId.Equals(jti))
+        {
+            throw new AuthenticationFailureException("This refresh token does not match this Jwt.");
+        }
+
+        _context.RefreshTokens.Remove(storedRefreshToken);
+        await _context.SaveChangesAsync(CancellationToken.None);
     }
     
     private async Task RevokeDescendentRefreshToken(
