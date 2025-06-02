@@ -41,6 +41,22 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
                 .ThenInclude(y => y.WorkspaceTypeAtBranch)
                 .ThenInclude(z => z.Branch)
             .AsNoTracking()
+        .Include(x => x.Transactions)
+            .ThenInclude(y => y.Order)
+                .ThenInclude(z => z.OrderDetails)
+                    .ThenInclude(w => w.ItemWithSize)
+                        .ThenInclude(r => r.Item)
+        .Include(x => x.Transactions)
+            .ThenInclude(y => y.Order)
+                .ThenInclude(z => z.OrderDetails)
+                    .ThenInclude(w => w.ItemWithSize)
+                        .ThenInclude(r => r.Size)
+        .Include(x => x.Transactions)
+                .ThenInclude(y => y.Order)
+                    .ThenInclude(z => z.OrderDetails)
+                        .ThenInclude(w => w.IncludeToppings)
+                            .ThenInclude(r => r.Topping)
+        .AsNoTracking()
             .Include(x => x.User)
             .Include(x => x.ReservedSlots)
             .ThenInclude(y => y.Slot)
@@ -55,6 +71,22 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
                 .ThenInclude(y => y.WorkspaceTypeAtBranch)
                 .ThenInclude(z => z.Branch)
             .AsNoTracking()
+        .Include(x => x.Transactions)
+            .ThenInclude(y => y.Order)
+                .ThenInclude(z => z.OrderDetails)
+                    .ThenInclude(w => w.ItemWithSize)
+                        .ThenInclude(r => r.Item)
+        .Include(x => x.Transactions)
+            .ThenInclude(y => y.Order)
+                .ThenInclude(z => z.OrderDetails)
+                    .ThenInclude(w => w.ItemWithSize)
+                        .ThenInclude(r => r.Size)
+        .Include(x => x.Transactions)
+            .ThenInclude(y => y.Order)
+                .ThenInclude(z => z.OrderDetails)
+                    .ThenInclude(w => w.IncludeToppings)
+                        .ThenInclude(r => r.Topping)
+        .AsNoTracking()
             .Include(x => x.User)
             .Include(x => x.ReservedSlots)
             .ThenInclude(y => y.Slot)
@@ -74,7 +106,10 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
     public async Task<IQueryable<Reservation>> AutoUpdateReservationStatus(IQueryable<Reservation> query, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
-        var todayDateTime = new LocalDateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
+        var instant = Instant.FromDateTimeUtc(now);
+        var timeZone = DateTimeZoneProviders.Tzdb["Asia/Ho_Chi_Minh"];
+        var zonedDateTime = instant.InZone(timeZone);
+        var localDateTime = zonedDateTime.LocalDateTime;
         List<Reservation> latestReservationList = new List<Reservation>();
         int updateIndicator = 0;
 
@@ -88,7 +123,7 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
                         var reservedDate = reservation.ReserveDate;
                         var reservedEndTime = reservation.ReservedSlots.ToList()[reservation.ReservedSlots.ToList().Count - 1].Slot.TimeEnd;
                         var reservationDateTime = new LocalDateTime(reservedDate.Year, reservedDate.Month, reservedDate.Day, reservedEndTime.Hour, reservedEndTime.Minute, reservedEndTime.Second);
-                        if (todayDateTime > reservationDateTime)
+                        if (localDateTime > reservationDateTime)
                         {
                             Debug.WriteLine(reservation.Id);
                             reservation.Status = "Done";
@@ -101,7 +136,7 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
                         var reservedDate = reservation.ReserveDate;
                         var reservedEndTime = reservation.TimeStart;
                         var reservationDateTime = new LocalDateTime(reservedDate.Year, reservedDate.Month, reservedDate.Day, reservedEndTime.Value.Hour, reservedEndTime.Value.Minute, reservedEndTime.Value.Second);
-                        if (todayDateTime > reservationDateTime)
+                        if (localDateTime > reservationDateTime)
                         {
                             Debug.WriteLine(reservation.Id);
                             reservation.Status = "Done";

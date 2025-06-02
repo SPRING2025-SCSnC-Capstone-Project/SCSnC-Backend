@@ -27,6 +27,7 @@ public class ReservationDto : BaseDto, IMapFrom<Reservation>
     public TimeOnly TimeStart { get; set; }
     public TimeOnly TimeEnd { get; set; }
     public bool IsCanceled { get; set; }
+    public HashSet<TransactionDto> Transactions { get; set; } = null!;
 
 
     public void Mapping(Profile profile)

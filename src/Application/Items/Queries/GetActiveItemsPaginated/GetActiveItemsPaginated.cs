@@ -40,7 +40,8 @@ public class GetActiveItemsPaginatedQueryHandler : IRequestHandler<GetActiveItem
                 .ThenInclude(x => x.Size)
                 .Include(x => x.ItemPricesAtBranches.Where(y => y.BranchId == request.BranchId))
                 .ThenInclude(y => y.Branch)
-                .AsQueryable() :
+                .AsQueryable() 
+                :
                 _context.Items
                 .Include(x => x.ItemCategory)
                 .Include(x => x.ItemWithSizes)

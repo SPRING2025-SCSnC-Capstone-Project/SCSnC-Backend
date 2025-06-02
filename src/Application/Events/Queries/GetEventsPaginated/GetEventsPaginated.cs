@@ -38,8 +38,10 @@ public class GetEventsPaginatedQueryHandler : IRequestHandler<GetEventsPaginated
         ZonedDateTime currentZonedDateTime = clock.GetCurrentInstant().InZone(timeZone);
         LocalDate currentDate = currentZonedDateTime.Date;
         LocalTime currentTime = currentZonedDateTime.TimeOfDay;
+        DateTime today = DateTime.UtcNow;
         Debug.WriteLine(currentDate);
         Debug.WriteLine(currentTime);
+        Debug.WriteLine(LocalDate.FromDateTime(today));
         IQueryable<Event> query = query = request.GetAllEventByBranch ?
                         _context.Events
                     .Include(x => x.Reservation)
@@ -76,7 +78,7 @@ public class GetEventsPaginatedQueryHandler : IRequestHandler<GetEventsPaginated
                     .Where(x => !x.IsPrivate
                         && x.IsActive == true
                         && x.Reservation.Transactions.ToList()[0].TransactionStatus.ToLower() == "success"
-                        && x.EventDate > currentDate ? true : x.EventDate >= currentDate && x.EventSlots.ToList()[0].Slot.TimeStart >= currentTime)
+                        && x.EventDate >= LocalDate.FromDateTime(today))
                     .OrderBy(x => x.CreatedAt)
                     .AsQueryable();
 

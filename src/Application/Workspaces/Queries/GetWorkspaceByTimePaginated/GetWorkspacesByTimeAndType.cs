@@ -62,7 +62,17 @@ public class GetWorkspacesByTimePaginatedQueryHandler : IRequestHandler<GetWorks
             var requestedTimeStart = LocalTime.FromTimeOnly(timeStart);
             var requestedTimeEnd = LocalTime.FromTimeOnly(timeEnd);
             Debug.WriteLine(requestedTimeStart);
-            var allReservationByWorkspaceTypeAndReservedDate = _context.Reservations
+            var allSlots = await _context.Slots.Where(x => x.IsActive == true).ToListAsync();
+
+            var workspaces = await _context.Workspaces
+                .Include(x => x.WorkspaceTypeAtBranch)
+                    .ThenInclude(y => y.WorkspaceType)
+                .Include(x => x.WorkspaceTypeAtBranch)
+                    .ThenInclude(y => y.Branch)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var allReservationByWorkspaceTypeAndReservedDate = await _context.Reservations
                 .Include(x => x.ReservedSlots)
                     .ThenInclude(y => y.Slot)
                 .Include(x => x.Workspace)
@@ -75,24 +85,19 @@ public class GetWorkspacesByTimePaginatedQueryHandler : IRequestHandler<GetWorks
                 .Include(x => x.Transactions)
                 .Where(x => x.Workspace.WorkspaceTypeAtBranch.WorkspaceType.Id.Equals(workspaceTypeId)
                 && x.ReserveDate.Equals(new LocalDate(reserveDate.Year, reserveDate.Month, reserveDate.Day))
-                && x.Workspace.WorkspaceTypeAtBranch.Branch.Id.Equals(branchId))
-                .AsQueryable();
-
-            allReservationByWorkspaceTypeAndReservedDate = allReservationByWorkspaceTypeAndReservedDate.Where(x => x.Transactions.ToList()[0].TransactionStatus != "Failed");
+                && x.Workspace.WorkspaceTypeAtBranch.Branch.Id.Equals(branchId)
+                && x.Transactions.ToList()[0].TransactionStatus != "Failed"
+                && x.Status == "Booked"
+                )
+                .ToListAsync();
 
             Debug.WriteLine(allReservationByWorkspaceTypeAndReservedDate.ToList().Count);
 
-            var requestedTimeSlot = _context.Slots.Where(x => slotsId.Contains(x.Id)).AsQueryable();
+            var requestedTimeSlot = allSlots.Where(x => slotsId.Contains(x.Id)).AsQueryable();
             int[] requestedTimeRange = requestedTimeSlot.Select(x => x.SlotNumber).ToArray();
             List<Workspace> reservedWorkspaces = new List<Workspace>();
-            List<Workspace> availableWorkspaces = _context.Workspaces
-                .Include(x => x.WorkspaceTypeAtBranch)
-                    .ThenInclude(y => y.WorkspaceType)
-                .Include(x => x.WorkspaceTypeAtBranch)
-                    .ThenInclude(y => y.Branch)
-                .AsNoTracking()
-                .Where(x => x.IsActive && x.WorkspaceTypeAtBranch.WorkspaceType.Id.Equals(workspaceTypeId) && x.WorkspaceTypeAtBranch.Branch.Id.Equals(branchId))
-                .ToList();
+            List<Workspace> availableWorkspaces = workspaces.Where(x => x.IsActive && x.WorkspaceTypeAtBranch.WorkspaceType.Id.Equals(workspaceTypeId) && x.WorkspaceTypeAtBranch.Branch.Id.Equals(branchId)).ToList();
+                
 
             Debug.WriteLine(availableWorkspaces.Count);
 
@@ -119,7 +124,7 @@ public class GetWorkspacesByTimePaginatedQueryHandler : IRequestHandler<GetWorks
 
                     if (!reservation.TimeStart.Equals(LocalTime.Midnight))
                     {
-                        var slots = _context.Slots.Where(x => slotsId.Any(y => x.Id.Equals(y))).OrderBy(x => x.SlotNumber).ToList();
+                        var slots = allSlots.Where(x => slotsId.Any(y => x.Id.Equals(y))).OrderBy(x => x.SlotNumber).ToList();
                         var reservedTimeStart = reservation.TimeStart;
                         var reservedTimeEnd = reservation.TimeEnd;
                         var requestedSlotTimeStart = slots[0].TimeStart;

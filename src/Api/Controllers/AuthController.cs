@@ -88,7 +88,7 @@ public class AuthController : ControllerBase
             {
                 Email = res.Email,
                 Username = res.Email.Split('@')[0],
-                Role = "user",
+                Role = "customer",
                 Type = "google",
                 AvatarLink = res.Picture,
                 FullName = res.Name,

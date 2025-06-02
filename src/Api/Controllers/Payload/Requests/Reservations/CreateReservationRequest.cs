@@ -17,7 +17,7 @@ public class CreateReservationRequest {
     public string? EventDescription { get; set; }
     public string? CoverImageLink { get; set; }
     public double? EntranceFee { get; set; }
-    public Guid[] SlotIds { get; set; }
+    public Guid[]? SlotIds { get; set; }
     public Guid[]? WorkspaceUtilityServiceIds { get; set; }
     public string PaymentMethod { get; set; }
     public bool IsEventPrivate { get; set; }

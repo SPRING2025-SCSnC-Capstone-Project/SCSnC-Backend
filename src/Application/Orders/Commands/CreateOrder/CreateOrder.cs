@@ -204,7 +204,7 @@ public record CreateOrderCommand : IRequest<OrderDto>
     public Guid UserId { get; init; }
     public Guid? VoucherId { get; init; }
     public Guid BranchId { get; init; }
-    public Guid ReservationId { get; init; }
+    public Guid? ReservationId { get; init; }
     public double TotalPrice { get; init; }
     public List<CreateOrderDetailDto> OrderDetails { get; init; }
     public string PaymentMethod { get; init; }
@@ -270,7 +270,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             IsActive = true,
             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
-            PaymentStatus = false
+            PaymentStatus = request.PaymentMethod.ToLower().Equals("cash")
         };
 
         await _context.Orders.AddAsync(order, cancellationToken);
@@ -344,7 +344,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
                 var paymentUrl = await _vnpayService.GetPaymentLink(vnPayRequest);
                 result.PaymentLink = paymentUrl;
 
-                var statusVNPay = await PaymentHelper.CreateTransaction(order.Id, null, result.TotalPrice,
+                var statusVNPay = await PaymentHelper.CreateTransaction(order.Id, request.ReservationId, result.TotalPrice,
                     request.PaymentMethod, _context, cancellationToken);
 
                 if (statusVNPay.IsSuccess == true)

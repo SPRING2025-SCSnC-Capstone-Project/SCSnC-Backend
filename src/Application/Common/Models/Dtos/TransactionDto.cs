@@ -8,7 +8,11 @@ public class TransactionDto: BaseDto, IMapFrom<Transaction>
     //public Guid PaymentId { get; set; }
     public string TransactionStatus { get; set; }
     public DateTime TransactionDate { get; set; }
+    public Guid? ReservationId { get; set; }
     public Guid OrderId { get; set; }
+    public string PaymentMethod { get; set; }
+    public string TypeOfPayment { get; set; }
+    public OrderDto? Order { get; set; }
     
     public void Mapping(Profile profile)
     {

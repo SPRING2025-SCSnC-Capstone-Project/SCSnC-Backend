@@ -9,7 +9,7 @@ public class CreateOrderRequest
     public Guid UserId { get; set; }
     public Guid? VoucherId { get; set; }
     public Guid BranchId { get; set; }
-    public Guid ReservationId { get; set; }
+    public Guid? ReservationId { get; set; }
     public List<CreateOrderDetailDto> OrderDetails { get; set; }
     public double TotalPrice { get; set; }
     public string PaymentMethod { get; set; }

@@ -97,7 +97,7 @@ public static class PaymentHelper
                         ReservationId = null,
                         Amount = amount,
                         PaymentMethod = paymentMethod,
-                        TransactionStatus = "Pending",
+                        TransactionStatus = "Success",
                         TypeOfPayment = "Order",
                         TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
                     };
@@ -117,7 +117,7 @@ public static class PaymentHelper
                         ReservationId = reservationId,
                         Amount = amount,
                         PaymentMethod = paymentMethod,
-                        TransactionStatus = "Pending",
+                        TransactionStatus = paymentMethod.ToLower().Equals("cash") ? "Success" : "Pending",
                         TypeOfPayment = "Reservation",
                         TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
                     };
@@ -134,8 +134,22 @@ public static class PaymentHelper
                     result.IsSuccess = false;
                     break;
                 case (true, true):
-                    result.Message = "Both Order and Reservation ID cannot be provided at the same time";
-                    result.IsSuccess = false;
+                    var orderReservationTransaction = new Transaction
+                    {
+                        OrderId = orderId,
+                        ReservationId = reservationId,
+                        Amount = amount,
+                        PaymentMethod = paymentMethod,
+                        TransactionStatus = "Pending",
+                        TypeOfPayment = "Order",
+                        TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
+                    };
+
+                    await _context.Transactions.AddAsync(orderReservationTransaction, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                    result.Message = "Success";
+                    result.IsSuccess = true;
                     break;
             }
             

@@ -20,7 +20,7 @@ public record CreateReservationCommand : IRequest<ResponseReservationDto>
     public Guid? UserId { get; init; }
     public string PhoneNumber { get; init; } = null!;
     public double TotalPrice { get; init; }
-    public Guid[] SlotIds { get; init; } = null!;
+    public Guid[]? SlotIds { get; init; } = null!;
     public string? Note { get; set; }
     public string Email { get; set; }
     public string? Phone { get; set; }
@@ -73,7 +73,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             throw new KeyNotFoundException($"User with Id {request.UserId} does not exist");
         }
 
-        if (bookedReservation.Count >= 2)
+        if (user.Role.ToLower().Equals("customer") && bookedReservation.Count >= 2)
         {
             throw new KeyNotFoundException($"Chỉ được đặt phòng trước 2 lần");
         }
@@ -81,19 +81,22 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
         var reservedSlotsToAdd = new List<ReservedSlot>();
         var reservationUtilityServicesToAdd = new List<ReservationUtilityService>();
 
-        foreach (var slotId in request.SlotIds)
+        if (request.SlotIds != null && request.SlotIds.Length > 0)
         {
-            var slot = await _context.Slots.FirstOrDefaultAsync(x => x.Id == slotId && x.IsActive, cancellationToken);
-
-            if (slot is null)
+            foreach (var slotId in request.SlotIds)
             {
-                throw new KeyNotFoundException($"Slot with Id {slotId} does not exist");
-            }
+                var slot = await _context.Slots.FirstOrDefaultAsync(x => x.Id == slotId && x.IsActive, cancellationToken);
 
-            //if (await CheckConflict(request.ReservationDate, slotId, cancellationToken))
-            //{
-            //    throw new ConflictException("One or more slots have already been reserved");
-            //}
+                if (slot is null)
+                {
+                    throw new KeyNotFoundException($"Slot with Id {slotId} does not exist");
+                }
+
+                //if (await CheckConflict(request.ReservationDate, slotId, cancellationToken))
+                //{
+                //    throw new ConflictException("One or more slots have already been reserved");
+                //}
+            }
         }
 
         if (request.WorkspaceUtilityServiceIds != null)
@@ -116,7 +119,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             UserId = request.UserId,
             WorkspaceId = request.WorkspaceId,
             Deposit = request.Deposit,
-            IsFullPaid = false,
+            IsFullPaid = request.PaymentMethod.ToLower().Equals("cash"),
             TotalPrice = request.TotalPrice,
             ReserveDate = LocalDate.FromDateOnly(request.ReservationDate),
             Email = request.Email,
@@ -129,7 +132,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
             TimeStart = LocalTime.FromTimeOnly(request.TimeStart),
             TimeEnd = LocalTime.FromTimeOnly(request.TimeEnd),
-            Status = "Pending"
+            Status = request.PaymentMethod.ToLower().Equals("cash") ? "Booked" : "Pending"
         };
         Event reservationEvent = new Event();
         var newReservation = await _context.Reservations.AddAsync(reservation, cancellationToken);
