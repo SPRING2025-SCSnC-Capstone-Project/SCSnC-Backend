@@ -356,7 +356,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             case "Cash":
                 result.PaymentLink = "Please pay at the cashier";
 
-                var statusCash = await PaymentHelper.CreateTransaction(order.Id, null, result.TotalPrice,
+                var statusCash = await PaymentHelper.CreateTransaction(order.Id, request.ReservationId, result.TotalPrice,
                     request.PaymentMethod, _context, cancellationToken);
 
                 if (statusCash.IsSuccess == true)

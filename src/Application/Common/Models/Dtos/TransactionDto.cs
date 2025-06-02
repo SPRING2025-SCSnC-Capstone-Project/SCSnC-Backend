@@ -13,6 +13,7 @@ public class TransactionDto: BaseDto, IMapFrom<Transaction>
     public string PaymentMethod { get; set; }
     public string TypeOfPayment { get; set; }
     public OrderDto? Order { get; set; }
+    public ReservationDto? Reservation { get; set; }
     
     public void Mapping(Profile profile)
     {

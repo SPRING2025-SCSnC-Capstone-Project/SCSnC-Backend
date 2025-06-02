@@ -32,12 +32,15 @@ public class GetEventsByUserPaginatedQueryHandler : IRequestHandler<GetEventsByU
         IQueryable<Event> query = 
                 query = _context.Events
                     .Include(x => x.Reservation)
-                    .ThenInclude(y => y.Workspace)
-                    .ThenInclude(z => z.WorkspaceTypeAtBranch.WorkspaceType)
+                        .ThenInclude(y => y.Workspace)
+                            .ThenInclude(z => z.WorkspaceTypeAtBranch.WorkspaceType)
                     .Include(x => x.Reservation)
-                    .ThenInclude(y => y.User)
+                        .ThenInclude(y => y.Workspace)
+                            .ThenInclude(z => z.WorkspaceTypeAtBranch.Branch)
+                    .Include(x => x.Reservation)
+                        .ThenInclude(y => y.User)
                     .Include(x => x.EventSlots)
-                    .ThenInclude(y => y.Slot)
+                        .ThenInclude(y => y.Slot)
                     .Where(x => x.Reservation.UserId == request.UserId)
                     .AsQueryable();
         

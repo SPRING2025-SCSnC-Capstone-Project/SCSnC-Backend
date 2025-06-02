@@ -120,11 +120,12 @@ public class ReservationsController : ApiControllerBase
     }
 
     [HttpPut("cancel/{id:guid}")]
-    public async Task<ActionResult<Result<ResponseReservationDto>>> CancelReservation([FromRoute] Guid id)
+    public async Task<ActionResult<Result<ResponseReservationDto>>> CancelReservation([FromRoute] Guid id, [FromBody] CancelReservationRequest request)
     {
         var command = new CancelReservationCommand()
         {
             ReservationId = id,
+            UserId = request.UserId
         };
 
         var result = await Mediator.Send(command);

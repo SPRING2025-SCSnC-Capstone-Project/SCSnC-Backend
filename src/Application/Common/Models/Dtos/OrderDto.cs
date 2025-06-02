@@ -37,6 +37,7 @@ public class ResponseOrderDto: BaseDto, IMapFrom<Order>
     public bool PaymentStatus { get; set; }
     public bool IsActive {  get; set; }
     public List<OrderDetailDto> OrderDetails { get; set; }
+    public List<TransactionDto> Transactions { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdatedAt { get; set; }
     
