@@ -66,7 +66,7 @@ public class UsersController : ApiControllerBase {
         return Ok(Result<UserDto>.Succeed(result));
     }
 
-    [HttpDelete("userid:guid")]
+    [HttpDelete("{userId:guid}")]
     public async Task<ActionResult<Result<UserDto>>> DeleteUser([FromRoute] Guid userId) {
         var command = new DeleteUserCommand() {
            Id = userId 
