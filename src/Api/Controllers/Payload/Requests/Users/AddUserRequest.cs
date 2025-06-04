@@ -9,4 +9,5 @@ public class AddUserRequest {
     public string? Address { get; set; }
     public string Role { get; set; } = null!;
     public string? AvatarLink { get; set; } 
+    public Guid? BranchId { get; set; }
 }

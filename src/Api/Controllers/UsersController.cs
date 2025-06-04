@@ -20,6 +20,7 @@ public class UsersController : ApiControllerBase {
             Address = request.Address,
             FullName = request.FullName,
             AvatarLink = request.AvatarLink,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(command);
