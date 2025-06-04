@@ -14,6 +14,8 @@ public class User : BaseEntity
         Blogs = new HashSet<Blog>();
         ShiftSelections = new HashSet<ShiftSelection>();
     }
+    [ForeignKey("BranchId")]
+    public Guid? BranchId { get; set; }
     public string AccountType { get; set; }
     public string Username { get; set; }
     public string? PasswordHash { get; set; }
