@@ -8,6 +8,7 @@ using Application.Events.Queries.GetEventById;
 using Application.Events.Queries.GetEventsByUserPaginated;
 using Application.Events.Queries.GetEventsPaginated;
 using Application.Reservations.Commands;
+using Azure.Core;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,6 +47,22 @@ public class EventsController : ApiControllerBase {
 
         var result = await Mediator.Send(query);
         return Ok(Result<EventDto>.Succeed(result));
+    }
+
+    [HttpGet("new")]
+    public async Task<ActionResult<Result<PaginatedList<EventDto>>>> GetNewEventsInGivenDays([FromQuery] GetNewEventsInGivenDaysRequest request)
+    {
+        var query = new GetNewEventsInGivenDayQuery()
+        {
+            Page = request.Page,
+            Size = request.Size,
+            SortBy = request.SortBy,
+            SortOrder = request.SortOrder,
+            GivenDays = request.GivenDays
+        };
+
+        var result = await Mediator.Send(query);
+        return Ok(Result<PaginatedList<EventDto>>.Succeed(result));
     }
 
     [HttpGet("user/{userid:guid}")]
