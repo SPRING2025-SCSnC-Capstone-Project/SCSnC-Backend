@@ -28,7 +28,8 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
     {
         PaymentResponse paymentResponse = new PaymentResponse();
 
-        paymentResponse.EntityId = request.vnpayResponse.vnp_TxnRef;
+        var entityId = request.vnpayResponse.vnp_TxnRef.Contains('_') ? request.vnpayResponse.vnp_TxnRef.Split('_')[0] : request.vnpayResponse.vnp_TxnRef;
+        paymentResponse.EntityId = entityId;
         paymentResponse.Amount = request.vnpayResponse.vnp_Amount;
 
         bool isValid = await _paymentService.IsValidSignature(request.vnpayResponse);
@@ -36,8 +37,8 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
         {
             string tag = "";
 
-            if (await _context.Orders.AnyAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef), cancellationToken)) tag = "Order";
-            else if (await _context.Reservations.AnyAsync(x => x.Id == Guid.Parse(request.vnpayResponse.vnp_TxnRef), cancellationToken)) tag = "Reservation";
+            if (await _context.Orders.AnyAsync(x => x.Id == Guid.Parse(entityId), cancellationToken)) tag = "Order";
+            else if (await _context.Reservations.AnyAsync(x => x.Id == Guid.Parse(entityId), cancellationToken)) tag = "Reservation";
 
             paymentResponse.EntityType = tag;
             
@@ -56,7 +57,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                 {
                     case "00":
                         paymentResponse.PaymentMessage = "Successful transaction.";
-                        await PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken, paymentResponse.PaymentStatus);
+                        await PaymentHelper.UpdateStatus(entityId, tag, _context, cancellationToken, paymentResponse.PaymentStatus);
                         break;
                     case "07":
                         paymentResponse.PaymentMessage =
@@ -81,7 +82,7 @@ public class CheckPaymentResponseQueryHandler : IRequestHandler<CheckPaymentResp
                         break;
                     case "24":
                         paymentResponse.PaymentMessage = "Transaction Canceled.";
-                        await PaymentHelper.UpdateStatus(request.vnpayResponse.vnp_TxnRef, tag, _context, cancellationToken, paymentResponse.PaymentStatus);
+                        await PaymentHelper.UpdateStatus(entityId, tag, _context, cancellationToken, paymentResponse.PaymentStatus);
                         break;
                     case "51":
                         paymentResponse.PaymentMessage =

@@ -25,6 +25,8 @@ public class GetWorkspaceTypesPaginatedQueryHandler: IRequestHandler<GetWorkspac
 
     public async Task<PaginatedList<WorkspaceTypeDto>> Handle(GetWorkspaceTypesPaginatedQuery request, CancellationToken cancellationToken) {
         var workspaceTypes = _context.WorkspaceTypes
+            .Include(x => x.WorkspacesAtBranches)
+                .ThenInclude(y => y.Branch)
             .Include(x => x.WorkspaceMedias)
             .Include(x => x.WorkspaceUtilityServices)
             .ThenInclude(y => y.UtilityService)

@@ -10,7 +10,9 @@ public class OrderDetailDto: BaseDto, IMapFrom<OrderDetail>
     public int Quantity { get; set; }
     public double TotalPrice { get; set; }
     public List<string> Toppings { get; set; }
-    
+    public string Additional { get; set; }
+
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<OrderDetail, OrderDetailDto>()
@@ -29,4 +31,6 @@ public class CreateOrderDetailDto
     public int Quantity { get; set; }
     public List<Guid> ToppingIds { get; set; }
     public double OrderDetailPrice { get; set; }
+    public string Additional { get; set; }
+
 }

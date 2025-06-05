@@ -115,7 +115,8 @@ public class EventsController : ApiControllerBase {
         {
             EventId = id,
             EventTitle = request.EventTitle ?? null,
-            Image = request.Image
+            Image = request.Image,
+            IsPrivate = request.IsPrivate
         };
 
         var result = await Mediator.Send(command);

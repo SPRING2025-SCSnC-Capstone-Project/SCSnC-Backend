@@ -284,7 +284,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
                     x.ItemId == orderDetail.ItemId && x.SizeId == orderDetail.SizeId, cancellationToken).Result.Id,
                 OrderId = order.Id,
                 Quantity = orderDetail.Quantity,
-                TotalPrice = orderDetail.OrderDetailPrice
+                TotalPrice = orderDetail.OrderDetailPrice,
+                Additional = orderDetail.Additional
             };
 
             await _context.OrderDetails.AddAsync(newOrderDetail, cancellationToken);

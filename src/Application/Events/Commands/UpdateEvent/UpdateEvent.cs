@@ -12,6 +12,7 @@ public record UpdateEventCommand : IRequest<EventDto>
     public Guid EventId { get; set; }
     public string? EventTitle { get; init; } = null!;
     public IFormFile? Image { get; set; }
+    public bool IsPrivate { get; set; }
 
 }
 
@@ -53,6 +54,7 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand, Eve
         }
 
         existedEvent.EventTitle = request.EventTitle ?? existedEvent.EventTitle;
+        existedEvent.IsPrivate = request.IsPrivate;
         existedEvent.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
         _context.Events.Update(existedEvent);
         await _context.SaveChangesAsync(cancellationToken);

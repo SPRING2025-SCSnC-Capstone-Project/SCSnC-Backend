@@ -15,6 +15,7 @@ public class OrderDetail : BaseEntity
     public Guid ItemWithSizeId { get; set; }
     public int Quantity { get; set; }
     public double TotalPrice { get; set; }
+    public string Additional { get; set; }
     
     public virtual Order Order { get; set; }
     public virtual ItemWithSize ItemWithSize { get; set; }

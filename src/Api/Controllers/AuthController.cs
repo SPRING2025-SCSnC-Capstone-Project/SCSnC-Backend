@@ -150,7 +150,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> Logout()
     {
         var refreshToken = Request.Cookies[nameof(RefreshToken)];
@@ -199,6 +199,8 @@ public class AuthController : ControllerBase
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
             Expires = jwtToken.ValidTo,
         };
 

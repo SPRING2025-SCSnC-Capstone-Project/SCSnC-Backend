@@ -137,8 +137,7 @@ public class ReservationsController : ApiControllerBase
     public async Task<ActionResult<Result<ReservationDto>>> UpdateReservation([FromRoute] Guid reservationid, [FromBody] UpdateReservationRequest request) {
         var command = new UpdateReservationCommand() {
             Id = reservationid,
-            Status = request.Status,
-            IsFullPaid = request.IsFullPaid,
+            PaymentMethod = request.PaymentMethod
         };
 
         var result = await Mediator.Send(command);

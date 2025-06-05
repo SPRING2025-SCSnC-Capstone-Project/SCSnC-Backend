@@ -35,15 +35,26 @@ public static class PaymentHelper
                 {
                     throw new KeyNotFoundException($"Reservation with reservation id {entityId} not found");
                 }
-                
+               
+
                 if(transactionStatus == "Success")
                 {
+                    var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
+                    if (reservation.Status.Equals("Booked"))
+                    {
+                        reservation.IsFullPaid = true;
+                        reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
+                        _context.Transactions.Update(reservationTransaction);
+                        _context.Reservations.Update(reservation);
+                        await _context.SaveChangesAsync(cancellationToken);
+                        return;
+                    }
                     reservation.IsFullPaid = false;
                     reservation.Status = "Booked";
+                    reservation.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
                     _context.Reservations.Update(reservation);
 
-                    var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
-                    reservationTransaction.TransactionStatus = "Success";
+                    reservationTransaction.TransactionStatus = transactionStatus;
                     reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
                     _context.Transactions.Update(reservationTransaction);
                     await _context.SaveChangesAsync(cancellationToken);
@@ -51,12 +62,17 @@ public static class PaymentHelper
 
                 if(transactionStatus == "Failed")
                 {
+                    var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
+                    if (reservation.Status.Equals("Booked"))
+                    {
+                        return;
+                    }
                     reservation.IsFullPaid = false;
-                    reservation.IsCanceled = false;
+                    reservation.IsCanceled = true;
                     reservation.Status = "Canceled";
+                    reservation.LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now);
                     _context.Reservations.Update(reservation);
 
-                    var reservationTransaction = await _context.Transactions.FirstOrDefaultAsync(x => x.ReservationId == Guid.Parse(entityId));
                     var reservationEvent = await _context.Events.Include(x => x.Reservation).FirstOrDefaultAsync(x => x.Reservation.Id.Equals(entityId));
                     reservationTransaction.TransactionStatus = transactionStatus;
                     reservationTransaction.TransactionDate = LocalDateTime.FromDateTime(DateTime.Now);
