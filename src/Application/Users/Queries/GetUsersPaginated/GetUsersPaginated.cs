@@ -24,7 +24,9 @@ public class GetUsersPaginatedQueryHandler: IRequestHandler<GetUsersPaginatedQue
     }
 
     public async Task<PaginatedList<UserDto>> Handle(GetUsersPaginatedQuery request, CancellationToken cancellationToken) {
-        var users = _context.Users.AsQueryable().Where(x => x.IsActive);
+        var users = _context.Users
+            .Include(x => x.Branch)
+            .AsQueryable().Where(x => x.IsActive);
 
         if (!string.IsNullOrEmpty(request.SearchTerm)) {
             users = users.Where(x => x.Username.Contains(request.SearchTerm));

@@ -18,6 +18,7 @@ public record AddUserCommand : IRequest<UserDto> {
     public string Role { get; init; } = null!;
     public string? AvatarLink { get; init; }
     public string Type { get; init; } = null!;
+    public Guid? BranchId { get; init; }
 }
 
 public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserDto> {
@@ -76,6 +77,10 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserDto> {
             var hashedPassword = _securityService.Hash(request.Password!, salt, request.Email);
             var b64HashedPassword = Convert.ToBase64String(hashedPassword);
             user.PasswordHash = $"{salt}{b64HashedPassword}";
+        }
+
+        if (request.BranchId is not null || request.BranchId != Guid.Empty) {
+            user.BranchId = request.BranchId;
         }
 
         var res = await _context.Users.AddAsync(user, cancellationToken);

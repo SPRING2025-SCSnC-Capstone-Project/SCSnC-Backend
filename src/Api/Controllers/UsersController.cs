@@ -20,6 +20,7 @@ public class UsersController : ApiControllerBase {
             Address = request.Address,
             FullName = request.FullName,
             AvatarLink = request.AvatarLink,
+            BranchId = request.BranchId
         };
 
         var result = await Mediator.Send(command);
@@ -65,7 +66,7 @@ public class UsersController : ApiControllerBase {
         return Ok(Result<UserDto>.Succeed(result));
     }
 
-    [HttpDelete("userid:guid")]
+    [HttpDelete("{userId:guid}")]
     public async Task<ActionResult<Result<UserDto>>> DeleteUser([FromRoute] Guid userId) {
         var command = new DeleteUserCommand() {
            Id = userId 

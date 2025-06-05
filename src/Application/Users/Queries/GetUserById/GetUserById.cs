@@ -19,6 +19,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDto
 
     public async Task<UserDto> Handle(GetUserByIdQuery request, CancellationToken cancellationToken) {
         var user = await _context.Users
+            .Include(x => x.Branch)
             .FirstOrDefaultAsync(x => x.Id.Equals(request.Id) 
                     && x.IsActive, cancellationToken);
 
