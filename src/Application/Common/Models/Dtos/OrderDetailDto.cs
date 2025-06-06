@@ -7,6 +7,7 @@ public class OrderDetailDto: BaseDto, IMapFrom<OrderDetail>
 {
     public string ItemName { get; set; }
     public string SizeName { get; set; }
+    public string CategoryName { get; set; }
     public int Quantity { get; set; }
     public double TotalPrice { get; set; }
     public List<string> Toppings { get; set; }
@@ -18,6 +19,7 @@ public class OrderDetailDto: BaseDto, IMapFrom<OrderDetail>
         profile.CreateMap<OrderDetail, OrderDetailDto>()
             .ForMember(dest => dest.ItemName, opt => opt.MapFrom(src => src.ItemWithSize.Item.ItemName))
             .ForMember(dest => dest.SizeName, opt => opt.MapFrom(src => src.ItemWithSize.Size.SizeName))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.ItemWithSize.Item.ItemCategory.CategoryName))
             .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalPrice))
             .ForMember(dest => dest.Toppings, opt => opt.MapFrom(src => src.IncludeToppings != null ? src.IncludeToppings.Where(i => i.OrderDetailId == src.Id).Select(i => i.Topping.ToppingName).ToList() : new List<string>()))
             .ReverseMap();

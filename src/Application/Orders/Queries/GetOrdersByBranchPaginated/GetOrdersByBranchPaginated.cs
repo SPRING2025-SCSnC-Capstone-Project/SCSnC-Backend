@@ -42,6 +42,7 @@ public class GetOrdersByBranchPaginatedQueryHandler : IRequestHandler<GetOrdersB
             .Include(x => x.OrderDetails)
                 .ThenInclude(y => y.ItemWithSize)
                     .ThenInclude(z => z.Item)
+                        .ThenInclude(r => r.ItemCategory)
             .Include(x => x.OrderDetails)
                 .ThenInclude(y => y.ItemWithSize)
                     .ThenInclude(z => z.Size)

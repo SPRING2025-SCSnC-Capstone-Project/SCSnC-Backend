@@ -5,6 +5,8 @@ using Application.ItemWithSizes.Commands.CreateItemWithSize;
 using Domain.Entities;
 using NodaTime;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
 
 namespace Application.Items.Commands.AddItem;
 
@@ -12,7 +14,7 @@ public record AddItemCommand : IRequest<ItemDto>
 {
     public string Name { get; init; }
     public string Description { get; init; }
-    public string Img { get; init; }
+    public IFormFile? Img { get; set; }
     public Guid CategoryId { get; init; }
     public List<Guid> SizeIds { get; init; }
     public bool? AutoCreate { get; init; } = false;
@@ -23,11 +25,13 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IAzureService _azureService;
 
-    public AddItemCommandHandler(IApplicationDbContext context, IMapper mapper)
+    public AddItemCommandHandler(IApplicationDbContext context, IMapper mapper, IAzureService azureService)
     {
         _context = context;
         _mapper = mapper;
+        _azureService = azureService;
     }
 
     public async Task<ItemDto> Handle(AddItemCommand request, CancellationToken cancellationToken)
@@ -53,7 +57,7 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
                             ItemDescription = categories[i].CategoryName + " " + (j + 1),
                             //ItemBasePrice = 65.000,
                             ItemCategoryId = categories[i].Id,
-                            ItemImg = request.Img,
+                            ItemImg = "",
                             IsActive = true,
                             CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
@@ -100,12 +104,17 @@ public class AddItemCommandHandler : IRequestHandler<AddItemCommand, ItemDto>
             }
             else
             {
+                var imgUrl = "";
+                if(request.Img != null)
+                {
+                    imgUrl = await _azureService.UploadFile(request.Img, $"{Regex.Replace(request.Name, @"\s", string.Empty) + Guid.NewGuid()}.png");
+                }
                 var entity = new Item
                 {
                     ItemName = request.Name,
                     ItemDescription = request.Description,
                     ItemCategoryId =request.CategoryId,
-                    ItemImg = request.Img,
+                    ItemImg = imgUrl,
                     IsActive = true,
                     CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
                     LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)

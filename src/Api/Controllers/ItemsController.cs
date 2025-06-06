@@ -12,6 +12,7 @@ using Application.Items.Queries.GetActiveItemsPaginated;
 using Application.Items.Queries.GetItemById;
 using Application.Items.Queries.GetItemsPaginated;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Api.Controllers;
 
@@ -52,8 +53,9 @@ public class ItemsController : ApiControllerBase
     }
     
     [HttpPost]
-    public async Task<ActionResult<Result<ItemDto>>> AddItem([FromBody] AddItemRequest request)
+    public async Task<ActionResult<Result<ItemDto>>> AddItem([FromForm] AddItemRequest request)
     {
+        //Debug.WriteLine(request.Img.FileName);
         var command = new AddItemCommand()
         {
             Name = request.Name,
