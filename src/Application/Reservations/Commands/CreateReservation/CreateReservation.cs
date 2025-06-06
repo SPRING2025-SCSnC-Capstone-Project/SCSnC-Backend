@@ -119,7 +119,7 @@ public class CreateReservationCommandHandler : IRequestHandler<CreateReservation
             UserId = request.UserId,
             WorkspaceId = request.WorkspaceId,
             Deposit = request.Deposit,
-            IsFullPaid = request.PaymentMethod.ToLower().Equals("cash"),
+            IsFullPaid = request.PaymentMethod.ToLower().Equals("cash") || user.Role.ToLower().Equals("staff"),
             TotalPrice = request.TotalPrice,
             ReserveDate = LocalDate.FromDateOnly(request.ReservationDate),
             Email = request.Email,

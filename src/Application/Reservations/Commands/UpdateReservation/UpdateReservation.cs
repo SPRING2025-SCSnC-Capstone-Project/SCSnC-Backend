@@ -42,10 +42,12 @@ public class UpdateReservationCommandHandler : IRequestHandler<UpdateReservation
 
         var reservationDate = reservation.ReserveDate;
         var reservationSlots = reservation.ReservedSlots.Count > 0 ? reservation.ReservedSlots.OrderBy(x => x.Slot.SlotNumber).ToList() : new List<Domain.Entities.ReservedSlot>();
+        var reservationStartTime = reservationSlots.Count > 0 ? reservationSlots[0].Slot.TimeStart : reservation.TimeStart.Value;
+        var reservationStartDate = new LocalDateTime(reservationDate.Year, reservationDate.Month, reservationDate.Day, reservationStartTime.Hour, reservationStartTime.Minute, reservationStartTime.Second);
         var reservationEndTime = reservationSlots.Count > 0 ? reservationSlots[reservationSlots.Count - 1].Slot.TimeEnd : reservation.TimeEnd.Value;
         var reservationEndDate = new LocalDateTime(reservationDate.Year, reservationDate.Month, reservationDate.Day, reservationEndTime.Hour, reservationEndTime.Minute, reservationEndTime.Second);
 
-        if(reservationEndDate <= localDateTime || reservation.IsCanceled == true || reservation.Status.ToLower().Equals("done"))
+        if(reservationEndDate <= localDateTime || reservation.IsCanceled == true || reservation.Status.ToLower().Equals("done") || localDateTime < reservationStartDate)
         {
             throw new RequestValidationException("Không thể thanh toán");
         }

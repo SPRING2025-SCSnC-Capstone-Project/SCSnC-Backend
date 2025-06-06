@@ -31,6 +31,9 @@ public class CreateBranchCommandHandler : IRequestHandler<CreateBranchCommand, B
 
     public async Task<BranchDto> Handle(CreateBranchCommand request, CancellationToken cancellationToken)
     {
+        List<WorkspaceTypeAtBranch> workspaceTypesAtBranches = new List<WorkspaceTypeAtBranch>();
+        var workspaceTypes = _context.WorkspaceTypes.AsQueryable();
+
         var branch = new Branch
         {
             BranchName = request.Name,
@@ -64,6 +67,19 @@ public class CreateBranchCommandHandler : IRequestHandler<CreateBranchCommand, B
             await _context.ItemPricesAtBranches.AddAsync(itemPriceAtBranch, cancellationToken);
         }
 
+        foreach(var workspaceType in workspaceTypes)
+        {
+            var workspaceTypeAtBranch = new WorkspaceTypeAtBranch()
+            {
+                BranchId = result.Entity.Id,
+                WorkspaceTypeId = workspaceType.Id,
+                CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+                IsAvailable = false
+            };
+            workspaceTypesAtBranches.Add(workspaceTypeAtBranch);
+        }
+
         var user = new User()
         {
             Username = result.Entity.BranchEmail.Split("@")[0],
@@ -87,6 +103,7 @@ public class CreateBranchCommandHandler : IRequestHandler<CreateBranchCommand, B
             user.PasswordHash = $"{salt}{b64HashedPassword}";
 
         await _context.Users.AddAsync(user, cancellationToken);
+        await _context.WorkspaceTypeAtBranches.AddRangeAsync(workspaceTypesAtBranches, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<BranchDto>(branch);
