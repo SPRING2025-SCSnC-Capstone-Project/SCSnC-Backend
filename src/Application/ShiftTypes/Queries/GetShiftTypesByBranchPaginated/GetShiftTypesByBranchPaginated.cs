@@ -30,7 +30,7 @@ public class GetShiftTypesByBranchQueryHandler : IRequestHandler<GetShiftTypesBy
     {
         var shiftTypes = _context.ShiftTypes
             .AsQueryable()
-            .Where(x => x.BranchId == request.BranchId);
+            .Where(x => x.BranchId == request.BranchId && x.IsActive);
 
         return await shiftTypes.ListPaginateWithSortAsync<ShiftType, ShiftTypeDto>(
             request.Page,
