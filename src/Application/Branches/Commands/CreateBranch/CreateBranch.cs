@@ -1,3 +1,4 @@
+using Application.Common.Helpers;
 using Application.Common.Interfaces;
 using Application.Common.Models.Dtos;
 using Domain.Entities;
@@ -19,11 +20,13 @@ public class CreateBranchCommandHandler : IRequestHandler<CreateBranchCommand, B
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly ISecurityService _securityService;
 
-    public CreateBranchCommandHandler(IApplicationDbContext context, IMapper mapper)
+    public CreateBranchCommandHandler(IApplicationDbContext context, IMapper mapper, ISecurityService securityService)
     {
         _context = context;
         _mapper = mapper;
+        _securityService = securityService;
     }
 
     public async Task<BranchDto> Handle(CreateBranchCommand request, CancellationToken cancellationToken)
@@ -41,7 +44,7 @@ public class CreateBranchCommandHandler : IRequestHandler<CreateBranchCommand, B
             LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now)
         };
 
-        await _context.Branches.AddAsync(branch, cancellationToken);
+        var result = await _context.Branches.AddAsync(branch, cancellationToken);
         
         await _context.SaveChangesAsync(cancellationToken);
         
@@ -60,6 +63,30 @@ public class CreateBranchCommandHandler : IRequestHandler<CreateBranchCommand, B
             
             await _context.ItemPricesAtBranches.AddAsync(itemPriceAtBranch, cancellationToken);
         }
+
+        var user = new User()
+        {
+            Username = result.Entity.BranchEmail.Split("@")[0],
+            Role = "staff",
+            Email = result.Entity.BranchEmail,
+            Phone = result.Entity.BranchPhone,
+            Address = "",
+            FullName = result.Entity.BranchEmail.Split("@")[0],
+            IsActive = true,
+            CreatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+            LastUpdatedAt = LocalDateTime.FromDateTime(DateTime.Now),
+            AvatarLink = "",
+            AccountType = "manual",
+            BranchId = result.Entity.Id
+        };
+
+        var salt = StringUtils.RandomString(15);
+
+        var hashedPassword = _securityService.Hash("12345678", salt, result.Entity.BranchEmail);
+            var b64HashedPassword = Convert.ToBase64String(hashedPassword);
+            user.PasswordHash = $"{salt}{b64HashedPassword}";
+
+        await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
         return _mapper.Map<BranchDto>(branch);
