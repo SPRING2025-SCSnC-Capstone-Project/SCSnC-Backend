@@ -1,9 +1,11 @@
+using Api.Controllers.Payload.Requests;
 using Api.Controllers.Payload.Requests.ShiftTypes;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Application.ShiftTypes.Commands.CreateShiftType;
 using Application.ShiftTypes.Commands.DeleteShiftType;
 using Application.ShiftTypes.Commands.UpdateShiftType;
+using Application.ShiftTypes.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -54,5 +56,22 @@ public class ShiftTypesController: ApiControllerBase
         var result = await Mediator.Send(command);
 
         return Ok(Result<ShiftTypeDto>.Succeed(result));
+    }
+
+    [HttpGet("branches/{branchId:guid}")]
+    public async Task<ActionResult<Result<PaginatedList<ShiftTypeDto>>>> GetShiftTypesByBranch([FromRoute] Guid branchId, [FromQuery] PaginatedQueryParameters request)
+    {
+        var command = new GetShiftTypesByBranchQuery()
+        {
+            BranchId = branchId,
+            Page = request.Page,
+            Size = request.Size,
+            SortBy = request.SortBy,
+            SortOrder = request.SortOrder,
+        };
+
+        var result = await Mediator.Send(command);
+
+        return Ok(Result<PaginatedList<ShiftTypeDto>>.Succeed(result));
     }
 }
