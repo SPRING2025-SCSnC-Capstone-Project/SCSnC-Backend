@@ -10,6 +10,7 @@ using Application.Branches.Queries.GetBranchesPaginated;
 using Application.Common.Models;
 using Application.Common.Models.Dtos;
 using Application.RegistrationWindows.Commands.UpdateRegistrationWindow;
+using Application.RegistrationWindows.Queries.GetBranchRegistrationWindow;
 using Application.ShiftSelections.Queries.GetShiftsByEmployeeAndWeekStart;
 using Application.ShiftSelections.Queries.GetShiftsByWeekStart;
 using Application.ShiftSelections.Queries.GetTotalWorkHoursOfWeek;
@@ -183,5 +184,19 @@ public class BranchesController : ApiControllerBase
         var result = await Mediator.Send(command);
 
         return Ok(Result<WorkHoursDto>.Succeed(result));
+    }
+
+    [Authorize]
+    [RequiresRole("Manager", "Employee")]
+    [HttpGet("{branchId:guid}/registration-window")]
+    public async Task<ActionResult<Result<RegistrationWindowDto>>> GetBranchRegistrationWindow([FromRoute] Guid branchId, [FromQuery] DateOnly weekStart) {
+        var command = new GetBranchRegistrationWindowQuery() {
+            BranchId = branchId,
+            WeekStart = weekStart
+        };
+
+        var result = await Mediator.Send(command);
+
+        return Ok(Result<RegistrationWindowDto>.Succeed(result));
     }
 }
