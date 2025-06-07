@@ -156,7 +156,7 @@ public static class PaymentHelper
                         ReservationId = reservationId,
                         Amount = amount,
                         PaymentMethod = paymentMethod,
-                        TransactionStatus = "Pending",
+                        TransactionStatus = paymentMethod.ToLower().Equals("cash") ? "Success" : "Pending",
                         TypeOfPayment = "Order",
                         TransactionDate = LocalDateTime.FromDateTime(DateTime.Now)
                     };

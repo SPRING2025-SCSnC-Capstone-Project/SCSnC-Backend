@@ -66,7 +66,7 @@ public class GetReservationsByUserPaginatedQueryHandler : IRequestHandler<GetRes
                 .Where(user != null ? x => x.UserId == request.UserId || x.Phone.Equals(user.Phone) || x.Email.Equals(user.Email) : x => x.UserId == request.UserId)
                 .AsQueryable();
 
-            await AutoUpdateReservationStatus(query, cancellationToken);
+            await AutoUpdateReservationStatus(cancellationToken);
 
             if (request.GetLatestReservation == true)
             {
@@ -187,8 +187,10 @@ public class GetReservationsByUserPaginatedQueryHandler : IRequestHandler<GetRes
         }
     }
 
-    public async Task<IQueryable<Reservation>> AutoUpdateReservationStatus (IQueryable<Reservation> query, CancellationToken cancellationToken)
+    public async Task<IQueryable<Reservation>> AutoUpdateReservationStatus (CancellationToken cancellationToken)
     {
+        var query = _context.Reservations.Include(x => x.ReservedSlots)
+    .ThenInclude(y => y.Slot).AsQueryable();
         var now = DateTime.UtcNow;
         var instant = Instant.FromDateTimeUtc(now);
         var timeZone = DateTimeZoneProviders.Tzdb["Asia/Ho_Chi_Minh"];

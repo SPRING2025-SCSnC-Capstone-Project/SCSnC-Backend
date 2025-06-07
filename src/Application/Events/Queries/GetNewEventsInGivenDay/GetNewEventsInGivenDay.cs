@@ -32,6 +32,7 @@ public class GetNewEventsInGivenDayQueryHandler : IRequestHandler<GetNewEventsIn
     public async Task<PaginatedList<EventDto>> Handle(GetNewEventsInGivenDayQuery request, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
+
         var givenDays = LocalDate.FromDateTime(now.AddDays(request.GivenDays));
         var events = _context.Events
             .Include(x => x.Reservation)
@@ -46,7 +47,8 @@ public class GetNewEventsInGivenDayQueryHandler : IRequestHandler<GetNewEventsIn
             .Include(x => x.Reservation)
             .Include(x => x.EventSlots)
                 .ThenInclude(y => y.Slot)
-            .Where(x => x.EventDate >= LocalDate.FromDateTime(now) && x.EventDate <= givenDays && x.Reservation.IsCanceled == false && x.IsCanceled == false && x.IsActive == true && x.IsPrivate == false).AsQueryable();
+            .Where(x => x.EventDate >= LocalDate.FromDateTime(now) && x.EventDate <= givenDays && x.Reservation.IsCanceled == false && x.IsCanceled == false && x.IsActive == true && x.IsPrivate == false)
+            .AsQueryable();
 
 
         return await events.ListPaginateWithSortAsync<Event, EventDto>(

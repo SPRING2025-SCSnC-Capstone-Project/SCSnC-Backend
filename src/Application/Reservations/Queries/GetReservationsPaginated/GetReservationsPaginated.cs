@@ -32,80 +32,90 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
 
     public async Task<PaginatedList<ReservationDto>> Handle(GetReservationsPaginatedQuery request, CancellationToken cancellationToken)
     {
-        var query = request.GetAllReservationByBranch ?
-                        _context.Reservations
-            .Include(x => x.Workspace)
-                .ThenInclude(y => y.WorkspaceTypeAtBranch)
-                .ThenInclude(z => z.WorkspaceType)
-            .Include(x => x.Workspace)
-                .ThenInclude(y => y.WorkspaceTypeAtBranch)
-                .ThenInclude(z => z.Branch)
-            .AsNoTracking()
-        .Include(x => x.Transactions)
-            .ThenInclude(y => y.Order)
-                .ThenInclude(z => z.OrderDetails)
-                    .ThenInclude(w => w.ItemWithSize)
-                        .ThenInclude(r => r.Item)
-        .Include(x => x.Transactions)
-            .ThenInclude(y => y.Order)
-                .ThenInclude(z => z.OrderDetails)
-                    .ThenInclude(w => w.ItemWithSize)
-                        .ThenInclude(r => r.Size)
-        .Include(x => x.Transactions)
-                .ThenInclude(y => y.Order)
-                    .ThenInclude(z => z.OrderDetails)
-                        .ThenInclude(w => w.IncludeToppings)
-                            .ThenInclude(r => r.Topping)
-        .AsNoTracking()
-            .Include(x => x.User)
-            .Include(x => x.ReservedSlots)
-            .ThenInclude(y => y.Slot)
-            .Where(x => x.Branch.Id.Equals(request.BranchId))
-            .AsQueryable()
-        :
-        _context.Reservations
-            .Include(x => x.Workspace)
-                .ThenInclude(y => y.WorkspaceTypeAtBranch)
-                .ThenInclude(z => z.WorkspaceType)
-            .Include(x => x.Workspace)
-                .ThenInclude(y => y.WorkspaceTypeAtBranch)
-                .ThenInclude(z => z.Branch)
-            .AsNoTracking()
-        .Include(x => x.Transactions)
-            .ThenInclude(y => y.Order)
-                .ThenInclude(z => z.OrderDetails)
-                    .ThenInclude(w => w.ItemWithSize)
-                        .ThenInclude(r => r.Item)
-        .Include(x => x.Transactions)
-            .ThenInclude(y => y.Order)
-                .ThenInclude(z => z.OrderDetails)
-                    .ThenInclude(w => w.ItemWithSize)
-                        .ThenInclude(r => r.Size)
-        .Include(x => x.Transactions)
-            .ThenInclude(y => y.Order)
-                .ThenInclude(z => z.OrderDetails)
-                    .ThenInclude(w => w.IncludeToppings)
-                        .ThenInclude(r => r.Topping)
-        .AsNoTracking()
-            .Include(x => x.User)
-            .Include(x => x.ReservedSlots)
-            .ThenInclude(y => y.Slot)
-            .AsQueryable();
+        try
+        {
+            var query = request.GetAllReservationByBranch ?
+                _context.Reservations
+    .Include(x => x.Workspace)
+        .ThenInclude(y => y.WorkspaceTypeAtBranch)
+        .ThenInclude(z => z.WorkspaceType)
+    .Include(x => x.Workspace)
+        .ThenInclude(y => y.WorkspaceTypeAtBranch)
+        .ThenInclude(z => z.Branch)
+    .AsNoTracking()
+.Include(x => x.Transactions)
+    .ThenInclude(y => y.Order)
+        .ThenInclude(z => z.OrderDetails)
+            .ThenInclude(w => w.ItemWithSize)
+                .ThenInclude(r => r.Item).AsNoTracking()
+.Include(x => x.Transactions)
+    .ThenInclude(y => y.Order)
+        .ThenInclude(z => z.OrderDetails)
+            .ThenInclude(w => w.ItemWithSize)
+                .ThenInclude(r => r.Size).AsNoTracking()
+.Include(x => x.Transactions)
+        .ThenInclude(y => y.Order)
+            .ThenInclude(z => z.OrderDetails)
+                .ThenInclude(w => w.IncludeToppings)
+                    .ThenInclude(r => r.Topping).AsNoTracking()
+.AsNoTracking()
+    .Include(x => x.User)
+    .Include(x => x.ReservedSlots)
+    .ThenInclude(y => y.Slot)
+    .Where(x => x.Branch.Id.Equals(request.BranchId))
+    .AsQueryable()
+:
+_context.Reservations
+    .Include(x => x.Workspace)
+        .ThenInclude(y => y.WorkspaceTypeAtBranch)
+        .ThenInclude(z => z.WorkspaceType)
+    .Include(x => x.Workspace)
+        .ThenInclude(y => y.WorkspaceTypeAtBranch)
+        .ThenInclude(z => z.Branch)
+    .AsNoTracking()
+.Include(x => x.Transactions)
+    .ThenInclude(y => y.Order)
+        .ThenInclude(z => z.OrderDetails)
+            .ThenInclude(w => w.ItemWithSize)
+                .ThenInclude(r => r.Item).AsNoTracking()
+.Include(x => x.Transactions)
+    .ThenInclude(y => y.Order)
+        .ThenInclude(z => z.OrderDetails)
+            .ThenInclude(w => w.ItemWithSize)
+                .ThenInclude(r => r.Size).AsNoTracking()
+.Include(x => x.Transactions)
+    .ThenInclude(y => y.Order)
+        .ThenInclude(z => z.OrderDetails)
+            .ThenInclude(w => w.IncludeToppings)
+                .ThenInclude(r => r.Topping).AsNoTracking()
+    .Include(x => x.User)
+    .Include(x => x.ReservedSlots)
+    .ThenInclude(y => y.Slot)
+    .AsQueryable();
 
-        await AutoUpdateReservationStatus(query, cancellationToken);
+            await AutoUpdateReservationStatus(cancellationToken);
 
-        return await query.ListPaginateWithSortAsync<Reservation, ReservationDto>(
-            request.Page,
-            request.Size,
-            request.SortBy,
-            request.SortOrder,
-            _mapper.ConfigurationProvider,
-            cancellationToken
-        );
+            return await query.ListPaginateWithSortAsync<Reservation, ReservationDto>(
+                request.Page,
+                request.Size,
+                request.SortBy,
+                request.SortOrder,
+                _mapper.ConfigurationProvider,
+                cancellationToken
+            );
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e);
+            throw new Exception(e.Message, e);
+        }
+
     }
-    public async Task<IQueryable<Reservation>> AutoUpdateReservationStatus(IQueryable<Reservation> query, CancellationToken cancellationToken)
+    public async Task<IQueryable<Reservation>> AutoUpdateReservationStatus(CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
+        var query = _context.Reservations.Include(x => x.ReservedSlots)
+    .ThenInclude(y => y.Slot).AsQueryable();
         var instant = Instant.FromDateTimeUtc(now);
         var timeZone = DateTimeZoneProviders.Tzdb["Asia/Ho_Chi_Minh"];
         var zonedDateTime = instant.InZone(timeZone);
@@ -127,7 +137,7 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
                         {
                             Debug.WriteLine(reservation.Id);
                             reservation.Status = "Done";
-                            _context.Reservations.Update(reservation);
+                            latestReservationList.Add(reservation);
                             updateIndicator++;
                         }
                     }
@@ -140,7 +150,7 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
                         {
                             Debug.WriteLine(reservation.Id);
                             reservation.Status = "Done";
-                            _context.Reservations.Update(reservation);
+                            latestReservationList.Add(reservation);
                             updateIndicator++;
                         }
                     }
@@ -150,6 +160,7 @@ public class GetReservationsPaginatedQueryHandler : IRequestHandler<GetReservati
 
         if (updateIndicator > 0)
         {
+            _context.Reservations.UpdateRange(latestReservationList);
             await _context.SaveChangesAsync(cancellationToken);
         }
         return query;

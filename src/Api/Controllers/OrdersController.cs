@@ -44,10 +44,14 @@ public class OrdersController : ApiControllerBase
     }
 
     [HttpGet("branch/{branchId:guid}")]
-    public async Task<ActionResult<Result<PaginatedList<ResponseOrderDto>>>> GetOrderByBranchId([FromRoute] Guid branchId)
+    public async Task<ActionResult<Result<PaginatedList<ResponseOrderDto>>>> GetOrderByBranchId([FromRoute] Guid branchId, [FromQuery] PaginatedQueryParameters request)
     {
         var query = new GetOrdersByBranchPaginatedQuery()
         {
+            Page = request.Page,
+            Size = request.Size,
+            SortBy = request.SortBy,
+            SortOrder = request.SortOrder,
             BranchId = branchId
         };
 
