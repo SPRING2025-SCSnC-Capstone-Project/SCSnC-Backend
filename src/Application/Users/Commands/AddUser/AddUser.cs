@@ -73,6 +73,12 @@ public class AddUserCommandHandler : IRequestHandler<AddUserCommand, UserDto> {
         }
 
         if (request.BranchId is not null || request.BranchId != Guid.Empty) {
+            var branch = await _context.Branches.FirstOrDefaultAsync(x => x.Id == request.BranchId, cancellationToken);
+
+            if (branch is null) {
+                throw new KeyNotFoundException($"Branch with Id {request.BranchId} does not exist");
+            }
+
             user.BranchId = request.BranchId;
         }
 
