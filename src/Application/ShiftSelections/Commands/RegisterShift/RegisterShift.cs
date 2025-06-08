@@ -102,44 +102,44 @@ public class RegisterShiftCommandHandler : IRequestHandler<RegisterShiftCommand,
                 throw new RequestValidationException($"Shift on {d.Date} is not within the registrated week");
             }
 
-            if (d.ShiftType.Name == "Morning") {
-                var consecutiveShift = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Afternoon");
+            if (d.ShiftType.Name == "Ca Sáng") {
+                var consecutiveShift = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Ca Chiều");
 
                 if (consecutiveShift is not null)
                 {
                     throw new RequestValidationException($"Cannot have both morning and afternoon shift on {consecutiveShift.Date}");
                 }
 
-                var conflict = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Sáng");
+                var conflict = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Ca Sáng");
 
                 if (conflict is not null)
                 {
                     throw new RequestValidationException($"Conflict morning shift on {conflict.Date}");
                 }
-            } else if (d.ShiftType.Name == "Afternoon") {
-                var consecutiveShift = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && (c.ShiftType.Name == "Evening" 
-                    || c.Date == d.Date && c.ShiftType.Name == "Morning"));
+            } else if (d.ShiftType.Name == "Ca Chiều") {
+                var consecutiveShift = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && (c.ShiftType.Name == "Ca Tối" 
+                    || c.Date == d.Date && c.ShiftType.Name == "Ca Sáng"));
 
                 if (consecutiveShift is not null)
                 {
                     throw new RequestValidationException($"Cannot have both afternoon and evening/morning shift on {consecutiveShift.Date}");
                 }
 
-                var conflict = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Afternoon");
+                var conflict = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Ca Chiều");
 
                 if (conflict is not null)
                 {
                     throw new RequestValidationException($"Conflict afternoon shift on {conflict.Date}");
                 }
-            } else if (d.ShiftType.Name == "Evening") {
-                var consecutiveShift = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Afternoon");
+            } else if (d.ShiftType.Name == "Ca Tối") {
+                var consecutiveShift = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Ca Chiều");
 
                 if (consecutiveShift is not null)
                 {
                     throw new RequestValidationException($"Cannot have both evening and afternoon shift on {consecutiveShift.Date}");
                 }
 
-                var conflict = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Evening");
+                var conflict = datesWithShiftTypes.FirstOrDefault(c => c.Date == d.Date && c.ShiftType.Name == "Ca Tối");
 
                 if (conflict is not null)
                 {

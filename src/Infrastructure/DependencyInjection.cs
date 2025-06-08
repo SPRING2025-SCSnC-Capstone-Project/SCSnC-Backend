@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using Application.Common.Interfaces;
 using Ardalis.GuardClauses;
@@ -65,6 +66,7 @@ public static class DependencyInjection
 
         services.AddSingleton(signingKey);
 
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         services
             .ConfigureOptions<JwtBearerTokenValidationConfiguration>()
             .AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)

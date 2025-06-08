@@ -29,6 +29,7 @@ public class GetShiftTypesByBranchQueryHandler : IRequestHandler<GetShiftTypesBy
     public async Task<PaginatedList<ShiftTypeDto>> Handle(GetShiftTypesByBranchQuery request, CancellationToken cancellationToken)
     {
         var shiftTypes = _context.ShiftTypes
+            .Include(x => x.Branch)
             .AsQueryable()
             .Where(x => x.BranchId == request.BranchId && x.IsActive);
 

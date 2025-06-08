@@ -8,7 +8,6 @@ namespace Application.ShiftSelections.Commands.UpdateShift;
 
 public record UpdateShiftCommand : IRequest<List<ShiftSelectionDto>>
 {
-    public Guid Id { get; init; }
     public Guid UserId { get; init; }
     public List<ShiftSelectionUpdateWithId> ShiftSelectionUpdatesWithId { get; init; } = [];
 }

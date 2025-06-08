@@ -18,7 +18,7 @@ public class EmployeesController : ApiControllerBase
     {
         var command = new RegisterShiftCommand()
         {
-            UserId = request.UserId,
+            UserId = id,
             BranchId = request.BranchId,
             WeekStart = request.WeekStart,
             DatesWithShiftTypeIds = request.DatesWithShiftTypeIds
@@ -33,7 +33,6 @@ public class EmployeesController : ApiControllerBase
     public async Task<ActionResult<List<ShiftSelectionDto>>> UpdateShift([FromRoute] Guid id, [FromBody] UpdateShiftRequest request)
     {
         var command = new UpdateShiftCommand() {
-            Id = request.Id,
             UserId = request.UserId,
             ShiftSelectionUpdatesWithId = request.ShiftSelectionUpdatesWithId
         };
