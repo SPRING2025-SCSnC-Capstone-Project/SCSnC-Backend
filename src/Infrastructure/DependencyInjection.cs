@@ -1,25 +1,45 @@
+using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using Application.Common.Interfaces;
 using Ardalis.GuardClauses;
+using Azure.Storage.Blobs;
 using Infrastructure.Data;
+using Infrastructure.Services.Azure;
+using Infrastructure.Services.Deepseek;
+using Infrastructure.Services.Identity;
+using Infrastructure.Services.Jwt;
+using Infrastructure.Services.Security;
+using Infrastructure.Services.VNPay;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddApplicationDbContext(configuration);
-        services.AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!);
-        
+        services
+            .AddApplicationDbContext(configuration)
+            .AddJwtAuthentication(configuration)
+            .AddVNPayService(configuration)
+            .AddAzureService(configuration)
+            .AddDeepseekService(configuration)
+            .AddScoped<IApplicationDbContext>(sp => sp.GetService<ApplicationDbContext>()!)
+            .AddTransient<ISecurityService, SecurityService>()
+            .AddScoped<IIdentityService, IdentityService>()
+            .AddScoped<IJwtSService, JwtService>()
+            .AddHttpClient<IDeepSeekService, DeepSeekService>();
+
+        return services;
     }
 
-    private static void AddApplicationDbContext(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddApplicationDbContext(this IServiceCollection services, IConfiguration configuration)
     {
-        
+
         var connectionString = configuration.GetConnectionString("SCSnC_DB");
         Guard.Against.Null(connectionString, message: "Connection string \"SCSnC_DB\" not found");
 
@@ -30,6 +50,78 @@ public static class DependencyInjection
                 option.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                 option.UseNodaTime();
             });
+            builder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            ;
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configurations)
+    {
+        services.Configure<JwtSettings>(configurations.GetSection(JwtSettings.Section));
+        services.AddScoped<IJwtSService, JwtService>();
+
+        var signingKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        services.AddSingleton(signingKey);
+
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+        services
+            .ConfigureOptions<JwtBearerTokenValidationConfiguration>()
+            .AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.IncludeErrorDetails = true;
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (context?.Request?.Cookies != null &&
+                            context.Request.Cookies.ContainsKey("SCSnCJwtToken"))
+                        {
+                            context.Token = context.Request.Cookies["SCSnCJwtToken"];
+                            Debug.WriteLine(context.Token ?? "No token found in cookie.");
+                        }
+                        else
+                        {
+                            Debug.WriteLine("No cookies or token found.");
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+        return services;
+    }
+
+    private static IServiceCollection AddVNPayService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<VNPayConfig>(configuration.GetSection(VNPayConfig.Section));
+        services.AddTransient<IPaymentService, VNPayService>();
+
+        return services;
+    }
+    private static IServiceCollection AddAzureService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton(x =>
+            new BlobServiceClient(configuration.GetConnectionString("Azure")));
+        services.AddTransient<IAzureService, AzureService>();
+        return services;
+    }
+
+    private static IServiceCollection AddDeepseekService(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<DeepSeekConfig>(configuration.GetSection(DeepSeekConfig.Section));
+        services.AddTransient<IDeepSeekService, DeepSeekService>();
+
+        services.AddOptions<DeepSeekConfig>()
+            .Bind(configuration.GetSection(DeepSeekConfig.Section))
+            .Validate(config => !string.IsNullOrEmpty(config.ApiKey))
+            .ValidateOnStart();
+
+        return services;
     }
 }

@@ -1,0 +1,19 @@
+﻿namespace Domain.Entities;
+
+public class WorkspaceUtilityService : BaseEntity
+{
+    public WorkspaceUtilityService()
+    {
+        ReservationUtilityServices = new HashSet<ReservationUtilityService>();
+    }
+
+    [ForeignKey("WorkspaceTypeId")]
+    public Guid WorkspaceTypeId { get; set; }
+    [ForeignKey("UtilityServiceId")]
+    public Guid UtilityServiceId { get; set; }
+    public double ServiceFee { get; set; }
+
+    public virtual WorkspaceType WorkspaceType { get; set; } = null!;
+    public virtual UtilityService UtilityService { get; set; } = null!;
+    public virtual ICollection<ReservationUtilityService> ReservationUtilityServices { get; set; }
+}

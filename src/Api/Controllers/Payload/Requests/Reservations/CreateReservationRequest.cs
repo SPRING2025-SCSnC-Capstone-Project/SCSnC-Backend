@@ -1,0 +1,30 @@
+using NodaTime;
+
+namespace Api.Controllers.Payload.Requests;
+
+public class CreateReservationRequest {
+    public DateOnly ReservationDate { get; set; }
+    public Guid WorkspaceTypeId { get; set; }
+    public Guid WorkspaceId { get; set; }
+    public double Deposit { get; set; }
+    public Guid? UserId { get; set; }
+    public double TotalPrice { get; set; }
+    public string? Note { get; set; }
+    public string Email { get; set; }
+    public string? Phone { get; set; }
+    public bool includeEvent { get; set; }
+    public string? EventTitle { get; set; }
+    public string? EventDescription { get; set; }
+    public string? CoverImageLink { get; set; }
+    public double? EntranceFee { get; set; }
+    public Guid[] SlotIds { get; set; }
+    public Guid[]? WorkspaceUtilityServiceIds { get; set; }
+    public string PaymentMethod { get; set; }
+    public bool IsEventPrivate { get; set; }
+    public Guid BranchId { get; set; }
+    public TimeOnly TimeStart { get; set; }
+    public TimeOnly TimeEnd { get; set; }
+    public bool BookingWithTime {  get; set; }
+    public IFormFile? File { get; set; }
+
+}

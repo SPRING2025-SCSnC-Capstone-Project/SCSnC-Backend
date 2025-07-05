@@ -404,3 +404,5 @@ FodyWeavers.xsd
 .idea
 .vscode
 .vs
+.config
+.env

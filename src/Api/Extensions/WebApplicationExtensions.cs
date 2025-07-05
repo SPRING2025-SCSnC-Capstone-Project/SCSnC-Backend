@@ -1,3 +1,4 @@
+using Api.Middlewares;
 using Infrastructure.Data;
 
 namespace Api.Extensions;
@@ -9,6 +10,7 @@ public static class WebApplicationExtensions
         // Configure the HTTP request pipeline.
         
         // Handle all exceptions: return appropriate status codes and messages
+        app.UseMiddleware<ExceptionMiddleware>();
 
         if (app.Environment.IsDevelopment())
         {
@@ -35,5 +37,8 @@ public static class WebApplicationExtensions
         app.MapControllers();
 
         app.MapGet("/", () => "Hello from SCSnC!");
+    }
+    public static void AddAppConfiguration(this IConfigurationBuilder configuration) {
+        configuration.AddEnvironmentVariables("SCSnC_");
     }
 }
